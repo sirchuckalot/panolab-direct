@@ -13,12 +13,15 @@ and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
   authenticated tunnel, manager, broker, Git gateway, ISE setup and
   modern HDL/Codex development. Local remote MCP and resource-limit
   evidence exist.
-- The current `main` repository is a clean source recipe; it has
-  passed local source tests, but a fresh installation from this
-  snapshot has **not** been accepted.
+- GitHub `main` at `006b6ee` is the accepted software lab baseline.
+  The owner's canonical checkout at `~/Projects/repos/panolab-direct-main`
+  is now on `development`, tracking GitHub `development`; source tests,
+  clean project reinstall, authenticated MCP and post-reboot service
+  recovery passed on that **already provisioned** laptop.
 - Licensed ISE installation/build, pinned LiteX integration, physical
-  FPGA operation and reboot persistence are **PENDING**. Never infer
-  these from source tests, CI or container uptime.
+  FPGA operation and fresh host provisioning remain **PENDING**. A
+  laptop reboot test passed only after setting the standalone dev
+  container restart policy; source tests or CI alone cannot prove it.
 - Target Pano Logic **G2 Rev B**, XC6SLX150-2-FGG484. Planned
   CPU-less LiteX/LiteEth/Etherbone, bounded CSR access, then LiteScope
   and coherent framebuffer observation. USB3300 is not baseline RTL.
@@ -31,8 +34,8 @@ and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
 ## Mandatory development process
 
 1. Inspect `lab_status`, `repo_status` and live GitHub branch SHA
-   before editing. Do not mistake the live laptop's different Git
-   ancestry for a fast-forwardable copy of `main`.
+   before editing. Work only on `development`; `main` is frozen until
+   explicit owner approval for a reviewed promotion.
 2. Define the specific outcome and relevant test gate before editing.
    Work in `/workspace`, a disposable local checkout, or an
    appropriately restricted local rootless container—not in the live
@@ -80,7 +83,9 @@ and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
 ## Documentation and publication hygiene
 
 Maintain **one current decision baseline** in
-[architecture](docs/ARCHITECTURE.md). Keep implementation instructions
+[architecture](docs/ARCHITECTURE.md). The verified first software
+laboratory milestone and its evidence are recorded in
+[LM1 acceptance](specs/LAB_MILESTONE_1.md). Keep implementation instructions
 in [getting started](docs/GETTING_STARTED.md), test and Git workflow
 in [development](docs/DEVELOPMENT.md), safety in
 [security](docs/SECURITY.md) and the stable vendor API in

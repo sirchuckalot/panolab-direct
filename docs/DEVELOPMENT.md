@@ -63,20 +63,44 @@ an approved local Go container. Keep the external
 `tests/ise_mcp_smoke_client.py` separate from the vendor worker.
 The fixture is not a bitstream ready to program.
 
+The default standalone development container mounts **selected**
+repository subtrees only, not the checkout root. Consequently the
+full `test_snapshot_integrity.py` suite needs to run from the host
+ordinary-user checkout or an approved full-source test environment;
+it will fail with missing paths if run inside the deliberately
+limited `/repo` container mount. That is **not** a reason to enlarge
+its source mounts or weaken private isolation.
+
+The LM2 simulation-only CSR fixture *can* be run inside the restricted
+development container, since `gateware` and `tests` are already
+mounted:
+
+```sh
+python3 -m unittest discover -s /repo/tests -p 'test_panolab_csr_demo.py' -v
+```
+
+On the owner-host checkout, rerun the full source suite; tests
+requiring Icarus/Yosys report `SKIP` if those tools are not installed
+there, so a passing **container** simulation is still required.
 For runtime changes, syntax and source tests are insufficient:
-validate the actual affected service behavior and authentication
-on the laptop. For vendor/physical acceptance, use the separate
-authorization gates described in [architecture](ARCHITECTURE.md)
-and [security](SECURITY.md).
+validate actual service and authentication behavior on the laptop.
+Vendor/physical acceptance requires separate authorization and tests
+per [architecture](ARCHITECTURE.md) and [security](SECURITY.md).
 
-## Current source-control caveat
+## Current source-control baseline
 
-The live laptop `development` checkout and clean GitHub `main`
-have unrelated ancestry. They **cannot** be made equal with a
-routine fast-forward. Until separately migrated and verified,
-leave the running gateway and its checkout intact. This is a
-current operational constraint, not a reason to force-reset
-Git history or use CI as a workaround.
+GitHub retains exactly two branches: `main` and `development`.
+They were identical at the accepted LM1 freeze commit `006b6ee`.
+The laptop's canonical directory `~/Projects/repos/panolab-direct-main`
+has **`development`** checked out, tracking `origin/development`.
+Do all experiments, edits and reviewed development commits on
+`development`; **never** publish directly to `main` without the
+owner's explicit acceptance. The histories share ancestry and can
+use guarded fast-forward synchronization while they do not diverge.
+No stale branch or unrelated-history reset is part of routine work.
+
+See the [LM1 acceptance report](../specs/LAB_MILESTONE_1.md) for
+the software-lab baseline, lessons and next acceptance gates.
 
 [Install and operation](GETTING_STARTED.md) ·
 [Architecture](ARCHITECTURE.md) ·

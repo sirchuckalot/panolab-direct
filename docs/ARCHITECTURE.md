@@ -33,11 +33,16 @@ The deployment merges `docker/compose.setup.yaml`,
 modern development container is created through the restricted
 Docker broker/launcher rather than as a Compose service.
 
-The current clean `main` source is a reviewed **recipe**, not proof of
-a fresh installation from that revision. The live laptop checkout
-follows a different Git ancestry and is intentionally left intact
-until an explicitly reviewed migration. Licensed ISE execution,
-physical FPGA acceptance and reboot persistence are **not yet proven**.
+The software-lab baseline was accepted on the owner's **already
+provisioned** laptop on 2026-11-23: project-only teardown and
+unmodified-installer rebuild, local/remote authenticated MCP acceptance,
+and all six services auto-recovering after reboot. The standalone
+development container required the `unless-stopped` restart policy.
+The canonical source checkout is on `development`, matching GitHub
+`main` at the LM1 freeze `006b6ee`. New work must not modify `main`.
+A brand-new host install, licensed ISE execution and physical FPGA
+acceptance are **not yet proven**. See the
+[LM1 evidence record](../specs/LAB_MILESTONE_1.md).
 
 ## Accepted functional design (planned)
 
@@ -63,8 +68,10 @@ physical FPGA acceptance and reboot persistence are **not yet proven**.
 
 The detailed functional requirements live in
 [`specs/PANOLAB_DIRECT_v1_0.txt`](../specs/PANOLAB_DIRECT_v1_0.txt).
-The minimal board/agent/gateware directories deliberately remain
-source placeholders until corresponding implementations are verified.
+The board and agent directories remain placeholders for target
+integration. `gateware/panolab_csr_demo.v` is a standalone
+simulation-only verification fixture, **not** the G2 Rev B Etherbone
+or LiteX implementation. FPGA board integration remains unverified.
 
 ## Next capabilities and acceptance gates
 

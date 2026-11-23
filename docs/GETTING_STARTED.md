@@ -81,17 +81,23 @@ The installer reuses existing services with `--no-recreate`; it is
 **not** a destructive repair utility. Before any service replacement,
 review effects on the remote tunnel, host resources, private mounts,
 licenses and persistent results. Do not globally prune Docker.
-Full reboot/logout recovery remains a separate acceptance gate;
-ordinary uptime does not prove it.
+Reboot recovery was accepted on the owner's provisioned laptop:
+all six PanoLab services (including standalone developer container)
+started automatically after an ordinary reboot and sign-in, using
+the developer's `unless-stopped` policy. This does not prove
+unattended headless startup before login or a fresh-host installation.
 
 ## 5. Source synchronization boundary
 
-GitHub `main` contains the clean source recipe, while the currently
-running laptop gateway was launched from a separate checkout
-history. **Do not** reset that checkout, force-update GitHub, or
-attempt `repo_sync` across unrelated histories. A future laptop
-checkout/gateway migration needs a separate, explicit, nondestructive
-plan and verification; until then the running environment takes
-priority. Follow [development and publishing](DEVELOPMENT.md).
+The canonical checkout is `~/Projects/repos/panolab-direct-main`,
+but its **active branch** is `development`, tracking
+`origin/development`. GitHub has exactly `main` and `development`.
+At the LM1 freeze both were identical at `006b6ee`, with `main`
+preserved as the accepted baseline. All engineering goes through
+`development`, and promotion to `main` requires explicit owner
+acceptance. Use guarded fast-forward sync only while the checkout
+is clean and source history permits it; never reset or force-push
+to hide divergence. Follow [development and publishing](DEVELOPMENT.md)
+and [LM1 evidence](../specs/LAB_MILESTONE_1.md).
 
 [Architecture](ARCHITECTURE.md) · [Security](SECURITY.md)

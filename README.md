@@ -18,6 +18,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [Security](docs/SECURITY.md) | Credentials, mounts, rootless authority, approval gates and hardware safety |
 | [Toolchain MCP contract](docs/TOOLCHAIN_MCP_CONTRACT.md) | Persistent vendor build worker and canonical five MCP tools |
 | [Agent instructions](AGENTS.md) | Rules for automated engineering sessions |
+| [LM1 first working lab milestone](specs/LAB_MILESTONE_1.md) | Software acceptance evidence, design lessons and LM2 demonstration |
 
 The selected [FPGA system specification](specs/PANOLAB_DIRECT_v1_0.txt)
 is the companion concise functional requirements file. These documents
@@ -26,21 +27,25 @@ log or chronology of past engineering attempts.
 
 ## Operational baseline
 
-The owner's laptop has demonstrated six running PanoLab rootless
-containers: tunnel, manager, restricted Docker broker, Git gateway,
-ISE setup service, and modern development container. Authenticated
-remote MCP, reused Codex authentication and kernel-enforced 2-CPU,
-4-GiB, 256-PID development limits were observed on that laptop.
+**LM1 accepted on the owner's already provisioned laptop (2026-11-23):**
+a project-only tear-down, unmodified-installer rebuild and authenticated
+MCP acceptance succeeded. The six rootless Docker services recovered
+automatically after a reboot once the standalone development container
+was configured with `unless-stopped`. Kernel-enforced 2-CPU, 4-GiB,
+256-PID limits, Codex authentication and HDL smoke simulation passed.
 
-The clean `main` source snapshot has passed **local source checks**;
-it has **not** itself been accepted as a fresh, unattended laptop
-installation. The current live checkout is on a separate Git history,
-so do not reset it or attempt a cross-history fast-forward as part
-of ordinary documentation or development changes.
+GitHub has only `main` (accepted software baseline `006b6ee`) and
+`development` (active engineering); both were identical at the LM1
+freeze. The canonical checkout `~/Projects/repos/panolab-direct-main`
+has **`development` checked out**, irrespective of its folder name.
+All new work happens on `development`; `main` changes only after
+owner-approved promotion.
 
-**Not yet verified:** licensed ISE build, pinned LiteX dependency set,
-G2 Rev B constraints and bitstream, real FPGA/Etherbone response,
-full logout/reboot persistence, or a fresh machine installation.
+**Not yet verified:** a completely unprovisioned host installation,
+licensed ISE implementation, pinned LiteX dependencies, G2 Rev B
+constraints/bitstream or physical FPGA/Etherbone operation.
+See the [milestone record](specs/LAB_MILESTONE_1.md) for exact evidence
+and limitations.
 
 ## Entrypoint
 
@@ -66,7 +71,8 @@ outputs stay in private ignored locations.
 | `docker/` | Compose recipes, modern toolchain, broker, Git gateway, manager and ISE sources |
 | `tests/` | Laptop-local source/protocol tests and external ISE fixture |
 | `specs/` | G2 functional design baseline |
-| `boards/`, `gateware/`, `agent/` | Intentionally minimal source placeholders for upcoming G2 integration |
+| `boards/`, `agent/` | Minimal placeholders for upcoming G2 integration |
+| `gateware/` | G2 implementation placeholder and a simulation-only CSR demonstration |
 | `docs/` | The five current engineering documents linked above |
 
 **Publish only working milestones:** experiment and verify inside the
