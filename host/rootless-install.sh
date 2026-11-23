@@ -200,7 +200,7 @@ options="$(r exec "$broker" docker info --format '{{json .SecurityOptions}}' 2>/
 # laptop owner, allowing access to existing owner-only credentials.
 # Do not change host permissions or treat namespace root as host root.
 if ! new_exists "$dev"; then
-  cmd=(run -d --name "$dev" --label panolab.managed=true
+  cmd=(run -d --name "$dev" --restart unless-stopped --label panolab.managed=true
     --user 0:0 --workdir /workspace --cap-drop ALL
     --security-opt no-new-privileges:true
     --memory 4g --cpus 2 --pids-limit 256
@@ -216,6 +216,26 @@ if ! new_exists "$dev"; then
     cmd+=(--mount "$mount")
   done
   r "${cmd[@]}" panolab-direct-modern:local sleep infinity >/dev/null
+else
+  # The standalone dev is not a Compose service. Adopt it only when
+  # its host mounts point at this checkout and these private inputs.
+  current_workspace="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/workspace"}}{{.Source}}{{end}}{{end}}' "$dev")"
+  current_codex="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/codex-auth"}}{{.Source}}{{end}}{{end}}' "$dev")"
+  current_gateware="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/gateware"}}{{.Source}}{{end}}{{end}}' "$dev")"
+  [[ "$current_workspace" == "$PANOLAB_WORKSPACE_HOST" &&
+     "$current_codex" == "$PANOLAB_CODEX_AUTH_HOST" &&
+     "$current_gateware" == "$root/gateware" ]] ||
+    fail "Existing dev container has unexpected bind mounts; inspect before recovery."
+fi
+# Repair pre-policy dev containers in place; never recreate or discard work.
+restart_policy="$(r inspect -f '{{.HostConfig.RestartPolicy.Name}}' "$dev")"
+if [[ "$restart_policy" != unless-stopped ]]; then
+  r update --restart unless-stopped "$dev" >/dev/null ||
+    fail "Cannot configure automatic restart for the managed dev container."
+fi
+if ! running_new "$dev"; then
+  say "Starting verified existing dev container."
+  r start "$dev" >/dev/null || fail "Could not restart the managed dev container."
 fi
 running_new "$dev" || fail "Rootless dev container failed."
 r exec "$dev" /bin/sh -ec \
