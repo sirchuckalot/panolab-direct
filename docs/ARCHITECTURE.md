@@ -48,7 +48,7 @@ acceptance are **not yet proven**. See the
 
 - **Board:** Pano Logic G2 **Rev B**, Xilinx Spartan-6
   `XC6SLX150-2-FGG484`; do not use Rev C constraints by assumption.
-- **Minimal FPGA:** CPU-less LiteX, clock/reset, LiteEth PHY/MAC,
+- **Normal application FPGA:** CPU-less LiteX, clock/reset, LiteEth PHY/MAC,
   Etherbone as Wishbone master, CSR identity/status and a bounded
   read/write test register. No soft CPU, BIOS, Linux-on-FPGA, HDMI
   capture device, Raspberry Pi or USB3300 protocol in the first design.
@@ -56,7 +56,9 @@ acceptance are **not yet proven**. See the
   *trusted-LAN-only* register access protocol; it cannot itself
   configure an unprogrammed FPGA. JTAG/volatile configuration and
   flash writes require exact owner authorization and recovery.
-  Factory SPI must be preserved.
+  Board-specific identity data and an independently bootable recovery
+  path must survive any approved factory conversion; preserving the
+  obsolete factory firmware is not a permanent product requirement.
 - **ISE worker:** persistent vendor toolchain and MCP server in
   **one runtime container**, with exactly five canonical build tools.
   The current CentOS setup and worker source do not prove licensing,
@@ -72,6 +74,19 @@ The board and agent directories remain placeholders for target
 integration. `gateware/panolab_csr_demo.v` is a standalone
 simulation-only verification fixture, **not** the G2 Rev B Etherbone
 or LiteX implementation. FPGA board integration remains unverified.
+
+## Cross-platform boot and update architecture (accepted direction; unimplemented)
+
+[PanoLab Rescue v1](../specs/PANOLAB_RESCUE_V1.md) defines a separate
+LiteX CPU-equipped recovery personality with A/B FPGA application slots,
+protected per-device identity, durable trial-boot and rollback metadata,
+authenticated network management, and per-board BSP qualification.
+The normal Etherbone application may remain CPU-less. Rescue and an
+application cannot execute concurrently in one reconfigured FPGA.
+Independent power-cycle/button recovery from a hung application must
+be physically demonstrated; Spartan-6 ICAP alone does not guarantee it.
+The standard is an architectural commitment, **not an implemented or
+hardware-accepted feature**.
 
 ## Next capabilities and acceptance gates
 

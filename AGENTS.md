@@ -6,6 +6,8 @@ baseline**, not an experiment log. Start at the repository
 [installation/operations](docs/GETTING_STARTED.md),
 [development](docs/DEVELOPMENT.md), [security](docs/SECURITY.md),
 and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
+Read [PanoLab Rescue v1](specs/PANOLAB_RESCUE_V1.md) for the
+approved forward boot/update/recovery standard (not yet implemented).
 
 ## What is real, and what is planned
 
