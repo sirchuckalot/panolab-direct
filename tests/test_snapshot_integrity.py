@@ -38,6 +38,20 @@ class SnapshotIntegrity(unittest.TestCase):
         self.assertNotIn('--rollback', script)
         self.assertNotIn('git reset --hard', script)
 
+    def test_low_noise_local_workflow_contract(self):
+        agents = (ROOT / "AGENTS.md").read_text()
+        workflow = (ROOT / "docs/GIT_WORKFLOW.md").read_text()
+        tests = (ROOT / "docs/TESTING.md").read_text()
+        operations = (ROOT / "docs/OPERATIONS.md").read_text()
+        self.assertIn("one focused, descriptive commit", agents)
+        self.assertIn("uncommitted and unpushed", workflow)
+        self.assertIn("shares", workflow)
+        self.assertIn("When CI is legitimate", workflow)
+        self.assertIn("Proper role of CI", tests)
+        self.assertIn("Working stopping point", tests)
+        self.assertIn("Create one coherent commit", operations)
+        self.assertFalse((ROOT / ".github" / "workflows").exists())
+
     def test_no_private_material_in_tree(self):
         self.assertFalse((ROOT / "docker/private").exists())
         self.assertFalse((ROOT / "docker/.env").exists())

@@ -26,16 +26,48 @@ Docker lab is the **primary execution environment**.
    next question. Use `dev_exec` for approved commands inside the
    running laptop development container, or an isolated local rootless
    container through the approved restricted broker.
-4. GitHub is **for source control**. Do not run hosted KVM, Docker,
-   rootless-installation, systemd, cgroup, licensed-build, tunnel or
-   physical hardware acceptance tests on GitHub CI. Narrow CI-only
-   repository checks require a specific justification.
-5. Review changes and local test evidence. Publish reviewed source
-   via the connected GitHub integration; fast-forward the clean laptop
-   checkout through `repo_sync`, and check the same HEAD SHA.
-   Never use a destructive local reset to resolve divergence silently.
-6. State PASS/PENDING precisely, including the actual execution
-   machine/container, command, output and limitations.
+4. GitHub hosts source, review and **selective CI**. CI is appropriate
+   for fast deterministic unit tests, lint, static/security checks,
+   clean-runner reproducibility and bounded PR gates. CI must **never**
+   substitute for laptop rootless Docker, cgroups, private networking,
+   authenticated MCP, licensed ISE or physical hardware acceptance.
+5. Explore, debug and retry **locally without publishing**. Define the
+   acceptance gate, verify the finished change in laptop containers,
+   review the diff, then publish **one coherent commit at a working
+   stopping point**; not a commit and push for every attempt.
+6. Publish through the connected GitHub integration. Only use
+   `repo_sync` if the clean laptop checkout has **shared ancestry**
+   with the target branch. Do not reset an old `development` history
+   onto unrelated `main` or silently force-update either side.
+7. Record PASS/PENDING with the actual test machine, commands,
+   results and limitations; source tests do not prove hardware.
+
+## Local experimentation and commit quality gate
+
+1. Before editing, specify the intended behavior and the smallest
+   practical **local verification** that proves it. Work in `/workspace`,
+   an isolated local checkout, or an approved disposable rootless test
+   container. Keep experiments and temporary output off published refs.
+2. Iterate through failures **without Git commits or pushes**. Preserve
+   existing tunnel, broker, user data and persistent toolchain workers.
+3. At a meaningful stopping point, run relevant laptop-local tests,
+   inspect all changed files and private-data boundaries, and record
+   confirmed PASS and separate PENDING gates. An untested change
+   cannot be labeled verified; publishing a draft requires approval.
+4. Only then make **one focused, descriptive commit and publication**
+   for that complete logical change. Additional commits represent
+   new independently verified progress, not repeated speculative
+   fixes or CI retries. Local unpublished checkpoints are permitted.
+5. If CI is specifically useful, state its purpose, supported
+   environment, size/time budget and exact claim. A CI failure calls
+   for local diagnosis and correction, **not a push-and-retry loop**.
+   Do not introduce Actions workflows by default.
+6. Keep unrelated laptop resources safe. The current clean main
+   history and the laptop's older development checkout are unrelated;
+   their reconciliation is separate from routine source publishing.
+
+Read `docs/TESTING.md` and `docs/GIT_WORKFLOW.md` for the venue and
+commit-decision checklists.
 
 ## Safety
 

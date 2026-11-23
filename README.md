@@ -53,13 +53,19 @@ and CSR read/write; later stages add LiteScope and framebuffer
 observation. The USB3300 project is an example future workload, not
 part of this repository's gateware.
 
-## Source control
+## Development and source control
 
-`main` is the accepted source snapshot. Use a temporary review branch
-for changes that need validation; publish through the connected GitHub
-integration and fast-forward the approved laptop checkout. Private
-files, media, tokens, generated outputs and history logs never belong
-in the source snapshot.
+The normal cycle is **experiment locally, get it working, run relevant
+local tests, review the diff, then make one meaningful commit and push**.
+Do not commit/push every attempted fix or hosted-runner experiment.
+GitHub is for source and review; narrowly justified lint, unit,
+static or PR quality-gate CI is appropriate, but CI is not a substitute
+for the actual laptop's Docker, licensed ISE or physical G2 acceptance.
 
-This repository deliberately contains **source and recipes, not CI
-experiment history**. See [local test policy](docs/TESTING.md).
+See [proper CI use and test gates](docs/TESTING.md) and
+[low-noise commit workflow](docs/GIT_WORKFLOW.md).
+
+`main` is the reviewed source snapshot. The laptop's older
+`development` checkout may still have unrelated history; do not
+blindly fast-forward or force-reset it. Private files, media, tokens,
+generated output and experimental logs stay outside Git.

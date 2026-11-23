@@ -30,14 +30,21 @@ a separate locally isolated rootless container through an audited MCP
 capability. Do not mount Docker's socket into a general-purpose agent
 container or restart a persistent service as a test fixture.
 
-## Update source
+## Update source: stop at a verified change
 
-1. Check `repo_status` and GitHub's current source SHA.
-2. Validate the intended change with local container checks.
-3. Publish through the connected GitHub integration using the exact
-   expected parent SHA; do not force-update shared branches.
-4. Call PanoLab `repo_sync` only when the current laptop checkout
-   is clean and fast-forwardable. Confirm matching SHA and clean tree.
+1. Inspect `repo_status`, the GitHub head and **branch ancestry**.
+2. Define the intended behavior and local tests. Experiment in
+   scratch or isolated laptop containers without test commits/pushes.
+3. When relevant local tests and checks pass, review the full diff
+   and label any still-unverified ISE/hardware gates PENDING.
+4. **Create one coherent commit for the verified change**, publish
+   through the connected GitHub integration with the expected parent,
+   and check the resulting SHA. Don't publish per trial or CI retry.
+5. Call `repo_sync` only for a clean, fast-forwardable checkout
+   on the same history. The current old `development` checkout is
+   unrelated to the clean `main` root history; don't overwrite it.
+
+See [Git workflow](GIT_WORKFLOW.md) and [testing](TESTING.md).
 
 ## Service changes
 
