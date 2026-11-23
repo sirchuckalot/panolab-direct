@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Integration test of the embedded ISE worker through MCP ONLY.
 
-Run in Codespaces or a trusted machine after privately connecting to the MCP
+Run in an approved laptop test container with private access to the MCP
 endpoint. Does not use Docker, SSH, Xilinx command-line, or hardware programming.
 With --run-build, requests the external example project through generic build_start.
 """

@@ -55,12 +55,12 @@ if [[ "$mode" == --install ]] && ! rootless_ok; then
   # Start the user-scoped rootless service from its pre-provisioned helper.
   unit="$HOME/.config/systemd/user/panolab-rootless-docker.service"
   launcher="$HOME/.local/libexec/panolab-rootless-29.1.3/dockerd-rootless.sh"
-  [[ -x "$launcher" && ! -L "$launcher" ]] || fail "The previously verified rootless launcher is missing or a symlink."
+  [[ -x "$launcher" && ! -L "$launcher" ]] || fail "The configured rootless launcher is missing or a symlink."
   if [[ ! -e "$unit" && ! -L "$unit" ]]; then
     mkdir -p "$(dirname "$unit")"
     cat > "$unit" <<'UNIT'
 [Unit]
-Description=PanoLab rootless Docker (ordinary user, separate from rootful system Docker)
+Description=PanoLab rootless Docker (ordinary laptop user)
 After=network-online.target
 [Service]
 Type=simple
@@ -144,7 +144,7 @@ if ! systemctl --user is-active --quiet panolab-rootless-docker.service; then
   mkdir -p "$(dirname "$unit")"
   cat > "$unit" <<'UNIT'
 [Unit]
-Description=PanoLab rootless Docker (ordinary user, separate from rootful system Docker)
+Description=PanoLab rootless Docker (ordinary laptop user)
 After=network-online.target
 [Service]
 Type=simple
@@ -228,7 +228,7 @@ r exec "$dev" /usr/local/bin/codex login status >/dev/null ||
   fail "Codex login unavailable; authenticate inside the rootless dev container and rerun."
 say "PASS: tools, 2 CPU, 4 GiB, 256 PIDs, Codex credentials."
 # Authenticated MCP test from an ephemeral container on the PRIVATE bridge.
-# Never print credentials, expose TCP ports, or use the existing rootful broker.
+# Never print credentials, publish MCP ports or use system Docker.
 probe="$(cat <<'PY'
 import json,sys,urllib.request,urllib.error,time
 token=open('/run/secrets/mcp-bearer').read().strip()

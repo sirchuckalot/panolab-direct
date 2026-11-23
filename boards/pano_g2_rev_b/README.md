@@ -1,11 +1,6 @@
-# Pano Logic G2 Rev B
+# Pano Logic G2 Rev B board source
 
-Target FPGA: Spartan-6 **XC6SLX150-2-FGG484** (not Rev C).
-Base platform and targets may be derived from compatible LiteX-Boards
-sources after pinout/PHY/clock/constraint verification. No UCF or
-programming method is accepted as proven by this source snapshot.
-
-First board deliverable: clock/reset and Ethernet connection to
-CPU-less Wishbone/CSR identity and bounded test register. Physical
-Etherbone and JTAG work require exact owner authorization and recorded
-measurements.
+Target XC6SLX150-2-FGG484. Board constraints, clocks, PHY and recovery
+require verification against physical Rev B hardware.
+See [architecture](../../docs/ARCHITECTURE.md) and
+[functional requirements](../../specs/PANOLAB_DIRECT_v1_0.txt).

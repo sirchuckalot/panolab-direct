@@ -1,5 +1,5 @@
 # Xilinx ISE 14.7 native Linux batchxsetup configuration.
-# Preserves owner-known-good System Edition selection from USB3300 archive.
+# Review and approve the ISE System Edition package selection.
 # Review Xilinx EULA and this configuration before installation.
 destination_dir=/opt/Xilinx
 copy_preferences=N

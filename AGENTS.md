@@ -1,98 +1,91 @@
-# PanoLab Direct — agent working contract
+# PanoLab Direct — agent engineering contract
 
-Read this file before changing source. The user's laptop rootless
-Docker lab is the **primary execution environment**.
+This file is the executable-session guidance for the **current
+baseline**, not an experiment log. Start at the repository
+[README](README.md), then read [architecture](docs/ARCHITECTURE.md),
+[installation/operations](docs/GETTING_STARTED.md),
+[development](docs/DEVELOPMENT.md), [security](docs/SECURITY.md),
+and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
 
-## Scope and architecture
+## What is real, and what is planned
 
-- Pano Logic G2 **Rev B**, Spartan-6 XC6SLX150-2-FGG484.
-- CPU-less LiteX, LiteEth/Etherbone, Wishbone/CSR; later LiteScope and
-  internal framebuffer observation. No USB3300/ULPI implementation.
-- Modern development and tooling run inside the laptop's rootless
-  Docker containers. Legacy ISE 14.7 is a separately licensed worker
-  with embedded MCP.
-- The ISE worker implements exactly `toolchain_info`,
-  `build_start`, `build_status`, `build_result`, `build_cancel`.
-  Reuse persistent workers and keep external test fixtures external.
-  Read `docs/TOOLCHAIN_MCP_CONTRACT.md` before modifying this interface.
+- The owner's laptop operates six rootless Docker PanoLab services:
+  authenticated tunnel, manager, broker, Git gateway, ISE setup and
+  modern HDL/Codex development. Local remote MCP and resource-limit
+  evidence exist.
+- The current `main` repository is a clean source recipe; it has
+  passed local source tests, but a fresh installation from this
+  snapshot has **not** been accepted.
+- Licensed ISE installation/build, pinned LiteX integration, physical
+  FPGA operation and reboot persistence are **PENDING**. Never infer
+  these from source tests, CI or container uptime.
+- Target Pano Logic **G2 Rev B**, XC6SLX150-2-FGG484. Planned
+  CPU-less LiteX/LiteEth/Etherbone, bounded CSR access, then LiteScope
+  and coherent framebuffer observation. USB3300 is not baseline RTL.
+- Persistent vendor build worker and MCP server reside in **one
+  runtime container**. Exactly five agent-facing build tools:
+  `toolchain_info`, `build_start`, `build_status`,
+  `build_result`, `build_cancel`. No added vendor-specific tools
+  without explicit owner approval.
 
-## Mandatory workflow
+## Mandatory development process
 
-1. Inspect live `lab_status`, `repo_status`, GitHub refs and worktree.
-   Never infer the current state from a chat summary.
-2. Read `README.md`, `docs/ARCHITECTURE.md`, `docs/OPERATIONS.md`,
-   `docs/SECURITY.md`, and relevant source before editing.
-3. Select the smallest **local container test** that proves the
-   next question. Use `dev_exec` for approved commands inside the
-   running laptop development container, or an isolated local rootless
-   container through the approved restricted broker.
-4. GitHub hosts source, review and **selective CI**. CI is appropriate
-   for fast deterministic unit tests, lint, static/security checks,
-   clean-runner reproducibility and bounded PR gates. CI must **never**
-   substitute for laptop rootless Docker, cgroups, private networking,
-   authenticated MCP, licensed ISE or physical hardware acceptance.
-5. Explore, debug and retry **locally without publishing**. Define the
-   acceptance gate, verify the finished change in laptop containers,
-   review the diff, then publish **one coherent commit at a working
-   stopping point**; not a commit and push for every attempt.
-6. Publish through the connected GitHub integration. Only use
-   `repo_sync` if the clean laptop checkout has **shared ancestry**
-   with the target branch. Do not reset an old `development` history
-   onto unrelated `main` or silently force-update either side.
-7. Record PASS/PENDING with the actual test machine, commands,
-   results and limitations; source tests do not prove hardware.
+1. Inspect `lab_status`, `repo_status` and live GitHub branch SHA
+   before editing. Do not mistake the live laptop's different Git
+   ancestry for a fast-forwardable copy of `main`.
+2. Define the specific outcome and relevant test gate before editing.
+   Work in `/workspace`, a disposable local checkout, or an
+   appropriately restricted local rootless container—not in the live
+   Git gateway's checkout merely for experiments.
+3. **Test on the laptop** using permitted MCP tools. HDL, source,
+   simulation, container, authenticated MCP and vendor integration
+   acceptance belong in its containerized environment. CI can serve
+   narrowly scoped, fast, deterministic clean-runner checks, but
+   cannot substitute for the actual laptop, private credentials,
+   licensed ISE or hardware.
+4. Iterate locally **without publishing trial-and-error**. Review
+   the final diff, run the appropriate local tests, record actual
+   PASS and unverified PENDING gates. Only then publish **one
+   coherent reviewed commit** for a working engineering milestone.
+   Draft work with incomplete required gates needs explicit approval.
+5. Publish reviewed source using the connected GitHub integration
+   with an expected-parent non-force update. Only call `repo_sync`
+   when the laptop checkout is clean and has shared ancestry with the
+   target branch. Never reset, stash, force-push or discard live work
+   to hide divergence.
+6. Never launch extensive hosted CI/KVM or repeated GitHub commits to
+   debug rootless namespaces, cgroups, Docker connectivity, private
+   MCP, ISE installation or hardware. If CI is justified, state
+   its narrow test purpose, budget and what success establishes.
 
-## Local experimentation and commit quality gate
+## Security and change boundaries
 
-1. Before editing, specify the intended behavior and the smallest
-   practical **local verification** that proves it. Work in `/workspace`,
-   an isolated local checkout, or an approved disposable rootless test
-   container. Keep experiments and temporary output off published refs.
-2. Iterate through failures **without Git commits or pushes**. Preserve
-   existing tunnel, broker, user data and persistent toolchain workers.
-3. At a meaningful stopping point, run relevant laptop-local tests,
-   inspect all changed files and private-data boundaries, and record
-   confirmed PASS and separate PENDING gates. An untested change
-   cannot be labeled verified; publishing a draft requires approval.
-4. Only then make **one focused, descriptive commit and publication**
-   for that complete logical change. Additional commits represent
-   new independently verified progress, not repeated speculative
-   fixes or CI retries. Local unpublished checkpoints are permitted.
-5. If CI is specifically useful, state its purpose, supported
-   environment, size/time budget and exact claim. A CI failure calls
-   for local diagnosis and correction, **not a push-and-retry loop**.
-   Do not introduce Actions workflows by default.
-6. Keep unrelated laptop resources safe. The current clean main
-   history and the laptop's older development checkout are unrelated;
-   their reconciliation is separate from routine source publishing.
+- Rootless container UID 0 maps to the ordinary owner's UID, not
+  host root. Restricted broker access to the user Docker socket
+  still carries broad authority over the owner's Docker resources.
+- No host `sudo`, package installation, system/rootful Docker
+  changes, broad `$HOME` mounts, privileged containers or global
+  Docker cleanup. Never bypass MCP broker allowlists.
+- Preserve the running manager, tunnel, Codex authentication, private
+  ISE media/license, project workspace and other applications.
+  Private files in `docker/private/` and ignored `docker/.env`
+  must never be published.
+- No physical FPGA programming, JTAG, SPI flash modification, volatile
+  configuration or unbounded Etherbone access without specific
+  owner authorization and a credible recovery path.
+- A software source PASS, licensed toolchain PASS and physical board
+  PASS are **different evidence levels**. State commands,
+  execution location and limitations accurately.
 
-Read `docs/TESTING.md` and `docs/GIT_WORKFLOW.md` for the venue and
-commit-decision checklists.
+## Documentation and publication hygiene
 
-## Safety
-
-- The user-scoped rootless Engine is not host root, but its broker
-  can control files/resources reachable by the laptop owner.
-  Do not mount its Docker socket into arbitrary agent containers.
-- No sudo, host package installations, rootful daemon manipulation,
-  broad home-directory mounts, privileged containers or global prune.
-- Preserve running tunnel, manager, workspace, Codex auth and persistent
-  workers unless a scoped, owner-approved change requires a restart.
-- Private token, API key, ISE media/license and host data stay in
-  `docker/private/` and ignored files, **never GitHub**.
-- Do not program, erase or alter FPGA configuration, JTAG or SPI flash
-  without exact owner authorization. Factory flash must be preserved.
-- Raw Etherbone is unauthenticated trusted-LAN debug; never publish
-  its port to an untrusted network.
-- A source check, simulation, ISE vendor build, volatile FPGA load and
-  real hardware observation are distinct proof levels. Do not
-  substitute one for another.
-
-## Branch lifecycle
-
-Keep `main` as the reviewed source baseline. Use a short-lived
-feature/review branch when helpful. No force push, reference deletion,
-history rewrite or protected branch change without separate explicit
-owner approval. The active laptop Git checkout and remote may be
-different revisions during review; preserve both until alignment is
-verified. Do not embed test history in the clean source recipe.
+Maintain **one current decision baseline** in
+[architecture](docs/ARCHITECTURE.md). Keep implementation instructions
+in [getting started](docs/GETTING_STARTED.md), test and Git workflow
+in [development](docs/DEVELOPMENT.md), safety in
+[security](docs/SECURITY.md) and the stable vendor API in
+[toolchain contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
+Update the root README navigation when paths change. Do not
+reintroduce duplicate decisions, debugging logs, dead links or
+per-iteration commits. Preserve future design
+requirements without claiming they are implemented.

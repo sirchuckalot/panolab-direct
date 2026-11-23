@@ -30,5 +30,7 @@ Factory SPI flash, JTAG, volatile FPGA programming and physical network
 access require separate exact owner authorization, trusted recovery
 provisions and evidence. A remote MCP tool is not blanket consent.
 
-The ISE legacy userspace is EOL. Isolate it and confirm licensing/
+The licensed ISE 14.7 CentOS 6.10 userspace is EOL. Isolate it and confirm licensing/
 HOSTID behavior before running a real vendor build.
+
+[Deployment and inputs](GETTING_STARTED.md) · [Vendor MCP worker](TOOLCHAIN_MCP_CONTRACT.md)

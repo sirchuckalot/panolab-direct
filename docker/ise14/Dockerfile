@@ -1,7 +1,6 @@
-# PanoLab Direct ISE14 MCP appliance.
-# Keep the proven USB3300 CentOS 6.10 runtime packages, VNC compatibility,
-# nproc limit, host-installed ISE path and non-root execution semantics.
-# Only addition: statically compiled MCP server INSIDE this runtime image.
+# PanoLab Direct ISE 14.7 runtime worker and authenticated setup service.
+# CentOS 6.10 compatibility; vendor binaries and license stay private.
+# The vendor MCP server and toolchain run in one runtime container.
 # Compile the embedded MCP binary in a local Docker build stage.
 FROM --platform=linux/amd64 golang:1.26-bookworm AS mcp-builder
 WORKDIR /src
@@ -45,5 +44,5 @@ EXPOSE 8766
 ENTRYPOINT ["/usr/local/bin/panolab-setup-mcp"]
 CMD []
 
-# Keep the existing ISE MCP runtime as the default output for all old builds.
+# Default output: ISE 14.7 runtime worker with embedded MCP.
 FROM runtime AS final

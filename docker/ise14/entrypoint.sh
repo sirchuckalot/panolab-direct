@@ -1,5 +1,5 @@
 #!/bin/bash
-# Preserve the legacy CentOS 6 non-root runuser/UID/license execution model.
+# ISE 14.7 runtime: controlled UID/GID, home and license environment.
 set -euo pipefail
 uid="${PANO_UID:-1000}"
 gid="${PANO_GID:-1000}"
@@ -12,8 +12,8 @@ chmod 0700 /results/jobs
 export HOME=/home/ise
 export XILINXD_LICENSE_FILE="${XILINXD_LICENSE_FILE:-/licenses/Xilinx.lic}"
 printf -v token_quoted '%q' "${PANOLAB_MCP_TOKEN:-}"
-# The official Docker MCP Gateway communicates over stdio and does not set
-# an HTTP bearer token; preserve the selected transport across runuser.
+# The optional stdio transport does not use an HTTP bearer token.
+# Preserve the selected transport across runuser.
 transport="${PANOLAB_MCP_TRANSPORT:-http}"
 case "$transport" in stdio|http) ;; *) echo "Invalid MCP transport" >&2; exit 2;; esac
 printf -v transport_quoted '%q' "$transport"

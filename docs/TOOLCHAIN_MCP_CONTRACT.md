@@ -1,8 +1,9 @@
 # Canonical vendor toolchain MCP contract
 
 Every FPGA vendor build appliance is a **persistent runtime container**
-with its own pinned operating system, libraries, licensed vendor
-toolchain and MCP server. The MCP server runs **inside the same
+with a specified operating system, libraries, separately installed
+licensed vendor toolchain and embedded MCP server. Pin exact versions
+before reproducible build claims. The MCP server runs **inside the same
 container as the build tools**; no MCP sidecar, SSH build controller,
 agent shell or second runtime worker is required. A multi-stage
 image build used to compile the MCP binary is allowed.
@@ -40,3 +41,5 @@ owner-approved interface revision.
 The ISE 14.7 implementation is source code in `docker/ise14/mcp/`.
 It must be separately proven with licensed media and real toolchain
 execution on the laptop before claiming vendor-build acceptance.
+
+[Architecture and acceptance gates](ARCHITECTURE.md) · [Security](SECURITY.md)
