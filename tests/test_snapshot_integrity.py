@@ -52,6 +52,22 @@ class SnapshotIntegrity(unittest.TestCase):
         self.assertIn("Create one coherent commit", operations)
         self.assertFalse((ROOT / ".github" / "workflows").exists())
 
+    def test_retired_prototypes_are_not_required(self):
+        retired = (
+            "tools/docker-isolation-check.sh",
+            "tools/ise14-headless-install.sh",
+            "tools/ise14-license-mac.sh",
+            "docker/mcp/panolab-ise14.server.yaml",
+            "docker/ise14/mcp/setup/main_test.go",
+        )
+        for rel in retired:
+            with self.subTest(path=rel):
+                self.assertFalse((ROOT / rel).exists(), rel)
+        gateway = (ROOT / "docker/control/repo_gateway.py").read_text()
+        self.assertNotIn('"tests", "tools")', gateway)
+        self.assertNotIn('panolab-ise14.server.yaml',
+                         (ROOT / "docker/README.md").read_text())
+
     def test_no_private_material_in_tree(self):
         self.assertFalse((ROOT / "docker/private").exists())
         self.assertFalse((ROOT / "docker/.env").exists())

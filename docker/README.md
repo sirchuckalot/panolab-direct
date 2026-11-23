@@ -24,8 +24,6 @@ the user's `/run/user/<uid>/docker.sock`.
 - `ise14/`: CentOS 6.10 ISE setup image, pinned build inputs and
   embedded persistent five-tool MCP worker. Licensed installation
   requires private owner media and separate approval.
-- `mcp/panolab-ise14.server.yaml`: optional MCP worker interface
-  descriptor, not a second deployed worker.
 
 No CI, nested Docker daemon, host package installation, broad
 Docker socket mount into developer containers, or FPGA programming.

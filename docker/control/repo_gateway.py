@@ -16,7 +16,7 @@ import threading
 ROOT = pathlib.Path("/repo")
 SOCKET = "/repo-rpc/panolab-git.sock"
 ALLOWED = ("agent", "boards", "docker/control", "docker/ise14", "docker/modern",
-           "docs", "gateware", "host", "specs", "tests", "tools")
+           "docs", "gateware", "host", "specs", "tests")
 ROOT_FILES = ("AGENTS.md", "README.md", "panolab-install.sh")
 SENSITIVE_SUFFIXES = (".key", ".pem", ".p12", ".pfx", ".lic")
 MAX_FILE = 1024 * 1024
