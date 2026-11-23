@@ -1,0 +1,43 @@
+services:
+  setup:
+    build: {context: ./ise14, target: setup-runtime}
+    image: panolab-direct-ise14-setup:local
+    platform: linux/amd64
+    user: "1000:1000"
+    environment: {HOME: /work}
+    volumes:
+      - ${PANOLAB_ISE_TARBALL:?Installer path from launcher}:/media/ise.tar:ro
+      - ./private/Xilinx.lic:/licenses/Xilinx.lic:ro
+      - ./ise14/ise-system-edition.batch:/config/ise-system-edition.batch:ro
+      - ./private/mcp-bearer:/run/secrets/mcp-bearer:ro
+      - ./private/Xilinx:/opt/Xilinx
+      - ./private/ise-work:/work
+    networks: [lab-backend]
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=32m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+  tunnel:
+    image: ghcr.io/openai/tunnel-client:v0.0.21
+    entrypoint: ["/usr/bin/tunnel-client", "run"]
+    command:
+      - "--control-plane.api-key=file:/run/secrets/tunnel-api-key"
+      - "--mcp.server-url=http://setup:8766/mcp"
+      - "--mcp.extra-headers=Authorization: file:/run/secrets/mcp-bearer"
+      - "--mcp.oauth-discovery=disabled"
+    user: "1000:1000"
+    environment:
+      CONTROL_PLANE_TUNNEL_ID: ${PANOLAB_TUNNEL_ID:?Missing tunnel ID}
+    volumes:
+      - ./private/tunnel-api-key:/run/secrets/tunnel-api-key:ro
+      - ./private/mcp-bearer:/run/secrets/mcp-bearer:ro
+    networks: [lab-backend]
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=16m", "/run:rw,nosuid,nodev,size=4m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    depends_on: {setup: {condition: service_started}}
+networks:
+  lab-backend: {}

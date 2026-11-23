@@ -1,0 +1,7 @@
+*
+!Dockerfile
+!entrypoint.sh
+!mcp/
+!mcp/*.go
+!mcp/go.mod
+!mcp/go.sum

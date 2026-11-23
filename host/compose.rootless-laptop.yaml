@@ -1,0 +1,20 @@
+# Laptop-only overlay on the existing setup + management Compose stack.
+# This changes ONLY the new rootless Docker Engine's container identities.
+# Namespace UID 0 == the current ordinary laptop user, NOT host root.
+# Private 0600/0700 host files must never be chmod'ed or chowned for this.
+services:
+  setup:
+    user: "0:0"
+  tunnel:
+    user: "0:0"
+  repo-git:
+    user: "0:0"
+  manager:
+    user: "0:0"
+  docker-broker:
+    environment:
+      PANOLAB_ROOTLESS_MODE: "1"
+    volumes:
+      - type: bind
+        source: ${PANOLAB_ROOTLESS_SOCKET:?Set actual rootless Docker socket}
+        target: /var/run/docker.sock

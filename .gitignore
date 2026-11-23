@@ -1,0 +1,46 @@
+# Secrets and sensitive host data
+.env
+.env.*
+!.env.example
+docker/private/
+docker/ise14/installed/
+**/auth.json
+**/Xilinx.lic
+*.lic
+*.key
+*.pem
+*.p12
+*.pfx
+# Hardware artifacts / logs
+build/
+dist/
+*.bit
+*.bin
+*.mcs
+*.jed
+*.ngc
+*.ncd
+*.pcf
+*.bgn
+*.bld
+*.map
+*.mrp
+*.par
+*.twr
+*.twx
+*.xst
+*.xrpt
+*.log
+*.jou
+*.wdb
+*.vcd
+*.fst
+*.vvp
+# Python and editors
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.vscode/
+.idea/
+.DS_Store

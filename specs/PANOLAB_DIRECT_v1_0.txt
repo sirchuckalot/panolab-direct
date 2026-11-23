@@ -1,0 +1,54 @@
+PANOLAB DIRECT v1.0 — SYSTEM DESIGN BASELINE
+
+MISSION
+Low-cost, FPGA-native, agent-driven engineering laboratory using the
+owner's Linux laptop, router/switch and Pano Logic G2 Rev B.
+USB3300 is a future workload; no USB protocol RTL in the lab baseline.
+
+TARGET
+Pano Logic G2 Rev B, Spartan-6 XC6SLX150-2-FGG484. Verify board
+revision, constraints, clocks, PHY, JTAG and programming recovery
+against the physical board. Do not silently use Rev C pinouts.
+
+FPGA DESIGN
+CPU-less LiteX system: clock/reset, LiteEth PHY/MAC and Etherbone,
+Wishbone/CSR, memory and allowlisted identity/read-write registers.
+No embedded CPU, BIOS, FPGA Linux, HDMI capture appliance or Raspberry
+Pi. Higher features: LiteScope, coherent internal framebuffer snapshot,
+optional DDR2/DMA streaming, only after measurements.
+
+LAPTOP LAB
+Ordinary user rootless Docker Engine and strictly isolated containers
+for development, ISE vendor tooling, MCP control and outbound tunnel.
+No host FPGA build dependencies. All system acceptance tests take
+place on the actual laptop, not GitHub Actions/KVM. Preserve private
+media/authentication, workspace and other host Docker applications.
+
+AGENT
+MCP governs agent-facing engineering operations. ISE worker exposes
+exactly toolchain_info, build_start, build_status, build_result and
+build_cancel. The agent inspects sources, runs local checks, requests
+separate approval for hardware operations and captures reproducible
+evidence. Persist workers across jobs.
+
+ETHERNET
+Etherbone is an unauthenticated trusted-LAN debug transport. Never
+expose it to Internet or arbitrary LAN users. An FPGA that is not
+configured cannot be configured merely through Etherbone.
+
+HARDWARE SAFETY
+Factory SPI flash remains untouched. No volatile programming, JTAG
+or flash writes without explicit owner permission, board identity
+and recovery path. Licensed ISE binaries/license are owner-provided,
+not published in this repository.
+
+WORK SEQUENCE
+M0: isolated container lab and verified remote MCP.
+M1: Rev B CPU-less Etherbone with CSR identity/read-write.
+M2: LiteScope captures and physical observation.
+M3: coherent BRAM framebuffer observation on laptop.
+M4: optional measured DMA/video/DDR2.
+M5: trusted approved programming/diagnostic bridge.
+
+Keep modules small, re-use compatible upstream libraries, pin versions
+before reproducible build claims and report test evidence by venue.

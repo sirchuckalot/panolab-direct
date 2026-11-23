@@ -1,0 +1,88 @@
+# Extend proven setup stack; separate MCP interface from Docker-socket broker.
+services:
+  docker-broker:
+    build:
+      context: ./control
+      dockerfile: Broker.Dockerfile
+    image: panolab-direct-broker:local
+    environment:
+      PANOLAB_ROOTLESS_MODE: "1"
+      PANOLAB_WORKSPACE_HOST: ${PANOLAB_WORKSPACE_HOST:?Missing PanoLab workspace}
+      PANOLAB_REPO_HOST: ${PANOLAB_REPO_HOST:?Missing owner Git clone path}
+      PANOLAB_CODEX_AUTH_HOST: ${PANOLAB_CODEX_AUTH_HOST:?Missing protected Codex auth path}
+    volumes:
+      - type: bind
+        source: ${PANOLAB_ROOTLESS_SOCKET:?Set user rootless Docker socket}
+        target: /var/run/docker.sock
+      - ./modern:/source/modern:ro
+      - management-rpc:/rpc
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=32m
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+  repo-git:
+    build:
+      context: ./control
+      dockerfile: Repo.Dockerfile
+    image: panolab-direct-repo-git:local
+    user: "1000:1000"
+    volumes:
+      - ../:/repo
+      - ./private/repo-rpc:/repo-rpc
+      # This empty, non-populated volume masks ALL private installer media and keys.
+      - type: volume
+        source: repo-private-mask
+        target: /repo/docker/private
+        read_only: true
+        volume:
+          nocopy: true
+      # The ignored tunnel.env never reaches the Git sidecar.
+      - /dev/null:/repo/docker/.env:ro
+    networks: [lab-backend]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=32m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+  manager:
+    build:
+      context: .
+      dockerfile: control/Manager.Dockerfile
+    image: panolab-direct-manager:local
+    user: "1000:1000"
+    environment:
+      HOME: /tmp
+    volumes:
+      - management-rpc:/rpc
+      - ./private/repo-rpc:/repo-rpc:ro
+      - ./private/agent-workspace:/workspace
+      - ./private/mcp-bearer:/run/secrets/mcp-bearer:ro
+    networks: [lab-backend]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=32m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    depends_on:
+      docker-broker:
+        condition: service_started
+      repo-git:
+        condition: service_started
+      setup:
+        condition: service_started
+  tunnel:
+    command:
+      - "--control-plane.api-key=file:/run/secrets/tunnel-api-key"
+      - "--mcp.server-url=http://manager:8767/mcp"
+      - "--mcp.extra-headers=Authorization: file:/run/secrets/mcp-bearer"
+      - "--mcp.oauth-discovery=disabled"
+    depends_on:
+      manager:
+        condition: service_started
+volumes:
+  management-rpc: {}
+  repo-private-mask: {}

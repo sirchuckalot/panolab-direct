@@ -1,0 +1,8 @@
+{
+  "top": "counter_top",
+  "part": "xc6slx150-fgg484-2",
+  "verilog": [
+    "counter_top.v"
+  ],
+  "ucf": ""
+}
