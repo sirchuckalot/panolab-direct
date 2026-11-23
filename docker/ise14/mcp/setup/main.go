@@ -1,3 +1,6 @@
+// Separate, owner-approved ISE media and installation service.
+// It does not provide the persistent five-tool vendor build worker
+// and never authorizes FPGA programming or unbounded host operations.
 package main
 import(
  "archive/tar";"compress/gzip";"compress/bzip2";"context";"crypto/sha256";"crypto/subtle";"encoding/hex";"encoding/json";"errors";"fmt";"io";"log";"net/http";"os";"os/exec";"path/filepath";"strings";"sync";"time"

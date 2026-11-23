@@ -1,3 +1,5 @@
+# Build the authenticated MCP manager. The rootless Compose overlay
+# uses owner-mapped namespace UID 0 for access to private 0600 inputs.
 FROM golang:1.26-bookworm AS build
 WORKDIR /src
 COPY ise14/mcp/go.mod ise14/mcp/go.sum ./

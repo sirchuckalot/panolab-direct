@@ -1,4 +1,6 @@
-# Extend proven setup stack; separate MCP interface from Docker-socket broker.
+# Management, Git gateway and restricted Docker broker services.
+# Merge with compose.setup.yaml and the host rootless overlay; the latter
+# overrides service UIDs for owner-only credentials and socket access.
 services:
   docker-broker:
     build:
@@ -38,7 +40,7 @@ services:
         read_only: true
         volume:
           nocopy: true
-      # The ignored tunnel.env never reaches the Git sidecar.
+      # Mask the ignored docker/.env so the Git gateway cannot read tokens.
       - /dev/null:/repo/docker/.env:ro
     networks: [lab-backend]
     read_only: true

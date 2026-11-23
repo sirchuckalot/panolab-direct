@@ -1,3 +1,5 @@
+// MCP manager: authenticated remote entrypoint. Docker and Git operations
+// are delegated to constrained private brokers, never a host shell.
 package main
 
 import (

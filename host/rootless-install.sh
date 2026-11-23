@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Rootless laptop deployment; the owner provisions Docker and private credentials.
-# Never sudo, apt, prune, flash FPGA, run GitHub CI, or touch other projects.
+# Install or inspect the owner-user rootless PanoLab Docker stack.
+# Host Docker provisioning and private inputs are preconditions, not installer actions.
+# No sudo, host packages, global Docker cleanup, CI execution or FPGA programming.
 set -Eeuo pipefail
 umask 077
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
@@ -50,7 +51,7 @@ status() {
   else say "Rootless Engine not reachable."; fi
 }
 if [[ "$mode" == --status ]]; then status; exit 0; fi
-# Use the approved user-level rootless service when no daemon is running.
+# Start only the known owner-user rootless service when the socket is unavailable.
 if [[ "$mode" == --install ]] && ! rootless_ok; then
   # Start the user-scoped rootless service from its pre-provisioned helper.
   unit="$HOME/.config/systemd/user/panolab-rootless-docker.service"
@@ -160,8 +161,8 @@ UNIT
   systemctl --user daemon-reload
   systemctl --user enable panolab-rootless-docker.service >/dev/null
   say "Installed owner-user systemd service. The current rootless daemon is foreground/manual."
-  say "Press Ctrl+C in its FIRST terminal, then run bash ./panolab-install.sh again."
-  say "Original PanoLab services are untouched. No cutover was attempted."
+  say "If a rootless daemon is running manually, stop it in its own terminal and rerun this installer."
+  say "No PanoLab containers were changed."
   exit 20
 fi
 rootless_ok || fail "Systemd-managed rootless Engine did not pass checks."
@@ -195,8 +196,9 @@ mounted="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/var/run/docker.
 [[ "$mounted" == "$sock" ]] || fail "Broker is not bound to rootless Docker socket."
 options="$(r exec "$broker" docker info --format '{{json .SecurityOptions}}' 2>/dev/null || true)"
 [[ "$options" == *'"name=rootless"'* ]] || fail "Broker does not connect to rootless Engine."
-# Namespace UID 0 is host UID 1000, so it can read the existing 0600
-# Codex and private workspace directories. No chown/chmod of host files.
+# In the rootless user namespace, UID 0 maps to the current ordinary
+# laptop owner, allowing access to existing owner-only credentials.
+# Do not change host permissions or treat namespace root as host root.
 if ! new_exists "$dev"; then
   cmd=(run -d --name "$dev" --label panolab.managed=true
     --user 0:0 --workdir /workspace --cap-drop ALL
@@ -265,8 +267,8 @@ for i,tool in enumerate(('lab_status','repo_status'),2):
 print('PASS: private authenticated MCP, anonymous request rejected, status and repo tools')
 PY
 )"
-# Docker Compose names networks using PROJECT_NETWORK, not PROJECT-NETWORK.
-# Validate the real network's ownership before attaching an auth probe.
+# Match Compose's project-scoped bridge and verify its labels before
+# attaching the one-shot authenticated MCP probe.
 mcp_network="${project}_lab-backend"
 network_owner="$(r network inspect "$mcp_network" \
   --format '{{index .Labels "com.docker.compose.project"}}/{{index .Labels "com.docker.compose.network"}}' \

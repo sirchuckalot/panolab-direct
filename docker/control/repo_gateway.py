@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Limited Git and source-file gateway for the owner's EXISTING checkout.
+"""Source-control gateway for one approved mounted laptop checkout.
 
-No host shell endpoint, Docker socket, or access to docker/private.
-The gateway is unprivileged and talks only over a private Unix socket.
+Only allowlisted source files are reachable. Private media, auth data,
+Docker socket and host shell operations are outside this gateway.
+Its container user is owner-mapped by the rootless Compose overlay.
 """
 import json
 import os
@@ -18,6 +19,9 @@ SOCKET = "/repo-rpc/panolab-git.sock"
 ALLOWED = ("agent", "boards", "docker/control", "docker/ise14", "docker/modern",
            "docs", "gateware", "host", "specs", "tests")
 ROOT_FILES = ("AGENTS.md", "README.md", "panolab-install.sh")
+# Explicit top-level Docker recipes are readable/editable without opening the
+# entire docker/ directory or exposing docker/private and docker/.env.
+CONFIG_FILES = ("docker/compose.setup.yaml", "docker/compose.manage.yaml")
 SENSITIVE_SUFFIXES = (".key", ".pem", ".p12", ".pfx", ".lic")
 MAX_FILE = 1024 * 1024
 MAX_MESSAGE = 160
@@ -36,6 +40,8 @@ def git(*args, timeout=30):
 def branch_ok():
     b = git("symbolic-ref", "--quiet", "--short", "HEAD")
     branch = b["stdout"].strip() if b["ok"] else ""
+    # Keep development only while the running laptop checkout still uses it.
+    # Routine work targets the clean main history; cross-history merges are refused.
     if branch not in ("main", "development"):
         raise ValueError("refusing operation outside main/development branch")
     return branch
@@ -56,7 +62,8 @@ def safe_path(raw, directory=False):
     parts = raw.split("/")
     if any(p in ("", ".", "..") or p.startswith(".") for p in parts):
         raise ValueError("hidden/traversal path refused")
-    permitted = raw in ROOT_FILES or any(raw == p or raw.startswith(p + "/") for p in ALLOWED)
+    permitted = raw in ROOT_FILES or raw in CONFIG_FILES or any(
+        raw == p or raw.startswith(p + "/") for p in ALLOWED)
     if not permitted or raw.startswith("docker/private/"):
         raise ValueError("path not in approved source tree")
     if raw.lower().endswith(SENSITIVE_SUFFIXES) or pathlib.PurePosixPath(raw).name in ("auth.json", ".env"):
@@ -76,7 +83,8 @@ def safe_path(raw, directory=False):
 
 def list_files(path):
     if path in ("", "."):
-        return {"entries": [{"name": n, "directory": n in ALLOWED} for n in ROOT_FILES + ALLOWED]}
+        return {"entries": [{"name": n, "directory": n in ALLOWED}
+                            for n in ROOT_FILES + CONFIG_FILES + ALLOWED]}
     p = safe_path(path, directory=True)
     if not p.is_dir():
         raise ValueError("not an approved directory")
@@ -143,6 +151,7 @@ def sync():
     if dirty["stdout"]:
         return {"ok": False, "reason": "local checkout contains changes; refusing pull",
                 "changes": dirty["stdout"][:8000]}
+    # Only fetch the exact current approved branch; never reset local work.
     fetched = git("fetch", "--no-tags", "origin", branch_ok(), timeout=120)
     if not fetched["ok"]:
         return {"ok": False, "reason": "fetch failed; no local changes made",
@@ -188,8 +197,9 @@ def commit(paths, message):
 def push():
     branch_ok()
     origin_ok()
-    # Requires a separately approved, scoped GitHub credential on the Git sidecar.
-    # Do not mount laptop credentials or prompt for a token in chat.
+    # The ordinary publishing path uses the connected GitHub integration,
+    # not credentials in this gateway. Direct push works only if explicitly
+    # configured with separately approved, narrowly scoped authentication.
     check = git("status", "--porcelain=v1")
     if not check["ok"] or check["stdout"]:
         raise ValueError("checkout must be clean before push")

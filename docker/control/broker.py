@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-"""Only this isolated broker holds the host Docker socket. Never expose it to MCP."""
+"""Restricted Docker broker: only this service gets the user rootless socket.
+
+The MCP manager communicates through private RPC, not via direct Docker access.
+"""
 import json, os, socket, subprocess, threading
 S="/rpc/panolab.sock"
 W=os.environ["PANOLAB_WORKSPACE_HOST"]
 REPO=os.environ["PANOLAB_REPO_HOST"]
 CODEX_AUTH=os.environ["PANOLAB_CODEX_AUTH_HOST"]
-# In rootless Docker, container UID 0 maps to the host's ordinary user.
-# Existing owner-owned 0700 bind mounts are inaccessible to mapped UID 1000.
-# This flag is ONLY accepted if the mounted Docker daemon confirms rootless.
+# Rootless namespace UID 0 maps to the ordinary host owner, enabling
+# existing private 0700 mounts without changing host permissions.
+# Enforce rootless Engine identity before honoring this owner-mapped mode.
 ROOTLESS_MODE=os.environ.get("PANOLAB_ROOTLESS_MODE") == "1"
 CONTAINER_DEV_USER="0:0" if ROOTLESS_MODE else "1000:1000"
+# Restricted dev-container reconfiguration uses project-scoped temporary
+# names and restores the prior dev container if the replacement fails.
 STAGE="panolab-direct-dev-stage"
 BACKUP="panolab-direct-dev-backup"
 SOURCE_MOUNTS=(("gateware","rw"),("agent","rw"),("boards","ro"),

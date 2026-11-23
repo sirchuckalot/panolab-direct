@@ -34,9 +34,9 @@ RUN set -eux; \
 WORKDIR /workspace
 CMD ["bash"]
 
-# Provide an optional named non-root identity and owned mountpoints.
-# The laptop rootless profile deliberately uses container UID 0 mapped to
-# the owner's ordinary host UID to access private owner-only mounts.
+# An optional UID 1000 account is retained in the tool image.
+# The active rootless dev container runs as namespace UID 0, which maps
+# to the ordinary laptop owner and can reach private owner-only binds.
 RUN if ! getent group 1000 >/dev/null; then groupadd --gid 1000 dev; fi && \
     if ! getent passwd 1000 >/dev/null; then \
       useradd --uid 1000 --gid 1000 --create-home --shell /bin/bash dev; \

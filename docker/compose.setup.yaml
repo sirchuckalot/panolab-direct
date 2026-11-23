@@ -1,3 +1,6 @@
+# Private ISE setup service and the outbound tunnel base configuration.
+# The management Compose layer routes the tunnel to the MCP manager;
+# both files and the rootless overlay are required by the installer.
 services:
   setup:
     build: {context: ./ise14, target: setup-runtime}

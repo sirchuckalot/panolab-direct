@@ -1,7 +1,7 @@
-# Laptop-only overlay on the existing setup + management Compose stack.
-# This changes ONLY the new rootless Docker Engine's container identities.
-# Namespace UID 0 == the current ordinary laptop user, NOT host root.
-# Private 0600/0700 host files must never be chmod'ed or chowned for this.
+# Overlay for the owner-user rootless Engine, merged after both base files.
+# Container UID 0 maps to the ordinary laptop owner, not host root;
+# this allows private 0600/0700 mounts without changing host permissions.
+# The broker receives ONLY the verified user-scoped Docker socket.
 services:
   setup:
     user: "0:0"

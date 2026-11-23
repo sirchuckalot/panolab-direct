@@ -4,6 +4,7 @@ No Docker daemon, private credentials, licensed toolchain or FPGA required.
 """
 from pathlib import Path
 import re
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,6 +59,65 @@ class SnapshotIntegrity(unittest.TestCase):
         for name in ("toolchain_info", "build_start", "build_status",
                      "build_result", "build_cancel"):
             self.assertIn('Name:"' + name + '"', worker)
+
+    def test_gateway_can_access_active_recipes_but_not_private_data(self):
+        # Execute only the source gateway's declarations and functions.
+        # Never start its Unix socket listener or touch the live checkout.
+        gateway = ROOT / "docker/control/repo_gateway.py"
+        source = gateway.read_text()
+        prelude, sep, _ = source.partition(
+            'if not (ROOT / ".git").is_dir():')
+        self.assertTrue(sep, "gateway module startup boundary missing")
+        namespace = {"__name__": "panolab_gateway_readonly_test"}
+        exec(compile(prelude, str(gateway), "exec"), namespace)
+
+        with tempfile.TemporaryDirectory(prefix="panolab-source-gateway-") as tmp:
+            target = Path(tmp)
+            (target / "docker").mkdir()
+            for filename in ("compose.setup.yaml", "compose.manage.yaml"):
+                (target / "docker" / filename).write_text(
+                    "services:\n  manager: {}\n")
+            namespace["ROOT"] = target
+            for filename in (
+                "docker/compose.setup.yaml",
+                "docker/compose.manage.yaml",
+            ):
+                with self.subTest(allowed=filename):
+                    self.assertEqual(namespace["read_file"](filename)["path"],
+                                     filename)
+            index = namespace["list_files"](".")["entries"]
+            self.assertIn("docker/compose.manage.yaml",
+                          {item["name"] for item in index})
+            for filename in (
+                "docker/private",
+                "docker/private/tunnel-api-key",
+                "docker/.env",
+                "docker/.env.example",
+                "docker/other-compose.yaml",
+                "docker/../README.md",
+            ):
+                with self.subTest(denied=filename):
+                    with self.assertRaises(ValueError):
+                        namespace["safe_path"](filename)
+
+    def test_no_stale_source_migration_messages(self):
+        comments = "\n".join((ROOT / name).read_text() for name in (
+            "host/rootless-install.sh",
+            "docker/compose.manage.yaml",
+            "docker/compose.setup.yaml",
+            "host/compose.rootless-laptop.yaml",
+            "docker/control/broker.py",
+        ))
+        for obsolete in (
+            "Original PanoLab services are untouched",
+            "ignored tunnel.env",
+            "previously verified rootless launcher",
+            "the new rootless Docker Engine",
+            "PROJECT-NETWORK",
+            "host UID 1000",
+        ):
+            with self.subTest(obsolete=obsolete):
+                self.assertNotIn(obsolete, comments)
 
     def test_single_current_documentation_tree(self):
         expected = set(DOCS)
