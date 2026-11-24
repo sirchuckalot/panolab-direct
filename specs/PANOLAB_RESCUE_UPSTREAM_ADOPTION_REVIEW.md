@@ -39,13 +39,13 @@ Factory stock (migration only)
   -> LiteX Rescue (independent bitstream + firmware in its ROM/BRAM)
      [CPU | PHY/LiteEth | TCP/IP | SPI read/erase/program/verify
       | board identity | durable journal | Spartan-6 ICAP/IPROG
-      | host-authenticated, narrow management interface]
+      | profile-aware, bounded Ethernet management interface]
      -> trial APP_A or APP_B via FPGA reconfiguration
      <- application-triggered return if healthy
      <- independent power-cycle/button recovery if hung (must prove)
 ```
 
-Foboot's *bootloader and firmware embedded into one configuration* is the reference for independently booting rescue without external Linux/rootfs. LiteX's own BIOS is a source for boot/console/network primitives. LimeSDR_GW's `firmware/main.c`, `firmware/bsp/`, flash drivers and host-command handling are a design reference, **not a drop-in Ethernet update server**. The independently working G2 `panog2_ldr` demonstrates the network provisioning path and button policy, **not a source that satisfies the LiteX requirement**.
+Foboot's *bootloader and firmware embedded into one configuration* is the reference for independently booting rescue without external Linux/rootfs. **Standard LiteX BIOS is the chosen recovery-firmware foundation**, rather than merely a source of boot/console/network primitives; PanoLab adds the network update service, A/B journal and FPGA-specific ICAP handoff. LimeSDR_GW's `firmware/main.c`, `firmware/bsp/`, flash drivers and host-command handling are a design reference, **not a drop-in Ethernet update server**. The independently working G2 `panog2_ldr` demonstrates the network provisioning path and button policy, **not a source that satisfies the LiteX requirement**.
 
 ## Required adaptations (not claimed done)
 
@@ -53,7 +53,7 @@ Foboot's *bootloader and firmware embedded into one configuration* is the refere
 2. **True independently bootable Rescue:** CPU firmware linked into FPGA ROM/BRAM, no Linux or external boot payload for rescue readiness. Rescue must boot with an invalid/unavailable app slot and should not depend on DDR2 unless a separately demonstrated requirement forces it.
 3. **Flash and reconfiguration:** Board-specific, bounded flash driver, programmed-image readback, Spartan-6 `ICAP_SPARTAN6` control and validated configuration/fallback headers. Do not assume 7-series ICAP glue works on Spartan-6.
 4. **PanoLab v1 update semantics:** protected BOOT/RESCUE/IDENTITY, APP_A/APP_B, independent STATE_0/STATE_1, manifest target/hash/signature validation, staging to inactive slot, trial/confirm/revert journal with power-failure tests. Neither Foboot nor the historic G2 examples directly implements this full contract.
-5. **Discovery/security:** unique per-board MAC and serial from identity region, DHCP/mDNS/DNS-SD, authenticated management API or a standard secure board-to-host channel (no unauthenticated flash writes). Legacy stock-protocol, Telnet and TFTP remain isolated provisioning-only tools.
+5. **Discovery/trust profile:** unique MAC and serial from board identity, DHCP/mDNS/DNS-SD, BIOS-based LiteEth networking, and the standard versioned management API. On an isolated owner-controlled LAN, `trusted-lan` intentionally permits unpaired bounded APP_A/B updates with a prominent warning; shared/production networks require authenticated access. Legacy factory protocol, Telnet and BIOS TFTP do not constitute a general unrestricted remote flash API.
 6. **Independent emergency recovery:** prove cold boot goes to Rescue and a button/reset/power-cycle entry works if the app has configured successfully but hangs; pure ICAP return from the app does not cover this failure class.
 7. **Two-board reproducibility:** deterministic pinning and builds, independent source verification, evidence from the owner's actual G2; hardware-qualified status only after PLR-ARCH-001 Q01–Q22 relevant tests pass.
 
@@ -67,6 +67,8 @@ Foboot's *bootloader and firmware embedded into one configuration* is the refere
 | R3 actual G2 read-only | Rev B PHY/MAC, CPU BIOS, SPI JEDEC/identity, discovery; no programming | Not run |
 | R4 isolated migration | Authorize exact board, stock entry-slot write, boot Rescue, demonstrate physical recovery | Not run |
 | R5 A/B acceptance | Full Q01–Q22 BSP qualification including interrupted write, unhealthy app and two-board checks | Not run |
+
+The newer [BIOS-first implementation plan](../docs/RESCUE_IMPLEMENTATION.md) and Rescue v1.1.0 revise the earlier all-authenticated network policy: Trusted-LAN unpaired operation is deliberately supported for isolated benches. This research record is an evidence review, not a physical qualification.
 
 No physical board was flashed or claimed tested during this review. Do not write `main`. `development` is the only work branch; laptop local commit is pending reconciliation with published GitHub history. GitHub documentation changes must not be conflated with local hardware verification.
 

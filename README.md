@@ -19,7 +19,9 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [Toolchain MCP contract](docs/TOOLCHAIN_MCP_CONTRACT.md) | Persistent vendor build worker and canonical five MCP tools |
 | [Agent instructions](AGENTS.md) | Rules for automated engineering sessions |
 | [LM1 first working lab milestone](specs/LAB_MILESTONE_1.md) | Software acceptance evidence, design lessons and LM2 demonstration |
-| [PanoLab Rescue v1 standard](specs/PANOLAB_RESCUE_V1.md) | Cross-platform boot, A/B update, identity, BSP, security and qualification contract |
+| [PanoLab Rescue v1 standard](specs/PANOLAB_RESCUE_V1.md) | Cross-platform boot, A/B update, identity, BSP, trust profiles and qualification contract |
+| [LiteX BIOS Rescue implementation](docs/RESCUE_IMPLEMENTATION.md) | Startup timeout/button behavior, Ethernet management, unpaired Trusted-LAN profile and validation gates |
+| [Upstream Rescue adoption review](specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Verified upstream bootloader examples, source reuse boundaries and outstanding proof |
 
 The selected [FPGA system specification](specs/PANOLAB_DIRECT_v1_0.txt)
 is the companion concise functional requirements file. These documents

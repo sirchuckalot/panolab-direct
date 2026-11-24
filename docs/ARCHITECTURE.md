@@ -80,7 +80,14 @@ or LiteX implementation. FPGA board integration remains unverified.
 [PanoLab Rescue v1](../specs/PANOLAB_RESCUE_V1.md) defines a separate
 LiteX CPU-equipped recovery personality with A/B FPGA application slots,
 protected per-device identity, durable trial-boot and rollback metadata,
-authenticated network management, and per-board BSP qualification.
+profile-aware Ethernet management, and per-board BSP qualification.
+The [BIOS-first Rescue implementation plan](RESCUE_IMPLEMENTATION.md)
+reuses LiteX BIOS and its drivers, provides configurable autoboot,
+and holds Rescue over Ethernet when the Pano button is held at power-on.
+On an isolated owner-controlled LAN, the first-use `trusted-lan` profile
+permits unpaired, partition-scoped update commands; shared or production
+use paired/authenticated modes. Physical recovery and all network modes
+still require BSP/hardware qualification.
 The normal Etherbone application may remain CPU-less. Rescue and an
 application cannot execute concurrently in one reconfigured FPGA.
 Independent power-cycle/button recovery from a hung application must

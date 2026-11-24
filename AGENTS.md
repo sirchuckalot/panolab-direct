@@ -8,6 +8,10 @@ baseline**, not an experiment log. Start at the repository
 and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
 Read [PanoLab Rescue v1](specs/PANOLAB_RESCUE_V1.md) for the
 approved forward boot/update/recovery standard (not yet implemented).
+Read the [LiteX BIOS implementation plan](docs/RESCUE_IMPLEMENTATION.md)
+for the timed/button-held recovery workflow and the deliberately unpaired
+Trusted-LAN appliance profile. That device mode does **not** waive
+owner approval for physical writes through the laptop MCP agent.
 
 ## What is real, and what is planned
 

@@ -3,7 +3,7 @@
 | Document control | Value |
 | --- | --- |
 | Identifier | `PLR-ARCH-001` |
-| Version | **1.0.0** — architecture and interoperability contract |
+| Version | **1.1.0** — architecture/interoperability contract; adds BIOS-first boot UX and explicit Trusted-LAN profile |
 | Date | 2026-11-23 |
 | Status | **Design baseline for development; not implemented or hardware-qualified** |
 | Scope | Embedded FPGA board boot, update, rescue, identity, and qualification |
@@ -16,6 +16,8 @@
 **PanoLab Rescue v1 SHALL be a LiteX-based, independently bootable rescue environment with two independently bootable FPGA application slots (A/B), a separately persisted device identity, verified trial updates, and recovery through a board-proven physical reset/power-cycle path.** Applications MAY be CPU-less. The rescue environment MAY contain a soft CPU and bare-metal management firmware; Linux is **not** required.
 
 A *common recovery implementation* means common sources, protocol, manifest, state model, and user experience. **It does not mean one universal FPGA bitstream binary**: an FPGA configuration image is built for a specific compatible board/FPGA target, toolchain, pinout, and flash boot arrangement. A BSP SHALL declare its compatibility group.
+
+The recovery firmware SHOULD build on **upstream LiteX BIOS** and existing LiteX boot, console, Ethernet and SPI support rather than a separate custom boot stack. PanoLab adds bounded network management, A/B state and FPGA ICAP reconfiguration. The first-use **trusted-lan** device profile explicitly allows unpaired app management on a fully owner-controlled isolated LAN; it MUST clearly disclose the lack of sender authentication. See [BIOS-based implementation plan](../docs/RESCUE_IMPLEMENTATION.md).
 
 The original Pano factory firmware is a **one-time provisioning entry point**, not a permanent product dependency. The migration MAY extract only relevant identity bytes/records, provided those are validated and kept safe before erasure. A full factory SPI image is useful for archaeology but **not a product prerequisite**. The integrity of the boot path and per-device identity remains mandatory.
 
@@ -43,11 +45,11 @@ The original Pano factory firmware is a **one-time provisioning entry point**, n
 ```text
 User / IDE / Agent / CLI
     |
-    | discovery (DNS-SD/mDNS), authenticated management API
+    | discovery (DNS-SD/mDNS), profile-aware Ethernet management API
     v
 PanoLab host-side tooling (optional gateway/management proxy)
     |
-    | network; each mutating request authorized end-to-end
+    | network; bounded updates under the active trust profile
     v
 +-------------- FPGA board / SPI NOR -------------------+
 | FPGA boots PanoLab Rescue first on cold boot/reset     |
@@ -74,12 +76,12 @@ PanoLab host-side tooling (optional gateway/management proxy)
 
 | Component | Mandatory responsibility |
 | --- | --- |
-| Rescue | First boot path; authenticate management; verify candidate; manage image slots; journal boot state; boot/recover |
+| Rescue | LiteX BIOS first boot; enforce selected network trust profile; verify candidate; manage image slots; journal boot state; boot/recover |
 | Application A and B | Independently bootable complete FPGA configurations; no assumption that both run simultaneously |
 | Identity | Per-unit serial, MAC, board/revision and original raw data with integrity; not overwritten by routine updates |
 | Boot state | Durable last-known-good, trial candidate, attempt policy, update generation and recovery reason |
 | BSP | Flash geometry/partition map, clock/PHY, FPGA reconfiguration, hard recovery button/reset, hardware identification |
-| Host tooling | Discovery, bundle preparation, authenticated updates, health observation, audit, optional pairing |
+| Host tooling | Discovery, bundle preparation, profile-aware Ethernet updates, health observation, audit, optional pairing |
 
 ## 3. Flash and partition contract
 
@@ -182,7 +184,7 @@ SHA-256 alone proves integrity, **not** authorization. A secret or public key st
 
 ### 5.1 Required startup invariant
 
-On a normal cold boot, hard reset, and validated recovery reset, **Rescue MUST be the first configured, independently usable environment**. Rescue inspects the journal and optionally the recovery button before deciding which application to load. Loading the application replaces the rescue FPGA configuration. The BSP MUST demonstrate this exact hardware behavior; relying on an application to be cooperative is **not** sufficient to claim recovery support.
+On a normal cold boot, hard reset, and validated recovery reset, **Rescue MUST be the first configured, independently usable environment**. Its LiteX BIOS starts independently of the user image, and Rescue reads device identity, redundant boot journal and a debounced recovery-button input. **Holding the recovery button through a BSP-defined power-on sampling window MUST suppress autoboot and keep Rescue available on Ethernet until explicitly told to boot.** With a valid confirmed app and no hold, a short bounded **configurable autoboot timeout** (initial candidate: five seconds; unverified) precedes verify-and-reconfigure to the confirmed application. No valid image, an unsafe journal or exhausted trial MUST remain recoverable. An absent network/DHCP link MUST NOT cause indefinite delay or unsafe image activation. Loading the application replaces the rescue FPGA configuration. The BSP MUST demonstrate this behavior; a cooperating application is **not** a sufficient recovery guarantee.
 
 ```text
 RESET / POWER-ON
@@ -198,7 +200,7 @@ RESET / POWER-ON
        |
        +-- unconfirmed prior trial --> ROLLBACK_TO_CONFIRMED
        |
-       +-- confirmed app exists --> VERIFY_CONFIRMED --> BOOT_CONFIRMED
+       +-- confirmed app exists --> AUTOBOOT_WINDOW -- deadline --> VERIFY_CONFIRMED --> BOOT_CONFIRMED
 
 RESCUE_IDLE / RUNNING RESCUE
        |
@@ -233,10 +235,10 @@ RESCUE_IDLE / RUNNING RESCUE
 4. `TRIAL`: Rescue invokes BSP-specific FPGA reconfiguration to candidate A or B.
 5. `OBSERVE`: PanoLab host and/or application's documented self-test evaluates target-specific health (e.g. discovery, version, protocol response, expected CSR). Simple FPGA configuration success is **not** sufficient health evidence.
 6. `RETURN`: A healthy application MAY initiate ICAP return to Rescue; its minimal return shim contains no unrestricted flash-write capability. Alternatively an independently supported device mechanism returns to Rescue.
-7. `CONFIRM`: Only after authenticated approval and matching trial ID/image digest may Rescue commit the new confirmed slot and clear the pending record. Retain former confirmed slot as rollback candidate until policy permits replacement.
+7. `CONFIRM`: Only after approval consistent with the active management profile and matching trial ID/image digest may Rescue commit the new confirmed slot and clear the pending record. Retain former confirmed slot as rollback candidate until policy permits replacement.
 8. `ROLLBACK`: If Rescue boots with an unconfirmed exhausted/failed trial, it MUST boot the previous confirmed image or remain in Rescue; it MUST NOT repeatedly retry a bad candidate indefinitely.
 
-**Concurrency caveat:** since the FPGA's Rescue logic is absent while an application runs, the application cannot call a Rescue HTTP endpoint *on the device at that time*. The v1 default health-confirmation protocol therefore uses the host as observer and a standardized application `return-to-rescue` operation; after the return, the host authenticates to Rescue and confirms the matching trial. A design that offers a true independent always-on supervisor MAY support stronger autonomous confirmation, but must declare and prove that hardware feature.
+**Concurrency caveat:** since the FPGA's Rescue logic is absent while an application runs, the application cannot call a Rescue HTTP endpoint *on the device at that time*. The v1 default health-confirmation protocol therefore uses the host as observer and a standardized application `return-to-rescue` operation; after the return, the host reconnects to Rescue and confirms the matching trial using the selected (unpaired trusted-lan or authenticated paired/production) profile. A design that offers a true independent always-on supervisor MAY support stronger autonomous confirmation, but must declare and prove that hardware feature.
 
 ### 5.3 Rollback on a hung, but valid, application
 
@@ -244,7 +246,7 @@ An FPGA image may configure successfully yet contain broken clocks, Ethernet, or
 
 ### 5.4 Recovery and rescue updates
 
-- `RECOVERY_ONLY` exposes identity, status, safe diagnostics, and authenticated repair without automatically booting bad applications.
+- `RECOVERY_ONLY` exposes identity, status, safe diagnostics, and profile-appropriate Ethernet repair without automatically booting bad applications.
 - Standard A/B application updates MUST NOT overwrite `BOOT`, `RESCUE`, `IDENTITY`, or the other confirmed slot.
 - Updating `RESCUE` is a **different maintenance class** requiring owner approval, separate verification, and a demonstrated independent fallback (redundant rescue or a proven hardware programming recovery method). Updating the currently running last recovery copy is forbidden in routine update mode.
 - Factory migration can replace obsolete proprietary images eventually, but the independent bootable recovery path MUST be proven before the last working factory fallback is erased.
@@ -254,29 +256,31 @@ An FPGA image may configure successfully yet contain broken clocks, Ethernet, or
 ### 6.1 Discovery
 
 - Use DHCP (when available), DNS-SD (RFC 6763) and mDNS (RFC 6762) for LAN discovery of **PanoLab Rescue**. Advertise service type `_panolab-rescue._tcp.local` as a project-specific DNS-SD service name (its protocol is standard, the service type is project-defined).
-- TXT records MAY include short non-secret fields: `api=1`, `id=<device-id>`, `bsp=<profile>`, `mode=rescue`, and a protocol hint. Advertisements are **untrusted until authenticated**; never infer authorization from a broadcast response or MAC address.
+- TXT records MAY include short non-secret fields: `api=1`, `id=<device-id>`, `bsp=<profile>`, `mode=rescue`, and a protocol hint. Advertisements do not prove ownership. The trusted-lan profile advertises that the device is **unpaired**; paired/production modes authenticate the actual session. Never infer authorization from an mDNS response or MAC address.
 - When application A/B is running, it MAY expose a compatible application service. The rescue service will disappear until reconfiguration back into Rescue; host software MUST understand this state transition.
 - Provide a deterministic fallback for networks that block multicast (configured IP, DHCP lease lookup, or an explicitly authorized subnet probe). No mandatory router firmware changes.
 
 ### 6.2 Versioned API resources (contract, not a claim of implementation)
 
-| Operation | Suggested resource / action | Authorization |
+| Operation | Suggested resource / action | Access rule |
 | --- | --- | --- |
 | Identify | `GET /v1/device` | Read-only identity; rate-limited |
 | Inventory | `GET /v1/slots` | Read-only; bounded |
 | Status & reason | `GET /v1/boot-state` | Read-only; bounded |
-| Stage inactive image | `POST /v1/updates` then chunk upload | Authenticated update role |
-| Verify candidate | `POST /v1/updates/{id}/verify` | Authenticated update role |
-| Trial boot | `POST /v1/boot/trial` | Authenticated boot-control role |
-| Confirm trial | `POST /v1/boot/confirm` | Authenticated; matching trial evidence |
-| Cancel/revert | `POST /v1/boot/rollback` | Authenticated boot-control role |
-| Enter recovery | `POST /v1/boot/rescue` | Authenticated; only when endpoint is actually present |
+| Stage inactive image | `POST /v1/updates` then chunk upload | Ethernet Rescue, profile-aware; inactive slot only |
+| Verify candidate | `POST /v1/updates/{id}/verify` | Same profile as stage; manifest and readback check |
+| Trial boot | `POST /v1/boot/trial` | Profile-aware; durable trial journal required |
+| Confirm trial | `POST /v1/boot/confirm` | Profile-appropriate approval and matching trial evidence |
+| Cancel/revert | `POST /v1/boot/rollback` | Profile-aware; preserves confirmed image |
+| Enter recovery | `POST /v1/boot/rescue` | Only when Rescue endpoint is present; button selects recovery on power-on |
 | Factory/identity provisioning | Separate `/v1/provisioning` operation | Explicit elevated, device-specific enrollment |
 | Rescue/boot-region update | Separate maintenance interface | Explicit owner authorization + proven independent fallback |
 
 Responses MUST expose stable machine-readable error codes, request IDs, update/slot status, and protocol version. Mutations MUST be idempotent or carry unique operation IDs and reject stale/replayed sequence values. Flash writes MUST be bounded to the region and update transaction authorized in the request. No generic arbitrary-address flash-write API is part of the ordinary developer interface.
 
-**Security of management:** the preferred external UX is an authenticated HTTPS API, with TLS 1.3 and provisioning-derived device/operator identity where supported. A constrained-board BSP MAY implement a standard equivalent secure transport with a separately documented and reviewed gateway mapping, but **unauthenticated write control over raw UDP, TFTP, Telnet, Etherbone or HTTP is not v1-conformant**. If a host proxy terminates HTTPS, the device MUST still authenticate/authorize update commands or the transport between proxy and board MUST be independently protected; a LAN-resident attacker must not be able to bypass the proxy. The practical LiteX bare-metal footprint, TLS profile and key-provisioning method remain PENDING qualification decisions, not assumed implementation capabilities.
+**Management trust profiles:** The first-use `trusted-lan` profile intentionally permits **unpaired** application-slot updates, boot, confirm and rollback on an isolated owner-controlled LAN through the bounded versioned network API (constrained HTTP is permitted). It MUST identify itself as unpaired and warn that **any reachable peer can issue allowed commands**. A held recovery button selects FPGA boot mode; it is NOT network sender authentication. Never expose unpaired Rescue to shared, guest, or internet-routed networks. No profile permits an ordinary arbitrary-address flash, JTAG, SPI, CSR/bus-master, or unrestricted reload interface. All profiles preserve image validation, inactive-slot bounds, protected recovery/identity regions, and the boot journal.
+
+The `developer` (paired) and `production` profiles REQUIRE authenticated update sessions and replay defense; production additionally requires encrypted management (e.g. HTTPS/TLS 1.3 or independently reviewed standard secure transport). A host gateway that terminates TLS does not magically authenticate traffic between the gateway and an unpaired device: the complete trust boundary must match the advertised profile. Native bare-metal HTTP/TLS, key enrollment and pairing are still engineering gates. BIOS TFTP/netboot provides useful primitives, but is not a complete PanoLab versioned updater or FPGA image reconfiguration.
 
 **Standard API ≠ flash protocol.** The BSP may speak SPI, ICAP, vendor boot commands and historic factory protocols internally. Those mechanisms are hidden from user and agent tooling after factory conversion. Existing LiteEth/Etherbone remains available for an application if desired, but it is not an authenticated update control protocol.
 
@@ -306,7 +310,8 @@ network:
   unique_mac_source: protected_identity
 capabilities:
   application_slots: 2
-  authenticated_management: "REQUIRED; implementation TBD"
+  management_profiles: [trusted-lan, developer, production]  # qualification varies
+  default_profile: trusted-lan  # isolated owner-controlled Ethernet only
   unattended_watchdog: false
 ```
 
@@ -329,7 +334,7 @@ This YAML is a proposed profile example, **not a release-ready partition map or 
 | `boot_status()` | Report watchdog/fallback/reset reason if hardware supports it |
 | `network_init()` | Correct PHY clock/reset sequencing; unique MAC initialization |
 
-Never expose BSP raw SPI erase/write to arbitrary remotely supplied offsets; all operations are mediated by a vetted transaction planner and owner authorization.
+Never expose BSP raw SPI erase/write to arbitrary remotely supplied offsets; all operations are mediated by a vetted transaction planner and the active network profile.
 
 ### 7.3 First BSP: Pano Logic G2 Rev B
 
@@ -364,21 +369,23 @@ Each step has a **stop on ambiguity** rule: unrecognized JEDEC geometry, mismatc
 
 - Threats considered: malicious LAN update request, forged discovery, replay of previous command, malformed image/manifest, wrong-board payload, power loss mid-write, stale boot journal, unauthorized agent command, compromised host credentials, and corrupted flash.
 - Factory stock protocol, legacy Telnet/TFTP loader and Etherbone are **not inherently authenticated**. Use only on an isolated owner-authorized conversion LAN, or hide them behind a verified dedicated physical provisioning process. They are not the finished product's remote write API.
-- Default ordinary user tools expose read-only status, discovery and review. Mutations require explicit user authorization, authenticated identity, per-device scope, per-region bounds, and audit record. Factory identity and Rescue updates require stronger privileges than application updates.
+- The first-use `trusted-lan` profile permits deliberately **unpaired** network operations on a single-owner isolated Ethernet network. Any host able to reach the appliance can stage/boot applications in its allowed slot; this is **not network sender authentication**. The unpaired profile and network-exposure restriction MUST be visible in device and host status. Paired/production profiles authenticate the actual device/operator and prevent command replays.
+- Application updates in every profile remain bounded to inactive APP_A/APP_B, with verified manifests/readback and an independent Rescue/identity. Factory identity or Rescue replacement uses a distinct explicitly initiated maintenance operation with a proven alternate recovery path. The laptop agent/MCP side requires per-device owner approval for physical writes, regardless of the device's unpaired profile.
 - Production update artifacts SHOULD use COSE signatures with owner-controlled keys. Development keys SHOULD be isolated and separately enrolled. Keys MUST NOT be published in source, image bundles, logs or general agent workspaces.
 - Persistent signing key IDs and release policy MAY be in writable flash, but no board lacking immutable verification hardware may be labeled physically tamper-resistant or fully secure-boot-enforced. Software anti-rollback using ordinary writable NOR metadata MUST NOT be advertised as hardware-enforced downgrade resistance.
-- Public network advertisements never authorize a session; the manager MUST reauthenticate after reconfiguration and use nonces/operation IDs against replay.
-- Devices MUST NOT expose unrestricted flash, JTAG, SPI, bus-master CSR, or FPGA reload commands to an unauthenticated remote caller.
+- Advertisements do not identify the sender. After FPGA reconfiguration, the host MUST reconnect to the newly available service. Paired/production modes MUST authenticate new sessions and prevent replay; trusted-lan uses isolated-network trust with operation IDs for duplicate suppression, not sender authentication.
+- No profile exposes unrestricted SPI/flash, JTAG, bus-master CSR or arbitrary FPGA reload via the normal network API. In trusted-lan mode the unpaired caller MAY use only **constrained** A/B application-update and recovery operations.
 
 ### 9.2 Release profiles
 
 | Profile | Allowed use | Minimum requirements |
 | --- | --- | --- |
 | `research` | Simulated or isolated factory observation | Logging, constrained probe, no automatic flash |
-| `developer` | Owner-managed experimental board | Protected Rescue/identity, authenticated management, verified A/B and documented physical recovery |
-| `production` | Shareable turnkey product | Developer requirements + signed releases, secure enrollment/key lifecycle, replay protection, update authorization, documented remaining hardware-root limitations |
+| `trusted-lan` **(default first-use)** | Owner-owned isolated Ethernet bench | Unpaired bounded network A/B operations, protected Rescue/identity, verified recovery and prominent unpaired warning; **not** safe on guest/shared/internet networks |
+| `developer` (paired) | Managed development workspace | Trusted-LAN A/B reliability guarantees **plus** authenticated management and replay defense |
+| `production` | Shareable turnkey product | Paired developer requirements **plus** encrypted network transport, signed releases, enrollment/key lifecycle, documented remaining hardware-root limitations |
 
-PanoLab agents SHALL NOT automatically elevate from research/developer to production status. Evidence, independent review and exact owner approval are required.
+PanoLab agents SHALL NOT automatically elevate from research/trusted-lan/developer to production status. Evidence, independent review and exact owner approval are required.
 
 ## 10. Qualification and acceptance matrix
 
@@ -392,7 +399,7 @@ Every BSP seeking `PanoLab Rescue v1 — A/B qualified` SHALL pass the required 
 | Q04 | Rescue-first cold boot | Rescue reachable before launching apps after power-on/reset |
 | Q05 | Independent recovery | Physical recovery selection works with app fabric completely dead/unresponsive |
 | Q06 | Discovery | Unique DNS-SD identity across at least two boards; no shared MAC; route across ordinary LAN where supported |
-| Q07 | Authentication | Unauthorized or replayed update/boot requests denied on real device |
+| Q07 | Profile-specific management access | Trusted-lan permits only visibly unpaired bounded commands on owner-controlled network; paired/production reject unauthenticated or replayed updates on real device |
 | Q08 | Wrong-board image | Revision/FPGA mismatch and oversize payload rejected before flash |
 | Q09 | Corrupt/manipulated image | Incorrect hash/signature rejected and active app unaffected |
 | Q10 | A/B staging | New candidate writes only inactive slot; current confirmed remains bootable |
@@ -400,24 +407,27 @@ Every BSP seeking `PanoLab Rescue v1 — A/B qualified` SHALL pass the required 
 | Q12 | Torn state journal | Interrupted state write preserves last valid record and boots into Rescue safely |
 | Q13 | First valid trial | Candidate loads via BSP ICAP/reconfiguration and reports expected image ID |
 | Q14 | Failed trial | A candidate that never confirms is not repeatedly booted; previous confirmed remains selectable |
-| Q15 | Confirm trial | After observed health, return to Rescue and authenticated confirmation persists across power cycle |
+| Q15 | Confirm trial | After observed health, return to Rescue and profile-appropriate confirmation persists across power cycle |
 | Q16 | Revert | Explicit rollback preserves prior known-good application and identity |
 | Q17 | Nonresponsive app | Power cycle/button returns to Rescue without assistance from app logic |
 | Q18 | Repeated power interruptions | Multiple interruptions at each flash/journal phase never lose the last independently bootable Rescue |
 | Q19 | Security/storage isolation | Recovery and identity erase attempts through ordinary API refused; secret material absent from public bundle/logs |
 | Q20 | Multi-device and cross-board CI | BSP source tests and device lab tests verify interoperability; another board's binary rejected |
 | Q21 | Recovery maintenance | If rescue updates are supported, a failed Rescue update cannot destroy the only verified boot route |
-| Q22 | Audit/reproducibility | Exact hashes, source/tools/BSP versions, device ID and test evidence captured without credential disclosure |
+| Q22 | Audit/reproducibility | Exact hashes, source/tools/BSP versions, device ID, management profile and test evidence captured without credential disclosure |
+| Q23 | Autoboot timeout | Configurable bounded delay; invalid/absent image and no network do not cause unsafe boot or indefinite stall |
+| Q24 | Physical recovery input | Debounced button held at power-on enters indefinite Ethernet Rescue; an unusable app cannot defeat physical recovery |
+| Q25 | Unpaired Ethernet update | Trusted-lan app update/verify/boot succeeds without serial/JTAG or login, yet invalid, mis-targeted and protected-region writes are rejected |
 
 Qualification status MUST indicate `NOT_STARTED`, `SIMULATED`, `BENCH_VERIFIED`, or `BOARD_ACCEPTED` for each test. `BOARD_ACCEPTED` requires logs or other reviewable evidence from the exact board revision; a vendor tool PASS is not physical-boot acceptance. Without Q04, Q05, Q10, Q14, Q17 and protected Rescue write checks, the BSP MUST NOT claim resilient A/B recovery.
 
 ### 10.1 Test stages
 
-- **S0 — Model:** flash layout checker, manifest parser, journal fault injection, boot state machine, ICAP testbench, auth API mocks.
+- **S0 — Model:** flash layout checker, manifest parser, journal fault injection, boot delay/button state machine, ICAP testbench, trusted-lan and paired API mocks.
 - **S1 — FPGA implementation:** pin-compatible LiteX build, timing/resource analysis, reproducible bitstream and vetted BSP image map.
 - **S2 — Isolated hardware observation:** board identity, PHY/clock, stock network protocol and safe read-only identity extraction.
 - **S3 — Controlled recovery conversion:** explicitly owner-approved power-loss-safe provisioning, rescued cold boot, app A/B test and forced bad-image fallback.
-- **S4 — Product qualification:** repeated cycles, two-board uniqueness, security negative tests, update/rollback logs and reproducible clean provisioning.
+- **S4 — Product qualification:** repeated cycles, two-board uniqueness, profile-specific security negative tests, recovery button and timeout checks, update/rollback logs and reproducible clean provisioning.
 
 ## 11. Release management, compatibility and versioning
 
@@ -426,7 +436,7 @@ Qualification status MUST indicate `NOT_STARTED`, `SIMULATED`, `BENCH_VERIFIED`,
 - Compatibility group: identified by board family, revision, exact FPGA part, flash geometry and boot wiring; a generic `Pano G2` name alone is insufficient.
 - Deployed builds: lock LiteX, Migen, LiteEth, BSP source commits, toolchain versions and tool images; record bitstream and manifest SHA-256.
 - Git: engineering changes only to `development`, tests and review before any owner-approved promotion to `main`. The source acceptance baseline is not invalidated by drafting this specification.
-- Reference implementation SHOULD provide a `panolab` CLI, discovery status, safe backup/export, authenticated inactive-slot update, verify, trial, confirm and rollback using the v1 API, but command syntax is not itself the interoperability boundary.
+- Reference implementation SHOULD provide a `panolab` CLI, discovery status, safe backup/export, profile-aware Ethernet inactive-slot update, verify, trial, confirm and rollback using the v1 API, but command syntax is not itself the interoperability boundary.
 
 ## 12. Decision log and unresolved technical gates
 
@@ -441,7 +451,10 @@ Qualification status MUST indicate `NOT_STARTED`, `SIMULATED`, `BENCH_VERIFIED`,
 | Exact Rev B new flash offsets and writable boot header | **PENDING** real image sizing, erase-map and boot-chain analysis |
 | Mechanism for Rev B independent cold-boot/button recovery | **PENDING** physical demonstration |
 | Spartan-6 ICAP wrapper and configuration/fallback/watchdog semantics | **PENDING** simulation and board validation |
-| Bare-metal network API/TLS or alternative authenticated secure transport | **PENDING** resource/security prototype |
+| LiteX BIOS as Rescue firmware foundation | **Adopted; independent G2 boot pending** |
+| Button-held Rescue and configurable autoboot timeout | **Adopted UX; hardware timing proof pending** |
+| Trusted-LAN unpaired default for isolated developer bench | **Adopted trust profile; implementation and boundary test pending** |
+| Paired/TLS-protected management for shared or production settings | **PENDING** resource/security prototype |
 | Secure key enrollment and limits of flash-based trust | **PENDING** design and threat review |
 | Rev C or future FPGA family A/B qualification | **PENDING** distinct BSP and capacity analysis |
 
@@ -468,5 +481,7 @@ Qualification status MUST indicate `NOT_STARTED`, `SIMULATED`, `BENCH_VERIFIED`,
 **Evidence rule:** historical third-party board bring-up does not count as PanoLab Rescue hardware qualification. No hardware writes were undertaken in producing this architecture specification.
 
 ---
+
+**Revision v1.1.0 (2026-11-23):** Approved LiteX BIOS-first implementation, button-held/timed autoboot, and explicit unpaired Trusted-LAN developer workflow. Added tests Q23–Q25. This is a change to the architectural specification, not a claim that an updated bitstream exists.
 
 **Final design principle:** *FPGA application images are disposable workloads; device identity, boot selection, and an independently usable rescue environment are protected system services. The developer sees normal embedded firmware update behavior; FPGA-specific configuration mechanisms stay behind the BSP.*
