@@ -107,6 +107,12 @@ func (p *setupProxy) call(ctx context.Context, name string, arguments any) (*mcp
 		return nil, nil, errSetupUnavailable
 	}
 	defer resp.Body.Close()
+	// An in-flight cancellation can race with an HTTP response arriving.
+	// Prefer the caller's cancellation over status/content-type validation:
+	// otherwise a canceled request may be misreported as a malformed reply.
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, nil, errSetupUnavailable
 	}

@@ -144,6 +144,7 @@ func main(){
  mcp.AddTool(s,&mcp.Tool{Name:"repo_push",Description:"Push approved branch only if scoped GitHub credentials exist"},repoPush)
  mcp.AddTool(s,&mcp.Tool{Name:"dev_attach_checkout",Description:"Safely reconfigure PanoLab dev container with selected bind mounts from existing laptop clone"},attachDev)
  registerSetupTools(s,newSetupProxy(string(token)))
+ registerISETools(s)
  handler:=mcp.NewStreamableHTTPHandler(func(_ *http.Request)*mcp.Server{return s},&mcp.StreamableHTTPOptions{Stateless:true,JSONResponse:true})
  mux:=http.NewServeMux()
  mux.HandleFunc("/mcp",func(w http.ResponseWriter,r *http.Request){

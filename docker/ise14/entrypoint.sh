@@ -1,42 +1,43 @@
 #!/bin/bash
-# ISE 14.7 runtime: controlled UID/GID, home and license environment.
+# ISE 14.7 rootless vendor worker. Container UID 0 maps to the ordinary
+# laptop owner, not host root. Docker must drop capabilities, isolate the
+# license-bound virtual Ethernet identity on an INTERNAL network, disable
+# new privileges, and use a read-only root filesystem.
+#
+# Do not create Linux users, modify /etc, run setuid, or chown bind mounts:
+# these operations are incompatible with the restricted rootless runtime.
 set -euo pipefail
-uid="${PANO_UID:-1000}"
-gid="${PANO_GID:-1000}"
-[[ "$uid" =~ ^[0-9]+$ && "$gid" =~ ^[0-9]+$ ]] || { echo "invalid UID/GID" >&2; exit 2; }
-if ! getent group "$gid" >/dev/null 2>&1; then groupadd -g "$gid" pano; fi
-if ! getent passwd "$uid" >/dev/null 2>&1; then useradd -u "$uid" -g "$gid" -d /home/ise -s /bin/bash ise; fi
-mkdir -p /results/jobs
-chown "$uid:$gid" /home/ise /results /results/jobs
-chmod 0700 /results/jobs
+umask 077
+
+[[ "$(id -u)" == 0 ]] || { echo "ISE worker requires rootless container UID 0" >&2; exit 2; }
+mapped_uid="$(awk '$1 == 0 {print $2; exit}' /proc/self/uid_map)"
+[[ "$mapped_uid" =~ ^[0-9]+$ && "$mapped_uid" != 0 ]] || {
+  echo "Refusing ISE worker without a non-root host UID mapping" >&2
+  exit 2
+}
 export HOME=/home/ise
 export XILINXD_LICENSE_FILE="${XILINXD_LICENSE_FILE:-/licenses/Xilinx.lic}"
-printf -v token_quoted '%q' "${PANOLAB_MCP_TOKEN:-}"
-# The optional stdio transport does not use an HTTP bearer token.
-# Preserve the selected transport across runuser.
+[[ -d "$HOME" && -d /results && -d /projects ]] || {
+  echo "ISE worker required isolated mounts are missing" >&2
+  exit 2
+}
+mkdir -p /results/jobs
+chmod 0700 /results/jobs
+
 transport="${PANOLAB_MCP_TRANSPORT:-http}"
 case "$transport" in stdio|http) ;; *) echo "Invalid MCP transport" >&2; exit 2;; esac
-printf -v transport_quoted '%q' "$transport"
-printf -v license_quoted '%q' "$XILINXD_LICENSE_FILE"
-mode="${1:-mcp}"
-case "$mode" in
+
+case "${1:-mcp}" in
   mcp)
-    exec runuser -s /bin/bash -c "
-      export HOME=/home/ise
-      export XILINXD_LICENSE_FILE=$license_quoted
-      export PANOLAB_MCP_TOKEN=$token_quoted
-      export PANOLAB_MCP_TRANSPORT=$transport_quoted
-      exec /usr/local/bin/panolab-ise-mcp
-    " ise
+    export PANOLAB_MCP_TRANSPORT="$transport"
+    exec /usr/local/bin/panolab-ise-mcp
     ;;
   shell)
-    # Local container maintenance, never an MCP-exposed remote shell.
-    exec runuser -s /bin/bash -c "
-      export HOME=/home/ise
-      export XILINXD_LICENSE_FILE=$license_quoted
-      if [ -r /opt/Xilinx/14.7/ISE_DS/settings64.sh ]; then . /opt/Xilinx/14.7/ISE_DS/settings64.sh; fi
-      exec /bin/bash -i
-    " ise
+    # Local-only maintenance, not exposed as an MCP action.
+    if [[ -r /opt/Xilinx/14.7/ISE_DS/settings64.sh ]]; then
+      . /opt/Xilinx/14.7/ISE_DS/settings64.sh
+    fi
+    exec /bin/bash -i
     ;;
   *)
     echo "Supported modes: mcp (default), shell (local maintenance only)" >&2

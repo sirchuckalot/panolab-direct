@@ -117,11 +117,18 @@ func prepare(dir,base string,p projectSpec)error{
  xst:=fmt.Sprintf("run\n-ifn design.prj\n-ifmt mixed\n-ofn design\n-ofmt NGC\n-p %s\n-top %s\n-opt_mode Speed\n-opt_level 1\n",p.Part,p.Top)
  return os.WriteFile(filepath.Join(dir,"design.xst"),[]byte(xst),0600)
 }
+var vendorStages=map[string]bool{"xst":true,"ngdbuild":true,"map":true,"par":true,"trce":true,"bitgen":true}
+func vendorExecutable(stage string)(string,error){
+ if !vendorStages[stage] {return "",errors.New("unsupported vendor stage")}
+ return filepath.Join("/opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64",stage),nil
+}
 func runStage(ctx context.Context,dir,stage string,args ...string)error{
- // Only fixed vendor commands and arguments generated from validated manifests.
+ // Only the six pinned, known ISE executable paths may be launched.
  // Source the 14.7 environment locally within the SAME container.
+ executable,err:=vendorExecutable(stage)
+ if err!=nil{return err}
  code:=`. /opt/Xilinx/14.7/ISE_DS/settings64.sh && exec "$@"`
- argv:=append([]string{"-c",code,"panolab-stage",stage},args...)
+ argv:=append([]string{"-c",code,"panolab-stage",executable},args...)
  cmd:=exec.CommandContext(ctx,"/bin/bash",argv...);cmd.Dir=dir
  f,err:=os.OpenFile(filepath.Join(dir,stage+".log"),os.O_CREATE|os.O_TRUNC|os.O_WRONLY,0600)
  if err!=nil{return err};defer f.Close()

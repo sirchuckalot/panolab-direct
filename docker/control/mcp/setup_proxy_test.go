@@ -174,10 +174,21 @@ func TestSetupProxySafeFailures(t *testing.T) {
 		server.Close()
 		assertSetupProxyError(t, testProxy(server.URL), context.Background(), errSetupUnavailable)
 	})
-	t.Run("canceled", func(t *testing.T) {
+	t.Run("canceled before request", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			t.Error("pre-canceled request should never reach setup")
+		}))
+		defer server.Close()
+		assertSetupProxyError(t, testProxy(server.URL), ctx, context.Canceled)
+	})
+	t.Run("canceled during response", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Deliberately return an otherwise malformed response after
+			// cancellation. The caller's cancellation must take precedence.
 			cancel()
 		}))
 		defer server.Close()

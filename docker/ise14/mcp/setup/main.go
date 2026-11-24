@@ -58,12 +58,21 @@ func validateArchive()error{
   bytes+=h.Size;if bytes>30<<30{return errors.New("tar extraction size exceeded")}
  }
 }
+// Rootless Docker's user namespace cannot chown files to vendor archive UIDs.
+// GNU tar's no-same-owner explicitly disables that operation; do not preserve
+// privileged owner/group permission bits from the archive.
+func rootlessExtractionArgs()[]string{
+ return []string{"--no-same-owner","--no-same-permissions","-xf","/media/ise.tar","-C","/work/ise-media"}
+}
 func perform(ctx context.Context)error{
  if !regular("/licenses/Xilinx.lic"){return errors.New("license missing")}
  files,e:=os.ReadDir("/opt/Xilinx");if e!=nil{return e};if len(files)>0{return errors.New("ISE installation directory not empty")}
  if e=validateArchive();e!=nil{return e}
  if e=os.Mkdir("/work/ise-media",0700);e!=nil{return e}
- c:=exec.CommandContext(ctx,"tar","-xf","/media/ise.tar","-C","/work/ise-media")
+ // Rootless Docker maps container UID 0 to the laptop owner: do not restore
+ // archived vendor UIDs/GIDs (e.g. 20290:902), which triggers EPERM.
+ // Retain executable modes subject to the extraction umask, not privileged bits.
+ c:=exec.CommandContext(ctx,"tar",rootlessExtractionArgs()...)
  if b,e:=c.CombinedOutput();e!=nil{return fmt.Errorf("tar extraction failed: %w (%s)",e,string(b[:min(len(b),256)]))}
  var dir string
  e=filepath.Walk("/work/ise-media",func(p string,i os.FileInfo,err error)error{

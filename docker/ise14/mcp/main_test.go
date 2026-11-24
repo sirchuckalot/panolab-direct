@@ -118,3 +118,14 @@ func TestSimulatedISEPipelineStopsOnFailure(t *testing.T){
  if strings.Join(called,",")!="xst,ngdbuild,map"{t.Fatalf("later stages executed after failure: %v",called)}
  if _,err:=os.Stat(filepath.Join(dir,"design.bit"));!os.IsNotExist(err){t.Fatal("fake bitstream unexpectedly present")}
 }
+
+func TestVendorExecutableUsesPinnedAbsoluteISEBinaryOnly(t *testing.T){
+ for _,name:=range []string{"xst","ngdbuild","map","par","trce","bitgen"}{
+  got,err:=vendorExecutable(name)
+  expected:=filepath.Join("/opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64",name)
+  if err!=nil||got!=expected{t.Fatalf("stage %q: got %q, err=%v",name,got,err)}
+ }
+ for _,name:=range []string{"../xst","/bin/sh","bash","xst -h",""}{
+  if _,err:=vendorExecutable(name);err==nil{t.Errorf("accepted unsafe vendor executable %q",name)}
+ }
+}
