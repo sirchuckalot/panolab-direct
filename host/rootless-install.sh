@@ -6,8 +6,8 @@ set -Eeuo pipefail
 umask 077
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
 mode="${1:---install}"
-case "$mode" in --install|--check|--status|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--check|--status|--help]" >&2; exit 2;; esac
-if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--check|--status|--help]"; exit 0; fi
+case "$mode" in --install|--check|--status|--upgrade-dev|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--help]" >&2; exit 2;; esac
+if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--help]"; exit 0; fi
 fail() { echo "PANOLAB ROOTLESS BLOCKED: $*" >&2; exit 9; }
 say() { echo "PanoLab rootless: $*"; }
 [[ "$(id -u)" != 0 ]] || fail "Run as ordinary laptop user, never sudo."
@@ -135,6 +135,12 @@ for n,svc in d.items():
 ' "$sock" || fail "Merged Compose violates rootless isolation policy."
 say "PASS: rootless Engine, private credentials, owner data, merged Compose."
 if [[ "$mode" == --check ]]; then say "Read-only preflight completed; no changes."; exit 0; fi
+# Explicitly requested dev-only image upgrade. Management services are not
+# restarted, and the previous dev is retained as a stopped rollback container.
+if [[ "$mode" == --upgrade-dev ]]; then
+  bash "$root/host/upgrade-dev-image.sh" "$root" "$sock" "$PANOLAB_WORKSPACE_HOST" "$PANOLAB_CODEX_AUTH_HOST"
+  exit $?
+fi
 # Establish restart-on-login without sudo. A manually running Docker daemon
 # cannot be adopted by systemd; never kill an unknown process to force a swap.
 unit="$HOME/.config/systemd/user/panolab-rootless-docker.service"
@@ -171,7 +177,7 @@ for n in "$project-setup-1" "$project-docker-broker-1" "$project-repo-git-1" "$p
   if new_exists "$n"; then new_valid "$n" || fail "Foreign rootless container: $n"; fi
 done
 if new_exists "$dev"; then dev_valid "$rootless" || fail "Foreign rootless dev container."; fi
-modern_recipe="rescue-g2b-20261123-v1"
+modern_recipe="modern-unified-dev-20261123-v2"
 installed_recipe="$(r image inspect -f '{{index .Config.Labels "org.panolab.litex.recipe"}}' panolab-direct-modern:local 2>/dev/null || true)"
 if [[ "$installed_recipe" != "$modern_recipe" ]]; then
   say "Building pinned LiteX/BIOS modern tools in local laptop rootless Docker."

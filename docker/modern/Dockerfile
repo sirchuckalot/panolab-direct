@@ -1,11 +1,19 @@
+# PanoLab Direct: ONE unified modern FPGA development tools image.
+# Specialized legacy/licensed Xilinx ISE 14.7 remains docker/ise14/.
+# This file is the single Docker recipe for all open-source FPGA tools.
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
+
+# [01] Base OS, languages, tooling, Git and Python
+# [02] Modern RTL simulation/synthesis: Icarus, Verilator, Yosys
+# [03] Embedded RISC-V firmware compiler and simulation C dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates git make gcc g++ curl python3 python3-pip python3-venv \
     yosys iverilog verilator ripgrep \
     gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf \
     libevent-dev libjson-c-dev zlib1g-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
+# [04] Agentic development: Codex CLI (versioned and verified upstream)
 # OpenAI Codex CLI: official standalone Linux binary, pinned by version and SHA-256.
 # Credentials are deliberately NOT baked into images. CODEX_HOME is a private,
 # dedicated host bind mount and never the shared workspace.
@@ -31,6 +39,8 @@ RUN set -eux; \
     rm /tmp/codex-code-mode-host.tar.gz; \
     test -x /usr/local/bin/codex-code-mode-host; \
     codex --version
+# [05] LiteX ecosystem: pinned Migen, LiteX BIOS, VexRiscv, LiteEth,
+#      LiteSPI, LiteX-Boards and isolated Python virtualenv.
 # PanoLab Rescue: immutable source-pinned LiteX development toolchain.
 # No old G2 FPGA framework, host package installer, license, JTAG or TAP sudo.
 COPY litex-bootstrap.py litex-upstream.lock.json litex-requirements.txt /opt/panolab/recipes/
@@ -49,12 +59,7 @@ ENV PANOLAB_RESCUE_UPSTREAM=/opt/panolab/litex/upstream \
     VIRTUAL_ENV=/opt/panolab/litex/venv
 ENV PATH="/opt/panolab/litex/venv/bin:${PATH}"
 ENV PYTHONPATH="/opt/panolab/litex/upstream/pythondata-software-picolibc:/opt/panolab/litex/upstream/migen:/opt/panolab/litex/upstream/litex:/opt/panolab/litex/upstream/litex-boards:/opt/panolab/litex/upstream/liteeth:/opt/panolab/litex/upstream/litespi:/opt/panolab/litex/venv/lib/python3.12/site-packages"
-LABEL org.panolab.litex.recipe="rescue-g2b-20261123-v1"
-# A deterministic CLI environment is also available at /opt/panolab/litex/env.sh.
-# Codex executable is installed; authentication remains separate in a private mount.
-WORKDIR /workspace
-CMD ["bash"]
-
+# [06] Runtime user and mountpoints; no identity or license baked in.
 # An optional UID 1000 account is retained in the tool image.
 # The active rootless dev container runs as namespace UID 0, which maps
 # to the ordinary laptop owner and can reach private owner-only binds.
@@ -65,3 +70,10 @@ RUN if ! getent group 1000 >/dev/null; then groupadd --gid 1000 dev; fi && \
     mkdir -p /workspace /codex-auth && \
     chown 1000:1000 /workspace /codex-auth
 
+
+# [07] Versioned single-image acceptance contract. Update on tool recipe changes.
+LABEL org.panolab.litex.recipe="modern-unified-dev-20261123-v2"
+# A deterministic CLI environment is at /opt/panolab/litex/env.sh.
+# Codex credentials are passed as an owner-private mount, never COPY-ed.
+WORKDIR /workspace
+CMD ["bash"]

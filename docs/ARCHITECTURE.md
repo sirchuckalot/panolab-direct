@@ -15,7 +15,8 @@ tunnel ─── manager (Go MCP endpoint, private RPC)
                ├── repo-git (Python, constrained source checkout)
                ├── docker-broker (Python, allowlisted rootless Docker operations)
                └── setup (CentOS 6.10 ISE media/license inspection)
-development (Ubuntu 24.04): Codex, Python, Yosys, Icarus, Verilator
+development (Ubuntu 24.04): ONE modern tools image; Codex, Python,
+   Yosys, Icarus, Verilator, LiteX/BIOS, LiteEth/SPI, Migen, RISC-V
 ```
 
 Six running containers were observed on the owner's laptop. The
@@ -26,6 +27,16 @@ container do not. The broker cannot be treated as a general privileged
 host shell. Rootless container UID 0 is mapped to the laptop owner's
 ordinary UID, **not host root**; it can still affect files owned by
 that user. See [security](SECURITY.md).
+
+**Image boundary (accepted):** compatible general FPGA tools share
+[one modern development image](../docker/modern/Dockerfile), organized
+into seven functional sections. Board-specific hardware adaptation
+belongs in BSPs, not new per-tool Docker images. The legacy/licensed
+ISE 14.7 stack remains isolated in its separate vendor environment.
+The new LiteX recipe and [guarded developer-image refresh](UNIFIED_DEV_IMAGE_UPGRADE.md)
+are published; the currently running laptop container still needs its
+explicit owner-executed migration. A stopped rollback container is
+retained temporarily during acceptance, not promoted to another service.
 
 The deployment merges `docker/compose.setup.yaml`,
 `docker/compose.manage.yaml` and `host/compose.rootless-laptop.yaml`.
@@ -70,8 +81,8 @@ acceptance are **not yet proven**. See the
 
 The detailed functional requirements live in
 [`specs/PANOLAB_DIRECT_v1_0.txt`](../specs/PANOLAB_DIRECT_v1_0.txt).
-The board and agent directories remain placeholders for target
-integration. `gateware/panolab_csr_demo.v` is a standalone
+The board directory now includes a [source-level G2 Rescue SoC](../boards/pano_g2_rev_b/README.md),
+not yet an ISE-built bitstream or hardware-accepted design. `gateware/panolab_csr_demo.v` is a standalone
 simulation-only verification fixture, **not** the G2 Rev B Etherbone
 or LiteX implementation. FPGA board integration remains unverified.
 
@@ -124,13 +135,16 @@ ISE or measurements on the real board.
 | LiteEth/Etherbone | https://github.com/enjoy-digital/liteeth |
 | LiteScope | https://github.com/enjoy-digital/litescope |
 | LiteDRAM (optional later) | https://github.com/enjoy-digital/litedram |
-| LiteSPI (optional later) | https://github.com/litex-hub/litespi |
+| LiteSPI (active G2 Rescue SPI driver) | https://github.com/litex-hub/litespi |
 
 Do not vendor unverified upstream master archives into this repo.
-The full compatible LiteX dependency set **is not yet pinned**.
-For reproducibility, pin source commits and hashes, vendor/package
-versions, image digests, generated constraints, device variant and
-licensed build artifacts before claiming repeatable FPGA results.
+The current **Rescue source build dependencies are pinned** at exact
+Git revisions and Python package versions under
+[`docker/modern/`](../docker/modern/) and checked against the G2 BSP
+lock. This establishes a reproducible *software build recipe*, not a
+qualified FPGA image. Before claiming repeatable FPGA results, also
+validate image digests on an actual new Docker build, vendor ISE,
+generated constraints, device variant and hardware test artifacts.
 Modern Docker tooling pins the Codex release by checksum, but does
 not ship ISE binaries or prove FPGA behavior.
 

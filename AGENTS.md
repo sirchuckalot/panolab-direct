@@ -24,8 +24,11 @@ owner approval for physical writes through the laptop MCP agent.
   is now on `development`, tracking GitHub `development`; source tests,
   clean project reinstall, authenticated MCP and post-reboot service
   recovery passed on that **already provisioned** laptop.
-- Licensed ISE installation/build, pinned LiteX integration, physical
-  FPGA operation and fresh host provisioning remain **PENDING**. A
+- The unified modern image recipe pins LiteX, LiteEth, LiteSPI, Migen,
+  VexRiscv, RISC-V C tools and BIOS; source-level G2 BIOS compilation and
+  simulation passed. The **new complete rootless Docker image rebuild**,
+  licensed ISE implementation, physical FPGA operation and fresh host
+  provisioning remain **PENDING**. A
   laptop reboot test passed only after setting the standalone dev
   container restart policy; source tests or CI alone cannot prove it.
 - Target Pano Logic **G2 Rev B**, XC6SLX150-2-FGG484. Planned
@@ -36,6 +39,24 @@ owner approval for physical writes through the laptop MCP agent.
   `toolchain_info`, `build_start`, `build_status`,
   `build_result`, `build_cancel`. No added vendor-specific tools
   without explicit owner approval.
+
+## Unified container policy
+
+Maintain **one** modern FPGA development Dockerfile at
+[`docker/modern/Dockerfile`](docker/modern/Dockerfile) for compatible
+open-source tools (RTL, firmware, LiteX, agents). Group the dependency
+recipe into coherent, version-pinned functional sections; use BSPs for
+board adaptation. Do **not** create per-tool development images or
+long-lived services when another modern tool is needed. Licensed legacy
+ISE 14.7 is a justified **separate vendor worker**.
+
+When upgrading the modern image, use the explicit, rollback-capable
+[development-container procedure](docs/UNIFIED_DEV_IMAGE_UPGRADE.md).
+Preserve the workspace, private Codex mount and all management services;
+never silently replace an active container. Local development SHA
+`f1ca3a66` and GitHub development have historically different ancestry:
+follow the content-verified local backup/ref reconciliation before
+changing the laptop checkout.
 
 ## Mandatory development process
 

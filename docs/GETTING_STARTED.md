@@ -47,6 +47,7 @@ From the repository checkout on the laptop:
 bash ./panolab-install.sh --status   # read-only status
 bash ./panolab-install.sh --check    # local configuration preflight
 bash ./panolab-install.sh            # build missing/stale-labeled images; start/reuse services
+bash ./panolab-install.sh --upgrade-dev   # explicitly upgrade only the dev image/container
 ```
 
 The launcher verifies the user rootless Engine and private inputs,
@@ -81,7 +82,7 @@ Docker access. Do not restart the authenticated tunnel or persistent
 workers to run an experiment.
 
 The installer reuses existing services with `--no-recreate`; it is
-**not** a destructive repair utility. If the modern tools image recipe
+**not** a destructive repair utility. The explicit `--upgrade-dev` mode uses [the safeguarded unified image migration](UNIFIED_DEV_IMAGE_UPGRADE.md): validate the new image before renaming/stopping only the dev container, retain its previous instance stopped for rollback, and reuse the same owner workspace, source mounts and Codex credentials. It neither creates a new development service nor restarts management/ISE. If the modern tools image recipe
 is newer, the installer rebuilds the image tag and performs its read-only
 LiteX environment smoke check, but **preserves the running old dev
 container** and reports the pending explicit container migration.

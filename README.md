@@ -24,6 +24,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [G2 Rev B first Rescue SoC](boards/pano_g2_rev_b/README.md) | Pinned LiteX BIOS/VexRiscv/LiteEth/LiteSPI implementation and build helper |
 | [G2 Rescue test evidence](docs/RESCUE_BUILD_EVIDENCE.md) | Actual generated BIOS/Verilog, nine tests, live LiteX simulation and unproven hardware gates |
 | [Rootless LiteX environment recipe](docs/RESCUE_ENVIRONMENT_RECIPE.md) | Container packages, immutable source locks, clean bootstrap evidence and safe image refresh |
+| [Unified development image upgrade](docs/UNIFIED_DEV_IMAGE_UPGRADE.md) | One modern FPGA development image, explicit laptop rebuild, source reconciliation and rollback plan |
 | [Upstream Rescue adoption review](specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Verified upstream bootloader examples, source reuse boundaries and outstanding proof |
 
 The selected [FPGA system specification](specs/PANOLAB_DIRECT_v1_0.txt)
@@ -52,6 +53,10 @@ licensed ISE implementation, full modern Docker **image** rebuild with the new L
 See the [milestone record](specs/LAB_MILESTONE_1.md) for exact evidence
 and limitations.
 
+## Unified development container
+
+**The modern Docker image is a single, shared FPGA development toolchain** with Python, HDL simulation, RISC-V GCC, LiteX BIOS, LiteEth, LiteSPI, Migen, VexRiscv and Codex. Its [Dockerfile](docker/modern/Dockerfile) separates tools by function within one recipe. Board-specific FPGA configuration is a BSP; only licensed legacy ISE 14.7 remains a separately specialized build environment. [Controlled dev-only upgrade](docs/UNIFIED_DEV_IMAGE_UPGRADE.md) explains how to move the existing dev container onto the rebuilt image without replacing the five management services.
+
 ## Entrypoint
 
 Run as the ordinary laptop user, with rootless Docker and private inputs
@@ -60,6 +65,7 @@ already provisioned (see [setup](docs/GETTING_STARTED.md)):
 ```sh
 bash ./panolab-install.sh --status
 bash ./panolab-install.sh --check
+bash ./panolab-install.sh --upgrade-dev   # explicit, guarded dev-only image upgrade
 bash ./panolab-install.sh
 ```
 

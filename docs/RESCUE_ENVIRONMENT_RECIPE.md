@@ -1,6 +1,6 @@
 # PanoLab Rescue — Rootless LiteX Development Environment Recipe
 
-**Record:** PLR-ENV-001 | **Date:** 2026-11-23 (US Pacific) | **Status:** Versioned Docker recipe; fresh isolated bootstrap + G2 BIOS source build validated; rebuilt full Docker image not yet accepted.
+**Record:** PLR-ENV-001 | **Date:** 2026-11-23 (US Pacific) | **Status:** Versioned Docker recipe; fresh isolated bootstrap + G2 BIOS source build validated; rebuilt full Docker image not yet accepted. The [unified development image and controlled migration](UNIFIED_DEV_IMAGE_UPGRADE.md) supersedes the original image-refresh note and provides the explicit owner-laptop upgrade command.
 
 **Source of truth:** [modern Dockerfile](../docker/modern/Dockerfile), [bootstrap utility](../docker/modern/litex-bootstrap.py), [upstream lock](../docker/modern/litex-upstream.lock.json), [Python package pins](../docker/modern/litex-requirements.txt), [rootless installer](../host/rootless-install.sh). The identical [G2 reference lock](../boards/pano_g2_rev_b/upstream.lock.json) is checked by [offline unit tests](../tests/test_litex_recipe.py).
 
@@ -60,7 +60,7 @@ python3 /repo/boards/pano_g2_rev_b/test_rescue_soc.py
 
 Use the proper checkout paths if mounted elsewhere; the read-only `/repo/boards` path above is the installer default. `build_probe.sh` checks all pinned upstream Git SHAs and compiles LiteX BIOS + generates Verilog/UCF but **never calls ISE or flashes hardware**. Use a unique lab MAC per board; this is not yet a permanent identity implementation.
 
-**Existing-container migration policy:** Rebuilding `panolab-direct-modern:local` updates only the image tag. A running development container keeps its previous image, mounts, workspace and login. The rootless installer reports the mismatch and **does not destroy/recreate** that container. The initial LiteX bootstrap was also tested as an independent workspace-local virtualenv in the currently running old container; a controlled image refresh can be added after reconciling the local checkout and preserving the workspace.
+**Existing-container migration policy:** An ordinary `--install` rebuilds the same modern tools image without replacing the running dev. The additional **explicit** `--upgrade-dev` mode performs [the guarded, rollback-capable dev-only replacement](UNIFIED_DEV_IMAGE_UPGRADE.md) after validating all mounts, source revisions and the new image. It retains the previous dev stopped for verification and never restarts manager/ISE/tunnel.
 
 ## Verification completed
 

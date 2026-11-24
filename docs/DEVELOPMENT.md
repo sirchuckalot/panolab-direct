@@ -53,6 +53,7 @@ Use an approved laptop container with the project available:
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m unittest discover -s tests -p 'test_litex_recipe.py' -v
+python3 -m unittest discover -s tests -p 'test_upgrade_reconcile.py' -v
 bash -n panolab-install.sh host/rootless-install.sh
 python3 -m py_compile docker/control/broker.py docker/control/repo_gateway.py
 ```
@@ -63,6 +64,8 @@ an approved local Go container. Keep the external
 `tests/fixtures/ise_counter/` RTL/manifest and
 `tests/ise_mcp_smoke_client.py` separate from the vendor worker.
 The fixture is not a bitstream ready to program.
+
+**Unified modern development image:** All open-source FPGA development tools share [one Dockerfile](../docker/modern/Dockerfile). Dedicated legacy vendor ISE remains separate. The [controlled dev-only upgrade](UNIFIED_DEV_IMAGE_UPGRADE.md) verifies source history and mounts and preserves a stopped rollback container before accepting a rebuilt image. Do not delete or recreate the running lab merely to add another HDL package.
 
 Rootless LiteX BIOS provisioning and source builds are documented in
 [RESCUE_ENVIRONMENT_RECIPE.md](RESCUE_ENVIRONMENT_RECIPE.md). The image

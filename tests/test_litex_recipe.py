@@ -53,7 +53,7 @@ class LiteXRecipeTests(unittest.TestCase):
                      "iverilog","verilator","yosys",
                      "litex-bootstrap.py","litex-upstream.lock.json",
                      "litex-requirements.txt",
-                     'org.panolab.litex.recipe="rescue-g2b-20261123-v1"'):
+                     'org.panolab.litex.recipe="modern-unified-dev-20261123-v2"'):
             self.assertIn(name,self.dockerfile)
 
     def test_docker_context_is_allowlist(self):
@@ -71,12 +71,44 @@ class LiteXRecipeTests(unittest.TestCase):
         self.assertIn("not a production identity", helper.lower())
 
     def test_installer_rebuilds_labeled_image_without_deleting_live_dev(self):
-        self.assertIn("rescue-g2b-20261123-v1",self.installer)
+        self.assertIn("modern-unified-dev-20261123-v2",self.installer)
         self.assertIn('if [[ "$dev_image" != "$current_modern_image" ]]',self.installer)
         self.assertIn("Preserving it and all mounts",self.installer)
         self.assertIn("verify-only",self.installer)
         self.assertNotIn("docker rm -f",self.installer)
         self.assertNotIn("docker system prune",self.installer)
+
+    def test_single_image_seven_sections(self):
+        self.assertEqual(len(re.findall(r"^FROM ", self.dockerfile, re.MULTILINE)), 1)
+        for n in range(1,8):
+            self.assertIn("# ["+str(n).zfill(2)+"]", self.dockerfile)
+        self.assertNotIn("FROM xilinx", self.dockerfile.lower())
+
+    def test_explicit_dev_only_upgrade_with_rollback(self):
+        upgrade=(ROOT/"host/upgrade-dev-image.sh").read_text()
+        self.assertIn('--upgrade-dev', self.installer)
+        self.assertIn('bash "$root/host/upgrade-dev-image.sh"', self.installer)
+        self.assertIn('panolab-direct-modern:local',upgrade)
+        self.assertIn('panolab-direct-dev-1',upgrade)
+        self.assertIn('rollback()',upgrade)
+        self.assertIn('r rename "$dev" "$backup"',upgrade)
+        self.assertIn('r rename "$backup" "$dev"',upgrade)
+        self.assertIn('--network none --read-only --cap-drop ALL',upgrade)
+        self.assertIn('build_probe.sh',upgrade)
+        self.assertIn('no-new-privileges:true',upgrade)
+        self.assertNotIn('docker system prune',upgrade)
+        self.assertNotIn('docker rm -f',upgrade)
+        self.assertNotIn('docker compose up',upgrade)
+
+    def test_local_branch_reconciliation_fail_closed(self):
+        bridge=(ROOT/"host/reconcile-and-upgrade.sh").read_text()
+        self.assertIn('git diff --quiet --exit-code "$old" "$equivalent_remote"',bridge)
+        self.assertIn('git merge --ff-only "$target"',bridge)
+        self.assertIn('git branch "$backup" "$old"',bridge)
+        self.assertIn('git reset --hard "$target"',bridge)
+        self.assertIn('PANOLAB_EXPECTED_DEV_SHA',bridge)
+        self.assertIn('git status --porcelain --untracked-files=all',bridge)
+        self.assertIn('bash "$root/panolab-install.sh" --upgrade-dev',bridge)
 
     def test_verify_only_on_missing_environment_fails_without_fetch(self):
         with tempfile.TemporaryDirectory() as tmp:
