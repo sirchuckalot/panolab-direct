@@ -45,6 +45,10 @@ This was followed by **independent live MCP checks** against the replacement dev
 
 The generated G2 artifacts remain on the owner's existing persistent workspace at `/workspace/panolab-rescue-upgrade-20261124T020839Z`. The live generic simulation log is `/workspace/panolab-rescue-live-sim-20261124/sim.log`; its generated simulation is **generic LiteX**, **not** a complete FPGA-accurate G2 model. No SPI flash device was written.
 
+## Subsequent toolchain cleanup
+
+After this first-image acceptance, a separate [clean-up milestone](DEV_TOOLCHAIN_WARNING_CLEANUP.md) implements Buildx host-side provisioning and exact rollback-container removal as a guarded owner action, and verifies a warning-free G2 BIOS source build with RX/RW load segments. This record's warning and rollback details below remain historical evidence of the earlier acceptance. Host cleanup is **pending** until the owner executes the new operation; do not describe it as already completed.
+
 ## Observed non-blocking issues
 
 1. Docker reported a deprecated legacy image builder and suggested Buildx. The builder **succeeded**; future BuildKit/Buildx adoption should be planned inside the existing rootless tooling, not by proliferating images or changing the host without review.

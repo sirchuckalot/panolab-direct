@@ -73,6 +73,10 @@ A separately staged clean workspace prefix using the versioned LiteX image recip
 
 See [the recipe record](RESCUE_ENVIRONMENT_RECIPE.md) for the precise installation problems and permanent fixes.
 
+## Follow-up warning cleanup
+
+The original first-build warning messages remain preserved as historical evidence. A later [source-hash-guarded warning cleanup](DEV_TOOLCHAIN_WARNING_CLEANUP.md) fixes prototypes, unused SPI master helper and the actual RWX BIOS ELF issue without modifying pinned upstream checkouts. An independently rebuilt G2 BIOS reported **zero warning/error diagnostics** and verified separate RX/RW load segments. That is a source-build improvement, not hardware acceptance.
+
 ## Next acceptance gates
 
 1. **BIOS policy and identity:** implement an upstream-compatible LiteX BIOS hook to read the actual unique MAC and boot journal, hold Rescue when button is latched, and start verified confirmed applications only after the bounded timeout.

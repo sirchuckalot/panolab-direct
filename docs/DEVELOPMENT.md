@@ -54,6 +54,7 @@ Use an approved laptop container with the project available:
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m unittest discover -s tests -p 'test_litex_recipe.py' -v
 python3 -m unittest discover -s tests -p 'test_upgrade_reconcile.py' -v
+python3 -m unittest discover -s tests -p 'test_bios_overlay.py' -v
 bash -n panolab-install.sh host/rootless-install.sh
 python3 -m py_compile docker/control/broker.py docker/control/repo_gateway.py
 ```
@@ -64,6 +65,15 @@ an approved local Go container. Keep the external
 `tests/fixtures/ise_counter/` RTL/manifest and
 `tests/ise_mcp_smoke_client.py` separate from the vendor worker.
 The fixture is not a bitstream ready to program.
+
+The [BIOS warning cleanup](DEV_TOOLCHAIN_WARNING_CLEANUP.md) uses
+six SHA-256-guarded, build-output-only overlays for the exact pinned
+LiteX/Compiler-RT sources: no blanket warning suppression or rewrites
+of the pristine upstream checkouts. A full G2 source build with zero
+compiler/link warnings and RX/RW (not RWX) BIOS ELF LOAD segments
+passed in the laptop development container. Docker image construction
+uses owner-local Buildx on the existing rootless Engine, never a
+second BuildKit service.
 
 **Unified modern development image:** All open-source FPGA development tools share [one Dockerfile](../docker/modern/Dockerfile). Dedicated legacy vendor ISE remains separate. The [controlled dev-only upgrade](UNIFIED_DEV_IMAGE_UPGRADE.md) verifies source history and mounts and preserves a stopped rollback container before accepting a rebuilt image. Do not delete or recreate the running lab merely to add another HDL package.
 

@@ -6,8 +6,8 @@ set -Eeuo pipefail
 umask 077
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
 mode="${1:---install}"
-case "$mode" in --install|--check|--status|--upgrade-dev|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--help]" >&2; exit 2;; esac
-if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--help]"; exit 0; fi
+case "$mode" in --install|--check|--status|--upgrade-dev|--finalize-maintenance|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--help]" >&2; exit 2;; esac
+if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--help]"; exit 0; fi
 fail() { echo "PANOLAB ROOTLESS BLOCKED: $*" >&2; exit 9; }
 say() { echo "PanoLab rootless: $*"; }
 [[ "$(id -u)" != 0 ]] || fail "Run as ordinary laptop user, never sudo."
@@ -135,6 +135,12 @@ for n,svc in d.items():
 ' "$sock" || fail "Merged Compose violates rootless isolation policy."
 say "PASS: rootless Engine, private credentials, owner data, merged Compose."
 if [[ "$mode" == --check ]]; then say "Read-only preflight completed; no changes."; exit 0; fi
+# Explicit final owner maintenance, not part of the generic installer. Verify
+# rootless Engine, image and all services before removing exact old rollback.
+if [[ "$mode" == --finalize-maintenance ]]; then
+  bash "$root/host/finalize-dev-maintenance.sh" "$root" "$sock" "$PANOLAB_WORKSPACE_HOST"
+  exit $?
+fi
 # Explicitly requested dev-only image upgrade. Management services are not
 # restarted, and the previous dev is retained as a stopped rollback container.
 if [[ "$mode" == --upgrade-dev ]]; then
@@ -180,10 +186,11 @@ if new_exists "$dev"; then dev_valid "$rootless" || fail "Foreign rootless dev c
 modern_recipe="modern-unified-dev-20261123-v2"
 installed_recipe="$(r image inspect -f '{{index .Config.Labels "org.panolab.litex.recipe"}}' panolab-direct-modern:local 2>/dev/null || true)"
 if [[ "$installed_recipe" != "$modern_recipe" ]]; then
-  say "Building pinned LiteX/BIOS modern tools in local laptop rootless Docker."
+  r buildx version >/dev/null || fail "Buildx CLI missing; run bash ./panolab-install.sh --finalize-maintenance first."
+  say "Building pinned LiteX/BIOS modern tools using BuildKit in rootless Docker."
   # Rebuild the IMAGE only. Never implicitly destroy a running development
   # container or its private workspace when the image recipe changes.
-  r build -t panolab-direct-modern:local "$root/docker/modern"
+  r buildx build --builder default --load -t panolab-direct-modern:local "$root/docker/modern"
 fi
 r run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true \
   --env PYTHONDONTWRITEBYTECODE=1 \
@@ -203,7 +210,7 @@ need_build=0
 for image in "${images[@]}"; do if ! r image inspect "$image" >/dev/null 2>&1; then need_build=1; fi; done
 if [[ "$need_build" == 1 ]]; then
   say "Building management images on the laptop rootless Engine."
-  "${compose[@]}" build setup docker-broker repo-git manager
+  DOCKER_BUILDKIT=1 "${compose[@]}" build setup docker-broker repo-git manager
 fi
 say "Starting rootless management services before tunnel acceptance."
 "${compose[@]}" up -d --no-build --no-recreate setup docker-broker repo-git manager

@@ -3,7 +3,7 @@
 **Status: source elaboration and BIOS generation verified; not a flashable hardware-qualified image.**  
 **Contract:** [Rescue v1.1.0](../../specs/PANOLAB_RESCUE_V1.md) · [Implementation plan](../../docs/RESCUE_IMPLEMENTATION.md) · [Evidence](../../docs/RESCUE_BUILD_EVIDENCE.md)
 
-This is the initial PanoLab Rescue LiteX SoC, **not a fork of panog2_ldr** or an alternative FPGA bootloader. It directly imports current pinned LiteX, LiteX-Boards, LiteEth, LiteSPI and Migen. The only board-specific logic here is the Rev B clock/reset adaptation and a synchronized/latching recovery-button CSR. It compiles upstream LiteX BIOS unmodified.
+This is the initial PanoLab Rescue LiteX SoC, **not a fork of panog2_ldr** or an alternative FPGA bootloader. It directly imports current pinned LiteX, LiteX-Boards, LiteEth, LiteSPI and Migen. The only board-specific logic here is the Rev B clock/reset adaptation and a synchronized/latching recovery-button CSR. It compiles the established LiteX BIOS with [source-hash-guarded, build-output-only compatibility fixes](bios_source_overlay.py). The original LiteX/Migen/LiteEth/LiteSPI and Pythondata installation files remain **unmodified**.
 
 ## Included and tested
 
@@ -31,7 +31,7 @@ Direct source verification after dependencies are present:
 python3 boards/pano_g2_rev_b/test_rescue_soc.py
 ```
 
-Outputs are BIOS `bios.bin`, generated LiteX Verilog, UCF and CSR JSON/CSV. `build_probe.sh` **deliberately uses `run=False`**; it never calls ISE place-and-route/BitGen, loads an SRAM image, or writes SPI flash. Do not install these artifacts on a real device.
+Outputs are BIOS `bios.bin`, generated LiteX Verilog, UCF and CSR JSON/CSV. The helper uses six source-hash-guarded overlays to fix upstream-only compiler and linker warnings (including RX/RW ELF segments instead of RWX) and explicitly rejects a future RWX BIOS. See [cleanup evidence](../../docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md). `build_probe.sh` **deliberately uses `run=False`**; it never calls ISE place-and-route/BitGen, loads an SRAM image, or writes SPI flash. Do not install these artifacts on a real device.
 
 ## What is still missing (required before claiming PanoLab Rescue v1 compliance)
 

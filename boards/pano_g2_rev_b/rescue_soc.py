@@ -13,7 +13,6 @@ from migen.genlib.cdc import MultiReg
 from litex.gen import LiteXModule
 from litex.soc.cores.clock import S6PLL
 from litex.soc.integration.soc import SoCCore
-from litex.soc.integration.builder import Builder
 from litex.soc.interconnect.csr import AutoCSR, CSRStatus
 from litex_boards.platforms import pano_logic_g2
 from liteeth.phy import LiteEthPHY
@@ -151,7 +150,9 @@ def main():
         window_seconds=args.autoboot_seconds,
     )
     if args.generate:
-        builder = Builder(soc, output_dir=args.out)
+        from bios_source_overlay import RescueBIOSBuilder
+        builder = RescueBIOSBuilder(soc, output_dir=args.out)
+        builder.prepare_clean_bios()
         builder.build(run=False)
     else:
         soc.finalize()

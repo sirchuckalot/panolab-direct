@@ -7,7 +7,7 @@ and has not been validated as an unattended fresh-machine install.
 ## 1. Host prerequisites
 
 Use an ordinary non-root user on Linux x86_64 with Git, Bash,
-Python 3, Docker CLI/Compose, and an already provisioned **rootless
+Python 3, Docker CLI/Compose and **Buildx**, and an already provisioned **rootless
 Docker Engine** with systemd cgroups v2 and CPU/memory/PID delegation.
 The laptop installation uses the preprovisioned user helper at
 `~/.local/libexec/panolab-rootless-29.1.3/dockerd-rootless.sh`.
@@ -19,7 +19,13 @@ Containerized tooling includes Python, Git, Yosys, Icarus, Verilator,
 Codex and the [pinned LiteX/VexRiscv Rescue stack](RESCUE_ENVIRONMENT_RECIPE.md):
 LiteX BIOS, LiteX-Boards, LiteEth, LiteSPI, Migen, SPI/PHY support,
 RISC-V GCC/binutils, Meson/Ninja and simulation C libraries.
-Licensed ISE remains separately approved.
+Licensed ISE remains separately approved. **Host Docker Buildx** is a
+Docker CLI extension (not another Docker image or development service).
+For the owner-laptop version-pinned, no-sudo bootstrap and exact
+old-development-rollback cleanup, see the
+[toolchain cleanup procedure](DEV_TOOLCHAIN_WARNING_CLEANUP.md).
+The installer now builds images with BuildKit and fails rather than
+falling back to Docker's deprecated legacy builder.
 
 ## 2. Owner-private inputs
 

@@ -41,6 +41,19 @@ owner approval for physical writes through the laptop MCP agent.
   `build_result`, `build_cancel`. No added vendor-specific tools
   without explicit owner approval.
 
+## Toolchain warning and legacy-builder policy
+
+Never silently silence BIOS compiler/linker warnings. The pinned-context
+[Rescue BIOS build overlay](boards/pano_g2_rev_b/bios_source_overlay.py)
+creates modified **build-output copies**, leaving pinned Git and
+installed Pythondata files intact. The G2 build must fail on an RWE/RWX
+ELF load segment. When upstream changes, update six exact SHA-256 guards
+and rerun the BIOS, HDL and source regression tests before publishing.
+Docker CLI Buildx belongs in the owner-local CLI plugin directory,
+not the general development image and not another BuildKit container.
+The [exact owner-approved rollback cleanup](docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md)
+is a separate, guarded host operation; never globally prune.
+
 ## Unified container policy
 
 Maintain **one** modern FPGA development Dockerfile at

@@ -43,7 +43,8 @@ fi
 label="$(r image inspect -f '{{index .Config.Labels "org.panolab.litex.recipe"}}' "$image" 2>/dev/null || true)"
 if [[ "$label" != "$recipe" ]]; then
   say "Building the SAME modern development image with the unified toolchain."
-  r build -t "$image" "$root/docker/modern" || die "Build failed; old dev untouched."
+  r buildx version >/dev/null || die "Buildx CLI missing; run --finalize-maintenance first."
+  r buildx build --builder default --load -t "$image" "$root/docker/modern" || die "Build failed; old dev untouched."
 fi
 new_id="$(r image inspect -f '{{.Id}}' "$image")"
 [[ "$(r image inspect -f '{{index .Config.Labels "org.panolab.litex.recipe"}}' "$image")" == "$recipe" ]] ||
