@@ -47,7 +47,7 @@ The generated G2 artifacts remain on the owner's existing persistent workspace a
 
 ## Subsequent toolchain cleanup
 
-After this first-image acceptance, a separate [clean-up milestone](DEV_TOOLCHAIN_WARNING_CLEANUP.md) implements Buildx host-side provisioning and exact rollback-container removal as a guarded owner action, and verifies a warning-free G2 BIOS source build with RX/RW load segments. This record's warning and rollback details below remain historical evidence of the earlier acceptance. Host cleanup is **pending** until the owner executes the new operation; do not describe it as already completed.
+After this first-image acceptance, a separate [clean-up milestone](DEV_TOOLCHAIN_WARNING_CLEANUP.md) implements Buildx host-side provisioning and exact rollback-container removal as a guarded owner action, and verifies a warning-free G2 BIOS source build with RX/RW load segments. This record's warning and rollback details below remain historical evidence of the earlier acceptance. **Update:** the owner executed `--finalize-maintenance` successfully on November 23, 2026 (Pacific): Buildx v0.36.1 installed, rootless default driver accepted and the exact stopped rollback container removed. Independent PanoLab service status confirms six running services and no rollback. See [PLR-ENV-004](DEV_TOOLCHAIN_WARNING_CLEANUP.md). The earlier details below remain historical evidence; a fresh Buildx image build is not yet separately qualified.
 
 ## Observed non-blocking issues
 
@@ -62,4 +62,4 @@ After this first-image acceptance, a separate [clean-up milestone](DEV_TOOLCHAIN
 
 **Still pending:** vendor ISE 14.7 synthesis/place-route/BitGen, physically demonstrated Pano G2 Rev B clock/reset, Ethernet PHY and SPI JEDEC/identity readings, independent power-cycle/button recovery, production boot journal/ICAP/A-B management, and a rootless unprivileged Ethernet simulation bridge. Do not equate compiled BIOS, generated HDL or simulated SPI with a flashable, hardware-qualified Rescue image.
 
-**Preservation:** Keep the prior stopped development container and historical Git backup ref until the owner approves cleanup. No `docker system prune`, host package installation, rootful operations or FPGA programming took place through these tests.
+**Later acceptance:** the owner approved and completed removal of the exact stopped development rollback container through the guarded maintenance script; the historical Git backup ref remains preserved. No `docker system prune`, host package installation, rootful operations or FPGA programming was required. Details: [PLR-ENV-004](DEV_TOOLCHAIN_WARNING_CLEANUP.md).

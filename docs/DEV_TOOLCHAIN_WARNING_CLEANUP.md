@@ -1,6 +1,6 @@
 # Development Toolchain Warning Cleanup — Scoped Maintenance
 
-**Record:** PLR-ENV-004 | **Date:** November 23, 2026 Pacific / November 24 UTC | **Status:** BIOS source-overlay fixes tested live; host Buildx installation and exact rollback-container removal **await owner execution**.
+**Record:** PLR-ENV-004 | **Date:** November 23, 2026 Pacific / November 24 UTC | **Status:** **LAPTOP_MAINTENANCE_ACCEPTED**: warning-free G2 BIOS source build; owner-side Buildx installation and exact rollback-container deletion completed, with six live services independently verified. A fresh image rebuild using Buildx remains separately untested.
 
 ## System boundary
 
@@ -46,11 +46,25 @@ No stop/restart of the running modern container, no pruning of images, builder c
 
 The old rollback's `Exited (137)` status is historical evidence; deleting the stopped container does **not** explain the exit code. The previous migration explicitly stopped that container; a code 137 can represent SIGKILL and is not proof of memory exhaustion. We do not attribute a precise cause without host evidence.
 
+## Owner execution and independent confirmation
+
+On November 23, 2026 (Pacific), the owner ran `bash ./panolab-install.sh --finalize-maintenance` from the existing laptop checkout. The returned terminal output showed:
+
+- `PanoLab rootless: PASS`: existing rootless engine, owner credentials/data and merged Compose passed preflight.
+- `BUILDX_PLUGIN=PASS github.com/docker/buildx v0.36.1 1d8dde89b8aba914e05e45366770736fea1fd690`: the checksum-pinned owner-local CLI plugin was successfully installed and recognized.
+- `BUILDKIT_DEFAULT_DRIVER=PASS`: the existing rootless engine uses the default Docker driver, without an additional BuildKit daemon/container.
+- `ROLLBACK_CONTAINER_REMOVED=PASS`: only `panolab-direct-dev-1-rollback-20261124T020818Z` was deleted.
+- `SIX_SERVICE_HEALTH=PASS`: all expected services passed the maintenance helper's health checks; no global prune or FPGA operation.
+
+A subsequent **independent PanoLab MCP `lab_status`** listed exactly six running services (`dev`, `tunnel`, `manager`, `repo-git`, `docker-broker`, `setup`) and no rollback container. `repo_status` confirmed a clean `development` checkout at `f03660d759bd532834c4b1948e054dde69b963ea` before this documentation-only acceptance update.
+
+This is evidence for plugin installation and safe old-container cleanup. It is **not** evidence of a fresh image build using Buildx; the already running unified development image does not need to be rebuilt for a host CLI-plugin change. The historical old-container exit code `137` remains unexplained and does not affect this accepted cleanup.
+
 ## Acceptance gates
 
 - **PASS:** patched G2 BIOS source build, warning count zero, ELF RX/RW load segments, source and RTL regression tests.
 - **PASS:** staged host scripts pass `bash -n`; offline contracts for Buildx checksum, legacy builder replacement, exact rollback cleanup and absence of broad prune pass.
-- **PENDING OWNER ACTION:** install/accept Buildx on the laptop owner account, validate the rootless default BuildKit driver and remove the exact stopped rollback object. No available PanoLab MCP operation can directly execute arbitrary host Docker cleanup from inside the agent's restricted development container.
+- **PASS — OWNER LAPTOP:** Buildx v0.36.1 installed and accepted; default BuildKit driver validated; exact stopped rollback container removed; six remaining services independently confirmed running.
 - **PENDING:** actual host Buildx rootless image rebuild (when next required), generic LiteX live simulation of the **patched G2 BIOS** rather than the already accepted generic upstream simulation, vendor ISE/G2 hardware qualification and real PHY/SPI identification.
 
 **Do not interpret a clean compiler log as proof of bootable physical FPGA hardware, valid SPI writes or production recovery security.**

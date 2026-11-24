@@ -52,7 +52,7 @@ owner-approved promotion.
 
 **Verified on the actual laptop (2026-11-23 Pacific):** the unified modern Docker image rebuilt and passed rootless deployment acceptance: **23 tests**, all seven pinned LiteX sources, CPU/memory/PID limits, generated G2 BIOS/Verilog/UCF, and a live generic LiteX BIOS console. See [full acceptance evidence](docs/UNIFIED_DEV_IMAGE_ACCEPTANCE.md).
 
-**Verified in the laptop development container:** a follow-up clean G2 BIOS source build using pinned-context overlays now emits no compile/link warnings and has separate RX/RW ELF load segments. The owner-local Buildx/rollback cleanup step is still required. See [cleanup evidence](docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md).
+**Verified in the laptop development container:** a follow-up clean G2 BIOS source build using pinned-context overlays now emits no compile/link warnings and has separate RX/RW ELF load segments. The owner-local Buildx v0.36.1 installation and precise rollback-container cleanup have **now passed** on the laptop, with six live services independently verified. A fresh Buildx image rebuild has not yet been needed or tested. See [cleanup evidence](docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md).
 
 **Not yet verified:** completely unprovisioned host installation, licensed ISE implementation, Spartan-6 bitstream, real Pano G2 boot or physical FPGA/Etherbone operation.
 See the [milestone record](specs/LAB_MILESTONE_1.md) for exact evidence
