@@ -171,13 +171,26 @@ for n in "$project-setup-1" "$project-docker-broker-1" "$project-repo-git-1" "$p
   if new_exists "$n"; then new_valid "$n" || fail "Foreign rootless container: $n"; fi
 done
 if new_exists "$dev"; then dev_valid "$rootless" || fail "Foreign rootless dev container."; fi
-say "Building modern tools in local laptop rootless Docker."
-if ! r image inspect panolab-direct-modern:local >/dev/null 2>&1; then
+modern_recipe="rescue-g2b-20261123-v1"
+installed_recipe="$(r image inspect -f '{{index .Config.Labels "org.panolab.litex.recipe"}}' panolab-direct-modern:local 2>/dev/null || true)"
+if [[ "$installed_recipe" != "$modern_recipe" ]]; then
+  say "Building pinned LiteX/BIOS modern tools in local laptop rootless Docker."
+  # Rebuild the IMAGE only. Never implicitly destroy a running development
+  # container or its private workspace when the image recipe changes.
   r build -t panolab-direct-modern:local "$root/docker/modern"
 fi
 r run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true \
+  --env PYTHONDONTWRITEBYTECODE=1 \
   --entrypoint /bin/sh panolab-direct-modern:local -ec \
-  'command -v yosys; command -v iverilog; command -v verilator; test -x /usr/local/bin/codex; test -x /usr/local/bin/codex-code-mode-host' >/dev/null
+  'command -v yosys; command -v iverilog; command -v verilator;
+   command -v riscv64-unknown-elf-gcc; command -v meson; command -v ninja;
+   test -x /usr/local/bin/codex; test -x /usr/local/bin/codex-code-mode-host;
+   test -s /opt/panolab/litex/env.sh;
+   python3 /opt/panolab/recipes/litex-bootstrap.py
+     --prefix /opt/panolab/litex
+     --lock /opt/panolab/recipes/litex-upstream.lock.json
+     --requirements /opt/panolab/recipes/litex-requirements.txt
+     --verify-only' >/dev/null
 images=(panolab-direct-ise14-setup:local panolab-direct-broker:local
         panolab-direct-repo-git:local panolab-direct-manager:local)
 need_build=0
@@ -238,6 +251,16 @@ if ! running_new "$dev"; then
   r start "$dev" >/dev/null || fail "Could not restart the managed dev container."
 fi
 running_new "$dev" || fail "Rootless dev container failed."
+current_modern_image="$(r image inspect -f '{{.Id}}' panolab-direct-modern:local)"
+dev_image="$(r inspect -f '{{.Image}}' "$dev")"
+if [[ "$dev_image" != "$current_modern_image" ]]; then
+  say "NOTICE: the existing development container runs an older image. Preserving it and all mounts."
+  say "Pinned LiteX tools are baked into the new image; explicit controlled dev-container migration is required."
+else
+  r exec "$dev" /bin/sh -ec \
+    'test -s /opt/panolab/litex/env.sh && command -v riscv64-unknown-elf-gcc && command -v meson' >/dev/null ||
+    fail "New development image lacks the pinned LiteX toolchain."
+fi
 r exec "$dev" /bin/sh -ec \
   'test -d /repo/gateware && test -d /workspace && test ! -e /repo/docker/private && command -v yosys && command -v iverilog && command -v verilator && test -x /usr/local/bin/codex' >/dev/null ||
   fail "Rootless development toolchain/source mounts failed."

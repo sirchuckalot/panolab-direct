@@ -3,6 +3,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates git make gcc g++ curl python3 python3-pip python3-venv \
     yosys iverilog verilator ripgrep \
+    gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf \
+    libevent-dev libjson-c-dev zlib1g-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
 # OpenAI Codex CLI: official standalone Linux binary, pinned by version and SHA-256.
 # Credentials are deliberately NOT baked into images. CODEX_HOME is a private,
@@ -29,7 +31,26 @@ RUN set -eux; \
     rm /tmp/codex-code-mode-host.tar.gz; \
     test -x /usr/local/bin/codex-code-mode-host; \
     codex --version
-# LiteX dependency sets will be pinned after source/API compatibility review.
+# PanoLab Rescue: immutable source-pinned LiteX development toolchain.
+# No old G2 FPGA framework, host package installer, license, JTAG or TAP sudo.
+COPY litex-bootstrap.py litex-upstream.lock.json litex-requirements.txt /opt/panolab/recipes/
+RUN python3 /opt/panolab/recipes/litex-bootstrap.py \
+      --prefix /opt/panolab/litex \
+      --lock /opt/panolab/recipes/litex-upstream.lock.json \
+      --requirements /opt/panolab/recipes/litex-requirements.txt && \
+    python3 /opt/panolab/recipes/litex-bootstrap.py \
+      --prefix /opt/panolab/litex \
+      --lock /opt/panolab/recipes/litex-upstream.lock.json \
+      --requirements /opt/panolab/recipes/litex-requirements.txt \
+      --verify-only
+ENV PANOLAB_RESCUE_UPSTREAM=/opt/panolab/litex/upstream \
+    PANOLAB_RESCUE_PYDEPS=/opt/panolab/litex/venv/lib/python3.12/site-packages \
+    PANOLAB_RESCUE_BIN=/opt/panolab/litex/venv/bin \
+    VIRTUAL_ENV=/opt/panolab/litex/venv
+ENV PATH="/opt/panolab/litex/venv/bin:${PATH}"
+ENV PYTHONPATH="/opt/panolab/litex/upstream/pythondata-software-picolibc:/opt/panolab/litex/upstream/migen:/opt/panolab/litex/upstream/litex:/opt/panolab/litex/upstream/litex-boards:/opt/panolab/litex/upstream/liteeth:/opt/panolab/litex/upstream/litespi:/opt/panolab/litex/venv/lib/python3.12/site-packages"
+LABEL org.panolab.litex.recipe="rescue-g2b-20261123-v1"
+# A deterministic CLI environment is also available at /opt/panolab/litex/env.sh.
 # Codex executable is installed; authentication remains separate in a private mount.
 WORKDIR /workspace
 CMD ["bash"]

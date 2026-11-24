@@ -23,6 +23,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [LiteX BIOS Rescue implementation](docs/RESCUE_IMPLEMENTATION.md) | Startup timeout/button behavior, Ethernet management, unpaired Trusted-LAN profile and validation gates |
 | [G2 Rev B first Rescue SoC](boards/pano_g2_rev_b/README.md) | Pinned LiteX BIOS/VexRiscv/LiteEth/LiteSPI implementation and build helper |
 | [G2 Rescue test evidence](docs/RESCUE_BUILD_EVIDENCE.md) | Actual generated BIOS/Verilog, nine tests, live LiteX simulation and unproven hardware gates |
+| [Rootless LiteX environment recipe](docs/RESCUE_ENVIRONMENT_RECIPE.md) | Container packages, immutable source locks, clean bootstrap evidence and safe image refresh |
 | [Upstream Rescue adoption review](specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Verified upstream bootloader examples, source reuse boundaries and outstanding proof |
 
 The selected [FPGA system specification](specs/PANOLAB_DIRECT_v1_0.txt)
@@ -47,8 +48,7 @@ All new work happens on `development`; `main` changes only after
 owner-approved promotion.
 
 **Not yet verified:** a completely unprovisioned host installation,
-licensed ISE implementation, pinned LiteX dependencies, G2 Rev B
-constraints/bitstream or physical FPGA/Etherbone operation.
+licensed ISE implementation, full modern Docker **image** rebuild with the new LiteX recipe, Spartan-6 bitstream or physical FPGA/Etherbone operation. A clean workspace-local pinned LiteX install, BIOS build, and HDL generation have passed.
 See the [milestone record](specs/LAB_MILESTONE_1.md) for exact evidence
 and limitations.
 
@@ -76,9 +76,10 @@ outputs stay in private ignored locations.
 | `docker/` | Compose recipes, modern toolchain, broker, Git gateway, manager and ISE sources |
 | `tests/` | Laptop-local source/protocol tests and external ISE fixture |
 | `specs/` | G2 functional design baseline |
-| `boards/`, `agent/` | Minimal placeholders for upcoming G2 integration |
+| `boards/` | Active G2 Rev B LiteX Rescue source, source lock and rootless build helper |
+| `agent/` | Agent integration design and ongoing capabilities |
 | `gateware/` | G2 implementation placeholder and a simulation-only CSR demonstration |
-| `docs/` | The five current engineering documents linked above |
+| `docs/` | Architecture, operation, toolchain, Rescue implementation and verification records |
 
 **Publish only working milestones:** experiment and verify inside the
 laptop's local containers, review changes, then make one coherent

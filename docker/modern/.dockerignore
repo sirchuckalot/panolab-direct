@@ -1,2 +1,6 @@
+# Only allow audited image recipes into build context.
 *
 !Dockerfile
+!litex-bootstrap.py
+!litex-upstream.lock.json
+!litex-requirements.txt

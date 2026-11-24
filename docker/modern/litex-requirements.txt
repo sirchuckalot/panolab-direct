@@ -1,0 +1,26 @@
+# Tested in the existing rootless development container (2026-11-23).
+# Exact Python versions prevent the original --target PATH drift. Picolibc
+# Pythondata wrapper comes from pinned Git source (NOT PyPI 1.7.9).
+attrs==26.1.0
+certifi==2026.11.20
+charset-normalizer==3.5.3
+colorama==0.4.6
+idna==3.20
+importlib_metadata==10.2.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+lazy-importer==0.1.0
+meson==1.12.1
+ninja==1.13.2
+packaging==26.4
+pyserial==3.5
+pythondata-cpu-vexriscv==1.0.1.post407
+pythondata-misc-tapcfg==0.0.post517
+pythondata-software-compiler-rt==0.0.post6206
+PyYAML==6.0.4
+referencing==0.37.0
+requests==2.34.2
+rpds-py==2026.9.1
+typing_extensions==4.16.0
+urllib3==2.8.0
+zipp==4.1.2

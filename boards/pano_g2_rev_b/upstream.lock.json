@@ -27,12 +27,16 @@
     "picolibc_data": {
       "url": "https://github.com/litex-hub/picolibc.git",
       "commit": "16ff442da4b92e28d0753fabed18ad4a15254498"
+    },
+    "picolibc_pythondata": {
+      "url": "https://github.com/litex-hub/pythondata-software-picolibc.git",
+      "commit": "6a13ccce7c575b32c102dd9dc52178505b81fe39"
     }
   },
   "pythondata_observed": {
     "cpu-vexriscv": "1.0.1.post407",
     "software-compiler-rt": "0.0.post6206",
-    "software-picolibc-wrapper": "1.7.9.post181 (data overridden with pinned 2026 picolibc snapshot)",
+    "software-picolibc-wrapper": "source pinned to 6a13ccce; data submodule linked to pinned 16ff442da picolibc repository (no PyPI 1.7.9)",
     "misc-tapcfg": "0.0.post517"
   },
   "toolchain_observed": {
@@ -41,5 +45,5 @@
     "meson": "1.12.1",
     "ninja": "1.13.2"
   },
-  "quality": "Pins identify inspected upstream snapshots; compatibility is verified only for elaboration and compiled BIOS; ISE and physical G2 not qualified."
+  "quality": "Exact Git revisions and observed Python packages for LiteX BIOS and HDL; rootless image build and physical hardware qualification are separate gates."
 }

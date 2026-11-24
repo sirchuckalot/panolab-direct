@@ -15,6 +15,8 @@ expected=(
   "liteeth:a54c730c323f271e5b5a33d48df54f6ce2d58c0a"
   "litespi:a5a0090ad16c2bebe0cb01dcc07e843b558ca4f6"
   "migen:e19524c963a8342952840983047557707fbe0b6a"
+  "picolibc:16ff442da4b92e28d0753fabed18ad4a15254498"
+  "pythondata-software-picolibc:6a13ccce7c575b32c102dd9dc52178505b81fe39"
 )
 for pair in "${expected[@]}"; do
   name="${pair%%:*}"
@@ -25,7 +27,7 @@ for pair in "${expected[@]}"; do
     exit 2
   fi
 done
-export PYTHONPATH="$here:$pydeps:$upstream/migen:$upstream/litex:$upstream/litex-boards:$upstream/liteeth:$upstream/litespi${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="$here:$pydeps:$upstream/pythondata-software-picolibc:$upstream/migen:$upstream/litex:$upstream/litex-boards:$upstream/liteeth:$upstream/litespi${PYTHONPATH:+:$PYTHONPATH}"
 if [[ -n "$bin_dir" ]]; then export PATH="$bin_dir:$PATH"; fi
 command -v riscv64-unknown-elf-gcc >/dev/null || {
   echo "RISC-V cross-compiler not available; supply a workspace-local toolchain in PANOLAB_RESCUE_BIN" >&2
@@ -35,6 +37,7 @@ command -v meson >/dev/null || {
   echo "Meson missing; supply isolated tools in PANOLAB_RESCUE_BIN" >&2
   exit 3
 }
+[[ -f "$upstream/pythondata-software-picolibc/pythondata_software_picolibc/data/libc/stdio/printf.c" ]] || { echo "Missing pinned Picolibc layout; rebuild image recipe" >&2; exit 3; }
 mkdir -p "$out"
 "$python" "$here/rescue_soc.py" --lab-mac "$lab_mac" --generate --out "$out"
 echo "LiteX BIOS + Verilog/UCF generated at $out"

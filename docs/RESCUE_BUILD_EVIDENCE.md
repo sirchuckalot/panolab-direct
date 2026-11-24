@@ -10,7 +10,7 @@ Environment: existing PanoLab rootless Docker development container, using only 
 
 Selected source revisions were read from upstream GitHub on November 23 and cloned at their exact full Git commits. See [lock](../boards/pano_g2_rev_b/upstream.lock.json). Of particular relevance, this uses LiteX `afed66238638fac1d1e13c3edd6568cdccea5356`, LiteX-Boards `2ccda1274d9a00088af3407bc93f0c7dd4892981`, LiteEth `a54c730c323f271e5b5a33d48df54f6ce2d58c0a`, LiteSPI `a5a0090ad16c2bebe0cb01dcc07e843b558ca4f6`, Migen `e19524c963a8342952840983047557707fbe0b6a`.
 
-The latest LiteX C runtime expected a newer Picolibc layout than the published PyPI `pythondata-software-picolibc 1.7.9.post181` wrapper provided. The workspace build explicitly redirected only its data location to pinned newer [LiteX Picolibc](https://github.com/litex-hub/picolibc/tree/16ff442da4b92e28d0753fabed18ad4a15254498), with no upstream C sources copied into the PanoLab repository. **Automating a clean, audited rootless dependency bootstrap remains pending.** This local workaround must not be silently assumed to reproduce on an arbitrary workstation.
+The latest LiteX C runtime expected a newer Picolibc layout than the published PyPI `pythondata-software-picolibc 1.7.9.post181` wrapper provided. The workspace build explicitly redirected only its data location to pinned newer [LiteX Picolibc](https://github.com/litex-hub/picolibc/tree/16ff442da4b92e28d0753fabed18ad4a15254498), with no upstream C sources copied into the PanoLab repository. **Historical first-build caveat:** this record describes the original manual workspace proof. The subsequent [versioned environment recipe](RESCUE_ENVIRONMENT_RECIPE.md) now automates source pinning, virtualenv installation and the absolute Picolibc link; it has passed a fresh workspace bootstrap and BIOS build, although the full new Docker image rebuild is not yet accepted.
 
 ## Evidence matrix
 
@@ -66,6 +66,12 @@ A second attempt with simulated Ethernet successfully built its models and linke
 - **Model based on established upstream data:** `M25P128` SPI NOR and BIOS LiteSPI driver. Actual JEDEC geometry, erase protection and identity data are not yet read.
 - **Research references only:** G2 factory multiboot header, golden/main slots, serial/MAC identity region; `panog2_ldr` demonstrates Ethernet update/button behavior but its non-LiteX SoC and firmware are **not adopted**.
 - **Explicit incomplete features:** permanent identity reader, boot-state journal, BIOS autoboot decision path, `ICAP_SPARTAN6`, safe A/B update transaction, versioned network management endpoint, mDNS/DNS-SD and pairing/production security.
+
+## Follow-up dependency recipe acceptance
+
+A separately staged clean workspace prefix using the versioned LiteX image recipe installed the seven pinned source checkouts and Python toolchain, passed the new eight offline recipe tests, ran the original nine G2 tests, compiled the 39,156-byte BIOS, and generated the 492,579-byte G2 Rev B Verilog plus UCF. This does **not** turn the original model/HDL proof into an ISE bitstream or a physical board acceptance. The rootless TAP/Ethernet simulator limitation remains.
+
+See [the recipe record](RESCUE_ENVIRONMENT_RECIPE.md) for the precise installation problems and permanent fixes.
 
 ## Next acceptance gates
 

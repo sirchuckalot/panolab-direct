@@ -52,6 +52,7 @@ Use an approved laptop container with the project available:
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
+python3 -m unittest discover -s tests -p 'test_litex_recipe.py' -v
 bash -n panolab-install.sh host/rootless-install.sh
 python3 -m py_compile docker/control/broker.py docker/control/repo_gateway.py
 ```
@@ -62,6 +63,14 @@ an approved local Go container. Keep the external
 `tests/fixtures/ise_counter/` RTL/manifest and
 `tests/ise_mcp_smoke_client.py` separate from the vendor worker.
 The fixture is not a bitstream ready to program.
+
+Rootless LiteX BIOS provisioning and source builds are documented in
+[RESCUE_ENVIRONMENT_RECIPE.md](RESCUE_ENVIRONMENT_RECIPE.md). The image
+pins seven upstream checkouts and Python build versions; standard LiteX
+BIOS builds do not require copying old Pano FPGA frameworks. A clean
+workspace-install PASS and static recipe tests do **not** demonstrate
+a new Docker image build, ISE bitstream, real FPGA boot, or TAP Ethernet
+simulation (upstream TAP setup still needs a nonprivileged solution).
 
 The default standalone development container mounts **selected**
 repository subtrees only, not the checkout root. Consequently the

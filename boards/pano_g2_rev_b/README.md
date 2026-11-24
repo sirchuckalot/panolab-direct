@@ -17,21 +17,18 @@ The target refuses a shared implicit MAC and rejects out-of-range or multicast/n
 
 ## Reproduce in the rootless development container
 
-Use pinned source trees recorded in [upstream.lock.json](upstream.lock.json) (GitHub source revisions, not copied HDL). Provide an isolated Python environment with `pythondata_cpu_vexriscv`, `pythondata_software_picolibc` backed by pinned Picolibc data, `pythondata_software_compiler_rt`, Meson, Ninja, and a RISC-V cross compiler. **Do not install host packages or use sudo.** The build helper verifies the five essential source SHAs and fails on a mismatch.
+The rootless [modern tools image](../../docker/modern/Dockerfile) now provisions pinned upstream source, an isolated Python virtual environment, the RISC-V BIOS toolchain, and simulation libraries. Source its environment file inside a **newly built** PanoLab development image. See the [environment recipe](../../docs/RESCUE_ENVIRONMENT_RECIPE.md) for installation and existing-container migration. The helper verifies all **seven** upstream source revisions and requires no host packages or `sudo`.
 
 ```sh
-export PANOLAB_RESCUE_UPSTREAM=/path/to/pinned-upstream-checkouts
-export PANOLAB_RESCUE_PYDEPS=/path/to/isolated-python-packages
-export PANOLAB_RESCUE_BIN=/path/to/workspace-local-tool-binaries
-export PANOLAB_LAB_MAC=02:00:00:00:00:01  # only for a single isolated lab build
+. /opt/panolab/litex/env.sh  # inside a newly built development container
+export PANOLAB_LAB_MAC=02:00:00:00:00:01  # for a single isolated lab build only
 ./boards/pano_g2_rev_b/build_probe.sh
 ```
 
 Direct source verification after dependencies are present:
 
 ```sh
-PYTHONPATH="$PANOLAB_RESCUE_PYDEPS:$PANOLAB_RESCUE_UPSTREAM/migen:$PANOLAB_RESCUE_UPSTREAM/litex:$PANOLAB_RESCUE_UPSTREAM/litex-boards:$PANOLAB_RESCUE_UPSTREAM/liteeth:$PANOLAB_RESCUE_UPSTREAM/litespi" \
-  python3 boards/pano_g2_rev_b/test_rescue_soc.py
+python3 boards/pano_g2_rev_b/test_rescue_soc.py
 ```
 
 Outputs are BIOS `bios.bin`, generated LiteX Verilog, UCF and CSR JSON/CSV. `build_probe.sh` **deliberately uses `run=False`**; it never calls ISE place-and-route/BitGen, loads an SRAM image, or writes SPI flash. Do not install these artifacts on a real device.

@@ -15,8 +15,11 @@ If a different host lacks this helper or delegated resources,
 **stop and review the prerequisite**; do not silently run `sudo`,
 host `apt` or a nested/rootful Docker daemon.
 
-Containerized tooling includes Python, Git, Yosys, Icarus,
-Verilator and Codex; licensed ISE remains separately approved.
+Containerized tooling includes Python, Git, Yosys, Icarus, Verilator,
+Codex and the [pinned LiteX/VexRiscv Rescue stack](RESCUE_ENVIRONMENT_RECIPE.md):
+LiteX BIOS, LiteX-Boards, LiteEth, LiteSPI, Migen, SPI/PHY support,
+RISC-V GCC/binutils, Meson/Ninja and simulation C libraries.
+Licensed ISE remains separately approved.
 
 ## 2. Owner-private inputs
 
@@ -43,7 +46,7 @@ From the repository checkout on the laptop:
 ```bash
 bash ./panolab-install.sh --status   # read-only status
 bash ./panolab-install.sh --check    # local configuration preflight
-bash ./panolab-install.sh            # build missing images and start/reuse services
+bash ./panolab-install.sh            # build missing/stale-labeled images; start/reuse services
 ```
 
 The launcher verifies the user rootless Engine and private inputs,
@@ -78,7 +81,11 @@ Docker access. Do not restart the authenticated tunnel or persistent
 workers to run an experiment.
 
 The installer reuses existing services with `--no-recreate`; it is
-**not** a destructive repair utility. Before any service replacement,
+**not** a destructive repair utility. If the modern tools image recipe
+is newer, the installer rebuilds the image tag and performs its read-only
+LiteX environment smoke check, but **preserves the running old dev
+container** and reports the pending explicit container migration.
+See the [LiteX environment recipe](RESCUE_ENVIRONMENT_RECIPE.md). Before any service replacement,
 review effects on the remote tunnel, host resources, private mounts,
 licenses and persistent results. Do not globally prune Docker.
 Reboot recovery was accepted on the owner's provisioned laptop:
