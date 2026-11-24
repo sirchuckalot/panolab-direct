@@ -13,6 +13,15 @@ for the timed/button-held recovery workflow and the deliberately unpaired
 Trusted-LAN appliance profile. That device mode does **not** waive
 owner approval for physical writes through the laptop MCP agent.
 
+**Source/project architecture authority:** Read the
+[PanoLab Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md)
+before adding, moving, or changing a project, board BSP, reusable RTL,
+upstream source snapshot, product dependency, source license or release
+workflow. It is the agreed **target organization and provenance standard**;
+the existing checkout is not yet migrated. Do not infer that proposed
+`projects/`, `shared/` or `third_party/` paths already exist, or
+restructure the working system without a separately approved plan.
+
 ## What is real, and what is planned
 
 - The owner's laptop operates six rootless Docker PanoLab services:
@@ -136,8 +145,11 @@ material in chat, mount it in `dev`, or publish it in logs.
 
 ## Documentation and publication hygiene
 
-Maintain **one current decision baseline** in
-[architecture](docs/ARCHITECTURE.md). The verified first software
+Maintain the **current operational baseline** in
+[architecture](docs/ARCHITECTURE.md) and the **authoritative future source/project
+structure, third-party, provenance and licensing decisions** in the
+[source and project standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
+Do not duplicate or silently override either authority. The verified first software
 laboratory milestone and its evidence are recorded in
 [LM1 acceptance](specs/LAB_MILESTONE_1.md). Keep implementation instructions
 in [getting started](docs/GETTING_STARTED.md), test and Git workflow

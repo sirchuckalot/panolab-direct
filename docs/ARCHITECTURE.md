@@ -5,6 +5,13 @@ ordinary-user **rootless Docker** laboratory with a restricted MCP control
 plane and a separately approval-gated FPGA toolchain. Decisions here
 are current requirements; this is not an ADR or experiment history.
 
+For the **agreed future source/project organization**, the authoritative
+standard is [PanoLab Source and Project Architecture](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
+That document specifies `projects/`, board and shared-code ownership,
+selective upstream snapshots, dependency manifests, build provenance,
+and licensing/attribution. **This file describes the current operational
+implementation**; the structural migration has not occurred.
+
 ## Implemented and observed on the laptop
 
 ```text

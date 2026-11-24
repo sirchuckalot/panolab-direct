@@ -4,6 +4,13 @@
 GitHub is the source/review system; publication happens only at a
 verified logical stopping point, not per experiment.
 
+For source ownership, project manifests, selective upstream imports,
+version isolation, build provenance, and license/attribution rules,
+follow the [Source and Project Architecture Standard](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
+It is the target design; existing commands below reflect the current
+unmigrated checkout. Changes to that layout need their own reviewed
+migration and tests.
+
 ## Choose the test venue
 
 | Goal | Default execution |

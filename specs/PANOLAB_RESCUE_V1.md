@@ -11,6 +11,13 @@
 | Repository policy | Develop on `development`; accepted `main` stays unchanged until expressly authorized |
 | Authority | PanoLab Direct project engineering standard |
 
+**Repository source-ownership authority:** [PanoLab Source and Project Architecture Standard](PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
+Rescue is a project (`projects/rescue/` in the **planned** layout),
+not a board BSP; this specification remains authoritative for Rescue's
+on-device behavior, A/B update, board qualification, and image manifest.
+The planned source project manifest is separate from that image manifest.
+No source move is implied by this cross-reference.
+
 ## 1. Executive decision
 
 **PanoLab Rescue v1 SHALL be a LiteX-based, independently bootable rescue environment with two independently bootable FPGA application slots (A/B), a separately persisted device identity, verified trial updates, and recovery through a board-proven physical reset/power-cycle path.** Applications MAY be CPU-less. The rescue environment MAY contain a soft CPU and bare-metal management firmware; Linux is **not** required.

@@ -13,6 +13,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | Read | What it covers |
 | --- | --- |
 | [Architecture and baseline decisions](docs/ARCHITECTURE.md) | What exists, system boundaries, G2 design and planned capabilities |
+| [Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md) | Authoritative planned ownership and layout for projects, BSPs, upstream source, manifests, licensing and releases |
 | [Install and operate](docs/GETTING_STARTED.md) | Host prerequisites, private inputs, rootless deployment, status and recovery limits |
 | [Develop, test and publish](docs/DEVELOPMENT.md) | Laptop-local testing, appropriate CI use and verified low-noise commits |
 | [Security](docs/SECURITY.md) | Credentials, mounts, rootless authority, approval gates and hardware safety |
@@ -82,6 +83,14 @@ be confused: credentials, license files, ISE installers and build
 outputs stay in private ignored locations.
 
 ## Source organization
+
+The table below describes the **existing checkout**, not the future
+[source and project architecture](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
+That standard is authoritative for the agreed target layout
+(`projects/`, `boards/`, `shared/`, selected `third_party/` sources),
+dependency and build provenance, and the selected GPL-3.0-or-later
+direction for original PanoLab code. Those folders and license changes
+have **not** been implemented by documenting the design.
 
 | Directory | Active role |
 | --- | --- |
