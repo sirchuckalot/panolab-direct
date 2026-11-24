@@ -38,8 +38,22 @@ by job, and published diagnostics free of private tokens or license
 material. Do not add vendor-specific agent-facing tools without
 owner-approved interface revision.
 
-The ISE 14.7 implementation is source code in `docker/ise14/mcp/`.
-It must be separately proven with licensed media and real toolchain
-execution on the laptop before claiming vendor-build acceptance.
+The ISE 14.7 worker implementation lives in `docker/ise14/mcp/`.
+**Vendor implementation acceptance for generic unconstrained XC6SLX150
+smoke designs was achieved on 2026-11-24:** two real runs completed all
+six stages and generated independently hashed nonempty bitstreams
+([evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md)).
+The node-locked license is satisfied by an explicitly managed,
+Docker-**internal** virtual Ethernet identity without publishing the
+private host ID. This does **not** qualify any board-specific pinout,
+timing budget or physical programming.
+
+The manager exposes additional *adapter* operations
+`ise_project_stage`, `ise_worker_diagnostics` and named wrappers for
+the five worker operations. Those adapter operations are not extra
+mandatory tools inside the vendor worker. During development, the
+owner-approved `@ise14` compatibility route and temporary maintenance
+bridge provide remote control; see
+[remote iteration design](REMOTE_ITERATION_ARCHITECTURE.md).
 
 [Architecture and acceptance gates](ARCHITECTURE.md) · [Security](SECURITY.md)

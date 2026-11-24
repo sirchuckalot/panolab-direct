@@ -9,8 +9,10 @@ For the **agreed future source/project organization**, the authoritative
 standard is [PanoLab Source and Project Architecture](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
 That document specifies `projects/`, board and shared-code ownership,
 selective upstream snapshots, dependency manifests, build provenance,
-and licensing/attribution. **This file describes the current operational
-implementation**; the structural migration has not occurred.
+and licensing/attribution. The source organization now has a migrated
+development candidate with board and third-party snapshot directories.
+**This file describes the operational deployment**; source-layout changes
+and the live service/mount cutover have separate acceptance evidence.
 
 ## Implemented and observed on the laptop
 
@@ -26,12 +28,22 @@ development (Ubuntu 24.04): ONE modern tools image; Codex, Python,
    Yosys, Icarus, Verilator, LiteX/BIOS, LiteEth/SPI, Migen, RISC-V
 ```
 
-Six running containers were observed on the owner's laptop. The
-development container uses approved source mounts and a private Codex
-volume with **2 CPUs, 4 GiB memory, 256 PIDs**. Only the restricted
-broker sees the *user-scoped* Docker socket; the manager and developer
-container do not. The broker cannot be treated as a general privileged
-host shell. Rootless container UID 0 is mapped to the laptop owner's
+The prior LM1 baseline was **six running containers**. On 2026-11-24,
+the expanded engineering system was observed with **eight active application
+containers**, including the persistent licensed ISE worker and temporary
+trusted-maintenance sidecar. **Eight is not the chosen final appliance
+topology.** The proposed steady-state design has **six active services**:
+tunnel, manager, docker-broker, repo-git, modern dev and licensed ISE worker.
+It would remove the temporary maintenance sidecar and make ISE setup an
+on-demand commissioning/repair service. The current Compose manager has
+a startup dependency on setup, so the six-service design remains untested
+until that dependency and the relevant setup operations are migrated safely. The development container
+continues to use approved source mounts and a private Codex volume with
+**2 CPUs, 4 GiB memory, 256 PIDs**. The normal manager and developer
+container have no Docker socket; the broker and, **temporarily**, the
+owner-approved trusted-maintenance sidecar do. That temporary sidecar
+has broad user-rootless Docker authority and must be retired before
+production hardening claims. Rootless container UID 0 is mapped to the laptop owner's
 ordinary UID, **not host root**; it can still affect files owned by
 that user. See [security](SECURITY.md).
 
@@ -59,9 +71,12 @@ and all six services auto-recovering after reboot. The standalone
 development container required the `unless-stopped` restart policy.
 The canonical source checkout is on `development`, matching GitHub
 `main` at the LM1 freeze `006b6ee`. New work must not modify `main`.
-A brand-new host install, licensed ISE execution and physical FPGA
-acceptance are **not yet proven**. See the
-[LM1 evidence record](../specs/LAB_MILESTONE_1.md).
+A brand-new host install and physical FPGA acceptance are **not yet
+proven**. However, later **licensed ISE execution passed** with two
+real six-stage Spartan-6 builds and distinct bitstream hashes on
+2026-11-24. See [the ISE acceptance evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md);
+the original [LM1 record](../specs/LAB_MILESTONE_1.md) remains historical
+and correctly excludes these later achievements.
 
 ## Accepted functional design (planned)
 
@@ -78,11 +93,14 @@ acceptance are **not yet proven**. See the
   Board-specific identity data and an independently bootable recovery
   path must survive any approved factory conversion; preserving the
   obsolete factory firmware is not a permanent product requirement.
-- **ISE worker:** persistent vendor toolchain and MCP server in
-  **one runtime container**, with exactly five canonical build tools.
-  The current CentOS setup and worker source do not prove licensing,
-  completed vendor implementation or hardware operation.
-  See [worker contract](TOOLCHAIN_MCP_CONTRACT.md).
+- **ISE worker:** persistent CentOS vendor toolchain and MCP server in
+  **one runtime container**, with exactly five canonical worker build tools.
+  A separate authenticated manager/broker adapter provides approved project
+  staging and safe diagnostics. Both real licensed implementation and
+  node-locked virtual Ethernet operation are now accepted on the laptop;
+  these results do **not** prove G2 board constraints or physical operation.
+  See [worker contract](TOOLCHAIN_MCP_CONTRACT.md) and
+  [real vendor test evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md).
 - **Agent:** local source edits and verification via restricted MCP
   capabilities. Physical reads, traces and any writes need a separate
   bounded, approved hardware access mechanism.
@@ -123,9 +141,10 @@ be physically demonstrated; Spartan-6 ICAP alone does not guarantee it.
 1. **G2 Rev B design:** pin compatible LiteX/Migen/LiteEth sources,
    verify exact clock, PHY, pinout and constraints, and simulate the
    CPU-less Etherbone/CSR design locally.
-2. **Vendor compilation:** obtain separate approval for private ISE
-   installation/licensing, then verify a persistent worker, real
-   XST/NGDBuild/MAP/PAR/TRACE/BitGen results and artifact hashes.
+2. **Vendor compilation:** **accepted for generic XC6SLX150 toolchain smoke
+   designs** on the licensed rootless worker: two real six-stage builds,
+   distinct artifacts and SHA-256 hashes. A real G2-specific constrained
+   implementation remains to be verified.
 3. **Physical G2:** with exact approval and a recovery path, validate
    a volatile load and trusted-LAN CSR identity/read/write.
 4. **Observability:** bounded LiteScope captures, then coherent

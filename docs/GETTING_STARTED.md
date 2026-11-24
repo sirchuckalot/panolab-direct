@@ -80,19 +80,33 @@ confirmation that remote `lab_status` and `repo_status` work.
 
 ## 4. Operate and inspect
 
-The live logical services are `tunnel`, `manager`,
+The original LM1 deployment ran `tunnel`, `manager`,
 `docker-broker`, `repo-git`, `setup` and `dev`.
-Inspect with PanoLab MCP `lab_status` / `repo_status`, or the
-read-only `--status` command. The user Docker socket is
+As of 2026-11-24 the approved owner laptop also runs the persistent
+`panolab-direct-ise14-worker-1` and the **temporary**
+`panolab-direct-trusted-maintenance` sidecar (**eight active development-phase containers**, not a permanent
+eight-service target; stopped backups preserved). The proposed final
+six-service operating set is tunnel, manager, broker, repo-git, dev and
+ISE worker, with installer setup started only for commissioning/repairs.
+This reduction has **not been deployed or reboot-accepted** because the
+manager still depends on setup in the existing Compose files. Inspect with authenticated PanoLab
+MCP `lab_status` / `repo_status` or the read-only `--status` command.
+The ordinary installer is **not yet** a clean-room reproducer of this
+expanded configuration; see [the ISE milestone review](ISE14_REMOTE_MILESTONE_REVIEW.md). The user Docker socket is
 `/run/user/$(id -u)/docker.sock`; never manage PanoLab through
 the default system/rootful Docker Engine.
 
 Use `dev_exec` for approved operations **inside** the already
 running development container and its `/workspace` scratch.
-Request a reviewed, bounded broker capability for any additional
-isolated local test container; `dev_exec` does not grant host
-Docker access. Do not restart the authenticated tunnel or persistent
-workers to run an experiment.
+The normal `dev_exec` operation runs inside the approved modern development
+container and is not host Docker access. The explicitly owner-approved,
+**temporary** `@maintenance` compatibility route is an exception: it
+can perform broad operations on the **owner's rootless Docker Engine**
+through the internal maintenance sidecar. Do not infer that rootless
+Docker makes this control production-safe. The separate `@ise14` path
+stages immutable RTL revisions and calls the installed licensed worker.
+Neither grants authorization to JTAG, SPI, flash or hardware programming.
+Avoid restarting the authenticated tunnel or worker for ordinary source edits.
 
 The installer reuses existing services with `--no-recreate`; it is
 **not** a destructive repair utility. The explicit `--upgrade-dev` mode uses [the safeguarded unified image migration](UNIFIED_DEV_IMAGE_UPGRADE.md): validate the new image before renaming/stopping only the dev container, retain its previous instance stopped for rollback, and reuse the same owner workspace, source mounts and Codex credentials. It neither creates a new development service nor restarts management/ISE. If the modern tools image recipe
@@ -102,11 +116,13 @@ container** and reports the pending explicit container migration.
 See the [LiteX environment recipe](RESCUE_ENVIRONMENT_RECIPE.md). Before any service replacement,
 review effects on the remote tunnel, host resources, private mounts,
 licenses and persistent results. Do not globally prune Docker.
-Reboot recovery was accepted on the owner's provisioned laptop:
-all six PanoLab services (including standalone developer container)
-started automatically after an ordinary reboot and sign-in, using
-the developer's `unless-stopped` policy. This does not prove
-unattended headless startup before login or a fresh-host installation.
+Reboot recovery was accepted for the **earlier six-service LM1 configuration**
+on the owner's provisioned laptop, using `unless-stopped` for the
+standalone developer container. The later eight-service deployment,
+Docker-internal node-locked ISE network, and trusted maintenance bridge
+**have not yet undergone a clean reboot acceptance test**. The earlier
+test does not prove unattended headless startup before login or a
+fresh-host installation.
 
 ## 5. Source synchronization boundary
 

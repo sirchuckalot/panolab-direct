@@ -3,4 +3,13 @@
 FROM python:3.12-alpine
 RUN apk add --no-cache docker-cli
 COPY broker.py /usr/local/bin/panolab-broker.py
+COPY ise_proxy.py /usr/local/bin/ise_proxy.py
+COPY ise_staging.py /usr/local/bin/ise_staging.py
+COPY test_ise_proxy.py /tmp/test_ise_proxy.py
+COPY test_ise_staging.py /tmp/test_ise_staging.py
+COPY test_trusted_maintenance.py /tmp/test_trusted_maintenance.py
+RUN PYTHONPATH=/usr/local/bin python3 /tmp/test_ise_proxy.py \
+ && PYTHONPATH=/usr/local/bin python3 /tmp/test_ise_staging.py \
+ && PYTHONPATH=/usr/local/bin python3 /tmp/test_trusted_maintenance.py \
+ && rm /tmp/test_ise_proxy.py /tmp/test_ise_staging.py /tmp/test_trusted_maintenance.py
 ENTRYPOINT ["python3","-u","/usr/local/bin/panolab-broker.py"]

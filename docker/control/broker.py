@@ -3,7 +3,9 @@
 
 The MCP manager communicates through private RPC, not via direct Docker access.
 """
-import json, os, socket, subprocess, threading
+import json, os, socket, subprocess, threading, importlib
+import ise_proxy
+import ise_staging
 S="/rpc/panolab.sock"
 W=os.environ["PANOLAB_WORKSPACE_HOST"]
 REPO=os.environ["PANOLAB_REPO_HOST"]
@@ -12,6 +14,8 @@ CODEX_AUTH=os.environ["PANOLAB_CODEX_AUTH_HOST"]
 # existing private 0700 mounts without changing host permissions.
 # Enforce rootless Engine identity before honoring this owner-mapped mode.
 ROOTLESS_MODE=os.environ.get("PANOLAB_ROOTLESS_MODE") == "1"
+TRUSTED_MAINTENANCE=ROOTLESS_MODE and os.environ.get("PANOLAB_TRUSTED_MAINTENANCE") == "1"
+MAINTENANCE="panolab-direct-trusted-maintenance"
 CONTAINER_DEV_USER="0:0" if ROOTLESS_MODE else "1000:1000"
 # Restricted dev-container reconfiguration uses project-scoped temporary
 # names and restores the prior dev container if the replacement fails.
@@ -106,6 +110,16 @@ def migrate_dev(image):
     command(["docker","rm","-f",BACKUP],30)
     return {"ok":True,"migrated":True,"source_tree":"/repo","private_mounted":False}
 
+def maintenance_identity(command_fn):
+    # This is explicitly owner-trusted and temporary. The sidecar has the
+    # ordinary user's rootless Docker socket, never host-root Docker.
+    inspect=command_fn(["docker","inspect","--format",
+       '{{.Name}}|{{.State.Running}}|{{index .Config.Labels "com.docker.compose.project"}}|{{.HostConfig.NetworkMode}}|{{.HostConfig.Privileged}}',
+       MAINTENANCE],15)
+    if not inspect.get("ok") or inspect.get("stdout","").strip()!=(
+        "/"+MAINTENANCE+"|true|panolab-direct-connect|none|false"):
+        raise ValueError("trusted maintenance service unavailable or misconfigured")
+
 def dispatch(r):
     a=r.get("action")
     if a=="status":
@@ -135,6 +149,55 @@ def dispatch(r):
         return command(["docker",op,name],90)
     if a=="logs":
         return command(["docker","logs","--tail","100",checked(r.get("container"))],30)
+    if a=="ise_rpc":
+        # Remote iteration: import the currently mounted Python modules for
+        # each authenticated call. Broker core policy remains startup-loaded.
+        if TRUSTED_MAINTENANCE:
+            importlib.reload(ise_proxy)
+        return ise_proxy.call_worker(r,command)
+    if a=="ise_stage":
+        # Editable staging adapter; immutable input snapshots still enforced.
+        if TRUSTED_MAINTENANCE:
+            importlib.reload(ise_proxy)
+            importlib.reload(ise_staging)
+        return ise_staging.stage_project(r.get("project"),command,W,REPO)
+    if a=="exec" and isinstance(r.get("argv"),list) and r["argv"][:1]==["@maintenance"]:
+        if not TRUSTED_MAINTENANCE:
+            raise ValueError("temporary trusted remote maintenance is disabled")
+        argv=r["argv"][1:]
+        if (not 1<=len(argv)<=32 or
+            any(not isinstance(x,str) or not x or len(x)>8192 or "\x00" in x for x in argv)):
+            raise ValueError("invalid trusted maintenance command")
+        maintenance_identity(command)
+        # Intentionally broad access ONLY inside the explicitly opted-in,
+        # offline, rootless trusted maintenance sidecar. Never host root.
+        return command(["docker","exec","--user","0:0",MAINTENANCE]+argv,170)
+    if a=="exec" and isinstance(r.get("argv"),list) and r["argv"][:1]==["@ise14"]:
+        # Live source-mounted Python protocol fixes must be visible on every
+        # request; no management image rebuild or process restart required.
+        if TRUSTED_MAINTENANCE:
+            importlib.reload(ise_proxy)
+            importlib.reload(ise_staging)
+        # Compatibility shim for the existing remote dev_exec connector schema.
+        # Only approved ISE tools and project staging are accepted here.
+        argv=r["argv"]
+        if not 2<=len(argv)<=4:
+            raise ValueError("invalid ISE compatibility action")
+        tool=argv[1]
+        arguments={}
+        if tool=="stage" and len(argv)==3:
+            return ise_staging.stage_project(argv[2],command,W,REPO)
+        if tool=="build_start" and len(argv)==3:
+            arguments={"Profile":"ise14-implementation","Project":argv[2]}
+        elif tool in ("build_status","build_cancel","build_result") and len(argv)==3:
+            arguments={"ID":argv[2]}
+        elif tool=="build_result" and len(argv)==4:
+            arguments={"ID":argv[2],"Artifact":argv[3]}
+        elif tool in ("toolchain_info","diagnose") and len(argv)==2:
+            arguments={}
+        else:
+            raise ValueError("ISE compatibility call has invalid arguments")
+        return ise_proxy.call_worker({"tool":tool,"arguments":arguments},command)
     if a=="exec":
         checked(DEV)
         argv=r.get("argv")

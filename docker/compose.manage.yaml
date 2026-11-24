@@ -7,21 +7,64 @@ services:
       context: ./control
       dockerfile: Broker.Dockerfile
     image: panolab-direct-broker:local
+    # Temporary trusted mode: execute Python directly from the mounted
+    # directory. Individual file binds pin old inodes after atomic writes.
+    entrypoint: ["python3", "/usr/local/lib/panolab-control/broker.py"]
     environment:
       PANOLAB_ROOTLESS_MODE: "1"
       PANOLAB_WORKSPACE_HOST: ${PANOLAB_WORKSPACE_HOST:?Missing PanoLab workspace}
       PANOLAB_REPO_HOST: ${PANOLAB_REPO_HOST:?Missing owner Git clone path}
       PANOLAB_CODEX_AUTH_HOST: ${PANOLAB_CODEX_AUTH_HOST:?Missing protected Codex auth path}
+      PANOLAB_TRUSTED_MAINTENANCE: "1"
     volumes:
       - type: bind
         source: ${PANOLAB_ROOTLESS_SOCKET:?Set user rootless Docker socket}
         target: /var/run/docker.sock
       - ./modern:/source/modern:ro
+      # Temporary remote-iteration mounts. Scripts are live source; Go binaries
+      # still require a remotely initiated compile and controlled restart.
+      - ./control:/usr/local/lib/panolab-control:ro
       - management-rpc:/rpc
     network_mode: none
     read_only: true
     tmpfs:
       - /tmp:rw,nosuid,nodev,size=32m
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+  trusted-maintenance:
+    # TEMPORARY opt-in owner-trusted remote maintenance capability. This
+    # container can control the laptop OWNER's rootless Docker Engine.
+    # Disable/remove this profile after the remote lab is stable.
+    profiles: ["trusted-maintenance"]
+    build:
+      context: ./control
+      dockerfile: Maintenance.Dockerfile
+    image: panolab-direct-trusted-maintenance:local
+    container_name: panolab-direct-trusted-maintenance
+    user: "0:0"
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+      PANOLAB_TRUSTED_MAINTENANCE: "1"
+      PANOLAB_ROOTLESS_SOCKET: ${PANOLAB_ROOTLESS_SOCKET:?Required rootless socket}
+      PANOLAB_REPO_HOST: ${PANOLAB_REPO_HOST:?Required canonical repo}
+      PANOLAB_WORKSPACE_HOST: ${PANOLAB_WORKSPACE_HOST:?Required agent workspace}
+      PANOLAB_CODEX_AUTH_HOST: ${PANOLAB_CODEX_AUTH_HOST:?Required private Codex path}
+      PANOLAB_ISE_TARBALL: ${PANOLAB_ISE_TARBALL:?Required approved ISE media}
+    volumes:
+      - type: bind
+        source: ${PANOLAB_ROOTLESS_SOCKET:?Required rootless socket}
+        target: /var/run/docker.sock
+      - type: bind
+        source: ${PANOLAB_REPO_HOST:?Required canonical repo}
+        target: ${PANOLAB_REPO_HOST:?Required canonical repo}
+        read_only: true
+      - type: bind
+        source: ${PANOLAB_WORKSPACE_HOST:?Required agent workspace}
+        target: /workspace
+    network_mode: none
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=64m"]
+    cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     restart: unless-stopped
   repo-git:
