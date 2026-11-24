@@ -21,6 +21,8 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [LM1 first working lab milestone](specs/LAB_MILESTONE_1.md) | Software acceptance evidence, design lessons and LM2 demonstration |
 | [PanoLab Rescue v1 standard](specs/PANOLAB_RESCUE_V1.md) | Cross-platform boot, A/B update, identity, BSP, trust profiles and qualification contract |
 | [LiteX BIOS Rescue implementation](docs/RESCUE_IMPLEMENTATION.md) | Startup timeout/button behavior, Ethernet management, unpaired Trusted-LAN profile and validation gates |
+| [G2 Rev B first Rescue SoC](boards/pano_g2_rev_b/README.md) | Pinned LiteX BIOS/VexRiscv/LiteEth/LiteSPI implementation and build helper |
+| [G2 Rescue test evidence](docs/RESCUE_BUILD_EVIDENCE.md) | Actual generated BIOS/Verilog, nine tests, live LiteX simulation and unproven hardware gates |
 | [Upstream Rescue adoption review](specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Verified upstream bootloader examples, source reuse boundaries and outstanding proof |
 
 The selected [FPGA system specification](specs/PANOLAB_DIRECT_v1_0.txt)

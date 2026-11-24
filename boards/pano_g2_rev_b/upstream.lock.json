@@ -1,0 +1,45 @@
+{
+  "schema": "panolab-rescue-upstream-lock-v1",
+  "date": "2026-11-23",
+  "fpga": "xc6slx150-2-fgg484",
+  "board": "pano-g2-rev-b",
+  "repositories": {
+    "litex": {
+      "url": "https://github.com/enjoy-digital/litex.git",
+      "commit": "afed66238638fac1d1e13c3edd6568cdccea5356"
+    },
+    "litex-boards": {
+      "url": "https://github.com/litex-hub/litex-boards.git",
+      "commit": "2ccda1274d9a00088af3407bc93f0c7dd4892981"
+    },
+    "liteeth": {
+      "url": "https://github.com/enjoy-digital/liteeth.git",
+      "commit": "a54c730c323f271e5b5a33d48df54f6ce2d58c0a"
+    },
+    "litespi": {
+      "url": "https://github.com/litex-hub/litespi.git",
+      "commit": "a5a0090ad16c2bebe0cb01dcc07e843b558ca4f6"
+    },
+    "migen": {
+      "url": "https://github.com/m-labs/migen.git",
+      "commit": "e19524c963a8342952840983047557707fbe0b6a"
+    },
+    "picolibc_data": {
+      "url": "https://github.com/litex-hub/picolibc.git",
+      "commit": "16ff442da4b92e28d0753fabed18ad4a15254498"
+    }
+  },
+  "pythondata_observed": {
+    "cpu-vexriscv": "1.0.1.post407",
+    "software-compiler-rt": "0.0.post6206",
+    "software-picolibc-wrapper": "1.7.9.post181 (data overridden with pinned 2026 picolibc snapshot)",
+    "misc-tapcfg": "0.0.post517"
+  },
+  "toolchain_observed": {
+    "riscv64-unknown-elf-gcc": "13.2.0-11ubuntu1+12",
+    "binutils-riscv64-unknown-elf": "2.42-1ubuntu1+6",
+    "meson": "1.12.1",
+    "ninja": "1.13.2"
+  },
+  "quality": "Pins identify inspected upstream snapshots; compatibility is verified only for elaboration and compiled BIOS; ISE and physical G2 not qualified."
+}

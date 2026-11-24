@@ -1,6 +1,6 @@
 # PanoLab Rescue — LiteX BIOS-Based Implementation Plan
 
-**Record:** PLR-IMPL-001 | **Date:** 2026-11-23 | **Status:** Adopted implementation direction; FPGA implementation and hardware qualification pending  
+**Record:** PLR-IMPL-001 | **Date:** 2026-11-23 | **Status:** Implementation underway: [first G2 Rev B LiteX SoC](../boards/pano_g2_rev_b/README.md) and [verification record](RESCUE_BUILD_EVIDENCE.md) published; full recovery functionality and physical hardware qualification pending  
 **Normative:** [PanoLab Rescue v1](../specs/PANOLAB_RESCUE_V1.md)  
 **Source research:** [Upstream implementation review](../specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md)
 
