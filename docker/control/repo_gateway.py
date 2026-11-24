@@ -21,18 +21,26 @@ ALLOWED = ("agent", "boards", "docker/control", "docker/ise14", "docker/modern",
 ROOT_FILES = ("AGENTS.md", "README.md", "panolab-install.sh")
 # Explicit top-level Docker recipes are readable/editable without opening the
 # entire docker/ directory or exposing docker/private and docker/.env.
-CONFIG_FILES = ("docker/compose.setup.yaml", "docker/compose.manage.yaml")
+CONFIG_FILES = ("docker/compose.setup.yaml", "docker/compose.manage.yaml",
+                "docker/compose.git-push.yaml")
 SENSITIVE_SUFFIXES = (".key", ".pem", ".p12", ".pfx", ".lic")
 MAX_FILE = 1024 * 1024
 MAX_MESSAGE = 160
 mutex = threading.Lock()
 
-def git(*args, timeout=30):
+def git(*args, timeout=30, push_auth=False):
     env = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_CONFIG_GLOBAL="/dev/null",
-               GIT_LFS_SKIP_SMUDGE="1")
+               GIT_CONFIG_NOSYSTEM="1", GIT_LFS_SKIP_SMUDGE="1")
+    # Only the explicitly approved push operation may request credentials.
+    # The token file is mounted read-only only in the repo-git service.
+    # Never pass it via Git arguments, remote URL, environment variables,
+    # Git configs, stdout, logs, or source-control data.
+    env["GIT_ASKPASS"] = ("/usr/local/bin/panolab-git-askpass"
+                          if push_auth else "/bin/false")
     proc = subprocess.run(
         ["git", "-C", str(ROOT), "-c", "core.hooksPath=/dev/null",
-         "-c", "core.fsmonitor=false", "-c", "protocol.file.allow=never", *args],
+         "-c", "core.fsmonitor=false", "-c", "protocol.file.allow=never",
+         "-c", "credential.helper=", *args],
         capture_output=True, text=True, timeout=timeout, env=env)
     return {"ok": proc.returncode == 0, "exit_code": proc.returncode,
             "stdout": proc.stdout[-20000:], "stderr": proc.stderr[-2000:]}
@@ -195,15 +203,19 @@ def commit(paths, message):
             "head": git("rev-parse", "HEAD")["stdout"].strip()}
 
 def push():
-    branch_ok()
+    # Direct Git pushes are permitted only to the development branch;
+    # main promotion remains an independent, owner-approved operation.
+    if branch_ok() != "development":
+        raise ValueError("GitHub push is restricted to development")
     origin_ok()
-    # The ordinary publishing path uses the connected GitHub integration,
-    # not credentials in this gateway. Direct push works only if explicitly
-    # configured with separately approved, narrowly scoped authentication.
-    check = git("status", "--porcelain=v1")
+    check = git("status", "--porcelain=v1", "--untracked-files=normal")
     if not check["ok"] or check["stdout"]:
         raise ValueError("checkout must be clean before push")
-    return git("push", "origin", "HEAD:refs/heads/" + branch_ok(), timeout=120)
+    # No force, no tags, no implicit refspec or detached HEAD.
+    # GitHub rejects a non-fast-forward push. Askpass is enabled only for
+    # this call and reads the single repository-scoped secret.
+    return git("push", "origin", "HEAD:refs/heads/development",
+               timeout=120, push_auth=True)
 
 def dispatch(r):
     op = r.get("action")

@@ -36,7 +36,10 @@ in this baseline. Avoid hosted KVM and push/CI debugging loops.
    tests are not proof of a licensed or physical FPGA build.
 5. Publish **one coherent, reviewed commit** for the verified change
    using the connected GitHub integration and an expected-parent,
-   non-force update. Draft/unverified work requires explicit approval.
+   non-force update. Alternatively, after the owner completes the
+   [private Git push setup](GITHUB_PUBLISHING.md), the existing
+   `repo-git` gateway can push a clean, reviewed local `development`
+   commit without force. Draft/unverified work requires explicit approval.
 6. Verify the new GitHub SHA. Only use PanoLab `repo_sync` when the
    checkout is clean, the gateway supports the branch, and the
    histories share ancestry. Never wipe local work or silently

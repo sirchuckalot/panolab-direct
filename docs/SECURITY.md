@@ -25,6 +25,14 @@ FPGA programming.
   request without a bearer must be rejected.
 - The Git gateway masks `docker/private/` and `docker/.env`;
   no credentials, media, license or bitstreams go to GitHub.
+- Optional GitHub direct-push authentication uses a **separate** ignored
+  `docker/private/github-git-auth` owner-only directory. The opt-in Compose
+  overlay mounts that **single directory** read-only in `repo-git` at
+  `/run/panolab-git-auth` without unmasking `/repo/docker/private`.
+  Only the gateway's clean, non-force `development` push invokes the
+  scoped `GIT_ASKPASS` helper. Tokens never enter the dev container,
+  general Git config, remote URLs or AI output. See
+  [GitHub publishing](GITHUB_PUBLISHING.md).
 
 ## Rescue appliance Ethernet trust — separate from MCP
 

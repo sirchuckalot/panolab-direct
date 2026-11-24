@@ -1,0 +1,12 @@
+# Opt-in GitHub write access for the existing repo-git service only.
+# Use only through host/enable-github-push.sh, never the general dev image.
+# The source dir contains a single owner-private 0600 token file.
+services:
+  repo-git:
+    volumes:
+      - type: bind
+        source: ./private/github-git-auth
+        target: /run/panolab-git-auth
+        read_only: true
+        bind:
+          create_host_path: false

@@ -6,8 +6,8 @@ set -Eeuo pipefail
 umask 077
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
 mode="${1:---install}"
-case "$mode" in --install|--check|--status|--upgrade-dev|--finalize-maintenance|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--help]" >&2; exit 2;; esac
-if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--help]"; exit 0; fi
+case "$mode" in --install|--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help]" >&2; exit 2;; esac
+if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help]"; exit 0; fi
 fail() { echo "PANOLAB ROOTLESS BLOCKED: $*" >&2; exit 9; }
 say() { echo "PanoLab rootless: $*"; }
 [[ "$(id -u)" != 0 ]] || fail "Run as ordinary laptop user, never sudo."
@@ -135,6 +135,12 @@ for n,svc in d.items():
 ' "$sock" || fail "Merged Compose violates rootless isolation policy."
 say "PASS: rootless Engine, private credentials, owner data, merged Compose."
 if [[ "$mode" == --check ]]; then say "Read-only preflight completed; no changes."; exit 0; fi
+# Opt-in: give only the repo-git service a private single-repository push
+# credential. Never bind the token into dev, manager, broker or ISE.
+if [[ "$mode" == --enable-github-push ]]; then
+  bash "$root/host/enable-github-push.sh" "$root" "$sock"
+  exit $?
+fi
 # Explicit final owner maintenance, not part of the generic installer. Verify
 # rootless Engine, image and all services before removing exact old rollback.
 if [[ "$mode" == --finalize-maintenance ]]; then

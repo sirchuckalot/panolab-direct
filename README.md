@@ -27,6 +27,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [Unified development image upgrade](docs/UNIFIED_DEV_IMAGE_UPGRADE.md) | One modern FPGA development image, explicit laptop rebuild, source reconciliation and rollback plan |
 | [Unified development image acceptance](docs/UNIFIED_DEV_IMAGE_ACCEPTANCE.md) | Real laptop rebuild, six-service health, 23 tests, BIOS/HDL artifacts and live LiteX BIOS simulation |
 | [Toolchain warning cleanup](docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md) | No-RWX BIOS link, pinned upstream C warning fixes, owner-local Buildx, and exact rollback cleanup |
+| [GitHub publishing and private push setup](docs/GITHUB_PUBLISHING.md) | Development branch sources, connected GitHub writes, one-time owner credential and scoped repository gateway |
 | [Upstream Rescue adoption review](specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Verified upstream bootloader examples, source reuse boundaries and outstanding proof |
 
 The selected [FPGA system specification](specs/PANOLAB_DIRECT_v1_0.txt)
@@ -71,6 +72,7 @@ already provisioned (see [setup](docs/GETTING_STARTED.md)):
 bash ./panolab-install.sh --status
 bash ./panolab-install.sh --check
 bash ./panolab-install.sh --upgrade-dev   # explicit, guarded dev-only image upgrade
+bash ./panolab-install.sh --enable-github-push  # optional one-time private gateway write credentials
 bash ./panolab-install.sh
 ```
 

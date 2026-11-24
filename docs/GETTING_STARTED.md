@@ -54,6 +54,7 @@ bash ./panolab-install.sh --status   # read-only status
 bash ./panolab-install.sh --check    # local configuration preflight
 bash ./panolab-install.sh            # build missing/stale-labeled images; start/reuse services
 bash ./panolab-install.sh --upgrade-dev   # explicitly upgrade only the dev image/container
+bash ./panolab-install.sh --enable-github-push  # opt-in GitHub direct push for repo-git only
 ```
 
 The launcher verifies the user rootless Engine and private inputs,
@@ -64,6 +65,12 @@ resource quotas and Codex login, probes authenticated MCP (including
 anonymous denial), then starts the outbound tunnel. Nothing in this
 recipe touches the system/rootful Docker Engine, installs host
 packages, changes unrelated containers or programs an FPGA.
+
+GitHub publishes through the connected integration even without a laptop PAT.
+To enable direct `repo_push` through the existing container, use the
+[one-time fine-grained GitHub setup](GITHUB_PUBLISHING.md), which puts
+only a narrowly scoped token in an ignored, private owner directory.
+Never put that token in the ordinary development container or Git config.
 
 A first-time Codex account may need an interactive owner-approved
 login **inside the local development container** before installation

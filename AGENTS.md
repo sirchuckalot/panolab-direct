@@ -72,6 +72,19 @@ never silently replace an active container. Local development SHA
 follow the content-verified local backup/ref reconciliation before
 changing the laptop checkout.
 
+## GitHub source publishing boundary
+
+GitHub `main` is the default branch and is **not** the active Rescue
+source. The [`development` branch](https://github.com/sirchuckalot/panolab-direct/tree/development)
+contains the implementation; pinned LiteX upstream sources are fetched
+inside the modern image instead of being vendored in this repo.
+The connected GitHub app is already authorized for server-side commits.
+The laptop `repo-git` gateway previously failed direct `repo_push`
+due to missing HTTPS authentication; the optional
+[one-time owner-private push setup](docs/GITHUB_PUBLISHING.md)
+allows **only** non-force `development` pushes. Never request token
+material in chat, mount it in `dev`, or publish it in logs.
+
 ## Mandatory development process
 
 1. Inspect `lab_status`, `repo_status` and live GitHub branch SHA
