@@ -1,0 +1,10 @@
+name = "pythondata-cpu-vexriscv"
+origin = "https://github.com/litex-hub/pythondata-cpu-vexriscv"
+revision = "1.0.1.post407"
+snapshot = "1.0.1.post407"
+license = "MIT"
+license_file = "LICENSE"
+file_count = 2
+file_manifest_sha256 = "9ad1fae4b3624e53b9fe8451ed2a399b7e778e22434de40ee369641b0f7b50dc"
+paths = ["pythondata_cpu_vexriscv/__init__.py", "pythondata_cpu_vexriscv/verilog/VexRiscv.v"]
+license_sha256 = "8f25018489d6fe0dec34a352314c38dc146247b7de65735790f4398a92afa84b"

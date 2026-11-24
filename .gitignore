@@ -13,6 +13,8 @@ docker/ise14/installed/
 *.pfx
 # Hardware artifacts / logs
 build/
+# A source directory called build/ inside a reviewed upstream snapshot is not an output.
+!third_party/**/build/
 dist/
 *.bit
 *.bin

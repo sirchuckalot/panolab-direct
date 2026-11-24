@@ -1,0 +1,10 @@
+name = "migen"
+origin = "https://github.com/m-labs/migen.git"
+revision = "e19524c963a8342952840983047557707fbe0b6a"
+snapshot = "e19524c9"
+license = "BSD-2-Clause"
+license_file = "LICENSE"
+file_count = 136
+file_manifest_sha256 = "714444a6e21d7fc9fe9baf0fc40a6f10fbb07dd291dcdaa0e7ee3d2e1f7d4dc8"
+paths = ["migen"]
+license_sha256 = "67a7e7bc7fa1b9f6dc05916f05214df4db67afbbf2289b9c24c3678c9dc6a180"

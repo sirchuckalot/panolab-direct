@@ -1,0 +1,11 @@
+name = "litex"
+origin = "https://github.com/enjoy-digital/litex.git"
+revision = "afed66238638fac1d1e13c3edd6568cdccea5356"
+snapshot = "afed6623"
+license = "BSD-2-Clause"
+license_file = "LICENSE"
+file_count = 727
+file_manifest_sha256 = "24fbda16562790b2074e906aae059724264b153dc68bad61dec5221ee1f3e178"
+paths = ["litex"]
+local_modifications = ["src/litex/build/tools.py: validate optional source revision environment to prevent enclosing Git SHA misidentification"]
+license_sha256 = "8371c1e1e72db0c21eba5acfec4f4f8597dc8555bd282b2a35ccbbde992675c5"

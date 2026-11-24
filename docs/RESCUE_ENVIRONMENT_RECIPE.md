@@ -2,7 +2,7 @@
 
 **Record:** PLR-ENV-001 | **Date:** 2026-11-23 (US Pacific) | **Status:** Versioned Docker recipe; fresh isolated bootstrap + G2 BIOS source build validated; rebuilt full Docker image **laptop-verified** (2026-11-24 UTC); see [acceptance evidence](UNIFIED_DEV_IMAGE_ACCEPTANCE.md). The [unified development image and controlled migration](UNIFIED_DEV_IMAGE_UPGRADE.md) supersedes the original image-refresh note and provides the explicit owner-laptop upgrade command.
 
-**Source of truth:** [modern Dockerfile](../docker/modern/Dockerfile), [bootstrap utility](../docker/modern/litex-bootstrap.py), [upstream lock](../docker/modern/litex-upstream.lock.json), [Python package pins](../docker/modern/litex-requirements.txt), [rootless installer](../host/rootless-install.sh). The identical [G2 reference lock](../boards/pano_g2_rev_b/upstream.lock.json) is checked by [offline unit tests](../tests/test_litex_recipe.py).
+**Source of truth:** [modern Dockerfile](../docker/modern/Dockerfile), [bootstrap utility](../docker/modern/litex-bootstrap.py), [upstream lock](../docker/modern/litex-upstream.lock.json), [Python package pins](../docker/modern/litex-requirements.txt), [rootless installer](../host/rootless-install.sh). The identical [G2 reference lock](../third_party/registry.toml) is checked by [offline unit tests](../tests/test_litex_recipe.py).
 
 ## What a newly built tools image contains
 
@@ -32,7 +32,7 @@ This is a development image, **not** an FPGA firmware image or standalone G2 fir
 | Meson/Ninja unavailable on `PATH` | `pip --target` did not provide their executable launchers | Use an isolated Python virtualenv with `bin` on `PATH`; test both commands |
 | Verilator Ethernet model compilation failed on `event2/listener.h` and `json-c/json.h` | Missing C development headers/libraries | Install `libevent-dev`, `libjson-c-dev`, `zlib1g-dev` |
 | LiteX TAP-network simulator invoked `sudo` | Upstream Ethernet simulation's TAP setup assumes elevated networking privileges | **Still blocked by design.** Do not grant privileges or run `sudo`; use unprivileged BIOS/SPI simulation and design a socket-based Ethernet test next |
-| Official G2 target rejected DHCP + fixed IP; holding Pano button also resets PLL | Upstream generic board target behavior unsuitable for Rescue-first, button-held boot | Addressed in the separate [G2 Rescue SoC](../boards/pano_g2_rev_b/rescue_soc.py), not by forking upstream LiteX |
+| Official G2 target rejected DHCP + fixed IP; holding Pano button also resets PLL | Upstream generic board target behavior unsuitable for Rescue-first, button-held boot | Addressed in the separate [G2 Rescue SoC](../projects/rescue/soc/rescue_soc.py), not by forking upstream LiteX |
 | Existing dev image tag already present, so future installer would not rebuild | Old installer tested only image existence | Installer now tests a versioned image label and builds a new image if stale; **does not automatically replace a running dev container** |
 
 ## Reproducible rootless usage
@@ -54,8 +54,8 @@ python3 /opt/panolab/recipes/litex-bootstrap.py \
   --requirements /opt/panolab/recipes/litex-requirements.txt --verify-only
 
 export PANOLAB_LAB_MAC=02:00:00:00:00:01 # one isolated lab unit only
-bash /repo/boards/pano_g2_rev_b/build_probe.sh
-python3 /repo/boards/pano_g2_rev_b/test_rescue_soc.py
+bash /repo/projects/rescue/build_probe.sh
+python3 /repo/projects/rescue/tests/test_rescue_soc.py
 ```
 
 Use the proper checkout paths if mounted elsewhere; the read-only `/repo/boards` path above is the installer default. `build_probe.sh` checks all pinned upstream Git SHAs and compiles LiteX BIOS + generates Verilog/UCF but **never calls ISE or flashes hardware**. Use a unique lab MAC per board; this is not yet a permanent identity implementation.

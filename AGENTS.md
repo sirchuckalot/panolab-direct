@@ -17,10 +17,11 @@ owner approval for physical writes through the laptop MCP agent.
 [PanoLab Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md)
 before adding, moving, or changing a project, board BSP, reusable RTL,
 upstream source snapshot, product dependency, source license or release
-workflow. It is the agreed **target organization and provenance standard**;
-the existing checkout is not yet migrated. Do not infer that proposed
-`projects/`, `shared/` or `third_party/` paths already exist, or
-restructure the working system without a separately approved plan.
+workflow. it is the authoritative organization and provenance standard. The
+source migration has established `projects/`, `shared/` and
+`third_party/` in the development source candidate; **do not assume
+the running laptop containers have been cut over** until the recorded
+runtime acceptance gates pass.
 
 ## What is real, and what is planned
 
@@ -53,7 +54,7 @@ restructure the working system without a separately approved plan.
 ## Toolchain warning and legacy-builder policy
 
 Never silently silence BIOS compiler/linker warnings. The pinned-context
-[Rescue BIOS build overlay](boards/pano_g2_rev_b/bios_source_overlay.py)
+[Rescue BIOS build overlay](projects/rescue/soc/bios_source_overlay.py)
 creates modified **build-output copies**, leaving pinned Git and
 installed Pythondata files intact. The G2 build must fail on an RWE/RWX
 ELF load segment. When upstream changes, update six exact SHA-256 guards
@@ -85,8 +86,10 @@ changing the laptop checkout.
 
 GitHub `main` is the default branch and is **not** the active Rescue
 source. The [`development` branch](https://github.com/sirchuckalot/panolab-direct/tree/development)
-contains the implementation; pinned LiteX upstream sources are fetched
-inside the modern image instead of being vendored in this repo.
+contains the implementation. Rescue now selects source-verified
+`third_party/` snapshots via its `project.toml`; historical upstream
+checkouts inside the current modern image are toolchain bootstrap inputs,
+**not** the authority for a Rescue product build.
 The connected GitHub app is already authorized for server-side commits.
 The laptop `repo-git` gateway previously failed direct `repo_push`
 due to missing HTTPS authentication; the optional

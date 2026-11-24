@@ -1,0 +1,220 @@
+#
+# This file is part of LiteEth.
+#
+# Copyright (c) 2015-2021 Florent Kermarrec <florent@enjoy-digital.fr>
+# Copyright (c) 2015-2018 Sebastien Bourdeauducq <sb@m-labs.hk>
+# Copyright (c) 2021 Leon Schuermann <leon@is.currently.online>
+# Copyright (c) 2017 whitequark <whitequark@whitequark.org>
+# SPDX-License-Identifier: BSD-2-Clause
+
+import math
+
+from litex.gen import *
+
+from liteeth.common import *
+
+# MAC Packet Writer Frontend -----------------------------------------------------------------------
+
+class LiteEthMACPacketWriter(LiteXModule):
+    def __init__(self, dw, depth, eth_mtu=eth_mtu_default, timestamp=None, drop_when_disabled=False):
+        # Endpoint / Signals.
+        self.sink   = sink   = stream.Endpoint(eth_phy_description(dw))
+        self.source = source = stream.Endpoint(eth_packet_description(dw))
+
+        self.enable  = Signal(reset=1)
+        self.done    = Signal()
+        self.drop    = Signal()
+        self.error   = Signal()
+        self.offset  = Signal(bits_for(depth*dw//8))
+        self.length  = Signal(bits_for(depth*dw//8))
+
+        # Parameters Check / Compute.
+        assert dw in [8, 16, 32, 64]
+        assert depth > 0
+        if timestamp is not None:
+            timestampbits  = len(timestamp)
+            self.timestamp = Signal(timestampbits)
+
+        # # #
+
+        length  = Signal.like(self.length)
+        error   = Signal()
+        pkt_len = Signal.like(self.length)
+
+        packet_source = sink
+        if timestamp is not None:
+            timestamp_value = Signal(timestampbits)
+            self.comb += self.timestamp.eq(timestamp_value)
+
+        # Count valid bytes.
+        length_inc = Signal(4)
+        self.comb += length_inc.eq(stream.byte_count(packet_source.be))
+
+        # Include the next beat without wrapping before the capacity comparison.
+        next_length = Signal(len(self.length) + 1)
+        oversized   = Signal()
+        last_error  = Signal()
+        self.comb += [
+            next_length.eq(length + length_inc),
+            oversized.eq(next_length > min(eth_mtu, depth*dw//8)),
+            last_error.eq((packet_source.error & packet_source.be) != 0),
+            self.offset.eq(length),
+            self.length.eq(Mux(self.done, pkt_len, next_length)),
+        ]
+
+        def write_statements(idle=False):
+            continue_statements = [NextState("WRITE")] if idle else []
+            return [
+                # Never present an out-of-range write, even on the beat that exceeds capacity.
+                source.valid.eq(packet_source.valid & ~oversized),
+                source.data.eq(packet_source.data),
+                source.last.eq(packet_source.last),
+                packet_source.ready.eq(Mux(oversized, 1, source.ready)),
+                If(packet_source.valid & packet_source.ready,
+                    NextValue(length, next_length),
+                    NextValue(pkt_len, next_length),
+                    If(oversized,
+                        NextValue(error, 1),
+                        If(packet_source.last,
+                            NextState("DISCARD")
+                        ).Else(
+                            NextState("DISCARD-ALL")
+                        )
+                    ).Elif(packet_source.last,
+                        If(error | last_error,
+                            NextValue(error, 1),
+                            NextState("DISCARD")
+                        ).Else(
+                            NextState("TERMINATE")
+                        )
+                    ).Else(
+                        If(last_error,
+                            NextValue(error, 1)
+                        ),
+                        *continue_statements
+                    )
+                )
+            ]
+
+        # FSM.
+        self.fsm = fsm = FSM(reset_state="IDLE")
+        if drop_when_disabled:
+            fsm.act("IDLE",
+                If(self.enable,
+                    *write_statements(idle=True)
+                ).Else(
+                    packet_source.ready.eq(1),
+                    If(packet_source.valid,
+                        If(packet_source.last,
+                            NextState("DISCARD")
+                        ).Else(
+                            NextState("DISCARD-ALL")
+                        )
+                    )
+                )
+            )
+        else:
+            fsm.act("IDLE",
+                If(self.enable,
+                    *write_statements(idle=True)
+                )
+            )
+        fsm.act("WRITE",
+            *write_statements()
+        )
+        fsm.act("DISCARD-ALL",
+            packet_source.ready.eq(1),
+            If(packet_source.valid & packet_source.last,
+                NextState("DISCARD")
+            )
+        )
+        fsm.act("DISCARD",
+            self.drop.eq(1),
+            self.error.eq(error),
+            NextValue(length, 0),
+            NextValue(pkt_len, 0),
+            NextValue(error, 0),
+            NextState("IDLE")
+        )
+        fsm.act("TERMINATE",
+            self.done.eq(1),
+            NextValue(length, 0),
+            NextValue(pkt_len, 0),
+            NextValue(error, 0),
+            NextState("IDLE")
+        )
+        if timestamp is not None:
+            self.sync += If(
+                (fsm.ongoing("IDLE") | fsm.ongoing("WRITE")) &
+                self.enable & packet_source.valid & packet_source.ready & (length == 0),
+                timestamp_value.eq(timestamp)
+            )
+
+
+# MAC Packet Reader Frontend -----------------------------------------------------------------------
+
+class LiteEthMACPacketReader(LiteXModule):
+    def __init__(self, dw, depth, timestamp=None):
+        # Endpoint / Signals.
+        self.sink   = sink   = stream.Endpoint(eth_packet_description(dw))
+        self.source = source = stream.Endpoint(eth_phy_description(dw))
+
+        self.enable      = Signal()
+        self.idle        = Signal()
+        self.done        = Signal()
+
+        self.length      = Signal(bits_for(depth*dw//8))
+
+        # Parameters Check / Compute.
+        assert dw in [8, 16, 32, 64]
+        assert depth > 0
+        if timestamp is not None:
+            timestampbits  = len(timestamp)
+            self.timestamp = Signal(timestampbits)
+
+        # # #
+
+        if timestamp is not None:
+            timestamp_value = Signal(timestampbits)
+            self.comb += self.timestamp.eq(timestamp_value)
+
+        direct_read = Signal()
+        self.comb += [
+            source.valid.eq(sink.valid & direct_read),
+            source.data.eq(sink.data),
+            source.last.eq(sink.last),
+            source.error.eq(0),
+            sink.ready.eq(source.ready & direct_read),
+        ]
+
+        # Enable the final word's payload bytes; intermediate words are full.
+        self.comb += source.be.eq(Mux(source.last,
+            eth_packet_last_mask(dw, self.length), (1 << (dw//8)) - 1))
+
+        if timestamp is not None:
+            self.sync += If(self.idle & self.enable, timestamp_value.eq(timestamp))
+
+        # FSM.
+        self.fsm = fsm = FSM(reset_state="IDLE")
+        self.comb += [
+            self.idle.eq(fsm.ongoing("IDLE")),
+            direct_read.eq(fsm.ongoing("READ")),
+        ]
+        fsm.act("IDLE",
+            If(self.enable,
+                If((self.length == 0) | (self.length > depth*dw//8),
+                    NextState("END")
+                ).Else(
+                    NextState("READ")
+                )
+            )
+        )
+        fsm.act("READ",
+            If(sink.valid & sink.ready & sink.last,
+                NextState("END")
+            )
+        )
+        fsm.act("END",
+            self.done.eq(1),
+            NextState("IDLE"),
+        )

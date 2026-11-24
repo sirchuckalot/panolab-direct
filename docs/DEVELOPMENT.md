@@ -7,9 +7,10 @@ verified logical stopping point, not per experiment.
 For source ownership, project manifests, selective upstream imports,
 version isolation, build provenance, and license/attribution rules,
 follow the [Source and Project Architecture Standard](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
-It is the target design; existing commands below reflect the current
-unmigrated checkout. Changes to that layout need their own reviewed
-migration and tests.
+It governs the migrated source-candidate layout. Historical operational
+commands below still describe the previous deployed toolchain where
+not explicitly superseded; a service/mount cutover must be separately
+verified before claiming the running laptop uses the new paths.
 
 ## Choose the test venue
 
@@ -57,6 +58,20 @@ experiments, runner permutations and transient logs are *not*
 published milestones.
 
 ## Local source checks
+
+For the G2 Rescue project, source bytes are checked **before** compiling:
+
+```sh
+python3 shared/source_registry.py verify --project projects/rescue/project.toml
+PANOLAB_LAB_MAC=02:00:00:00:00:01 bash projects/rescue/build.sh
+bash projects/rescue/test.sh
+```
+
+Use the provisioned modern development toolchain; output is isolated
+under `/workspace/panolab-projects/rescue-g2b/` unless explicitly redirected.
+The G2 source acceptance and the legacy Docker/bootstrap suite are
+separate test gates.
+
 
 Use an approved laptop container with the project available:
 

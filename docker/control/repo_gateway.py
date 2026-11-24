@@ -17,8 +17,9 @@ import threading
 ROOT = pathlib.Path("/repo")
 SOCKET = "/repo-rpc/panolab-git.sock"
 ALLOWED = ("agent", "boards", "docker/control", "docker/ise14", "docker/modern",
-           "docs", "gateware", "host", "specs", "tests")
-ROOT_FILES = ("AGENTS.md", "README.md", "panolab-install.sh")
+           "docs", "host", "specs", "tests", "projects", "shared", "third_party", "LICENSES")
+# These names are reviewed source roots; private Docker source remains denied.
+ROOT_FILES = ("AGENTS.md", "README.md", "panolab-install.sh", "LICENSE")
 # Explicit top-level Docker recipes are readable/editable without opening the
 # entire docker/ directory or exposing docker/private and docker/.env.
 CONFIG_FILES = ("docker/compose.setup.yaml", "docker/compose.manage.yaml",

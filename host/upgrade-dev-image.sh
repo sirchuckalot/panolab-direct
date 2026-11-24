@@ -15,7 +15,7 @@ say() { printf 'PanoLab dev upgrade: %s\n' "$*"; }
 [[ "$(id -u)" != 0 && -S "$socket" ]] || die "Expected ordinary user/rootless socket."
 [[ "$(r info --format '{{json .SecurityOptions}}')" == *'"name=rootless"'* ]] || die "Rootless Engine required."
 [[ -d "$root/.git" ]] || die "Expected PanoLab checkout missing."
-for rel in gateware agent boards specs tests docs host docker/modern; do
+for rel in projects boards shared third_party agent specs tests docs host docker/modern; do
   [[ -d "$root/$rel" && ! -L "$root/$rel" ]] || die "Unexpected source directory: $rel"
 done
 old_present=0; old_running=false
@@ -31,12 +31,19 @@ assert not c["HostConfig"]["Privileged"]
 assert any("no-new-privileges" in s for s in c["HostConfig"].get("SecurityOpt",[]))
 assert any(s.lower()=="all" for s in c["HostConfig"].get("CapDrop",[]))
 expected={"/workspace":(work,False),"/codex-auth":(auth,False)}
-for name,ro in (("gateware",False),("agent",False),("boards",True),
-                ("specs",True),("tests",True),("docs",True),("host",True),
-                ("docker/modern",True)):
-    expected["/repo/"+name]=(root+"/"+name,ro)
+legacy=(("gateware",False),("agent",False),("boards",True),
+        ("specs",True),("tests",True),("docs",True),("host",True),
+        ("docker/modern",True))
+current=(("projects",True),("boards",True),("shared",True),
+         ("third_party",True),("agent",False),("specs",True),
+         ("tests",True),("docs",True),("host",True),("docker/modern",True))
+def layout(mounts):
+    result=dict(expected)
+    for name,ro in mounts:
+        result["/repo/"+name]=(root+"/"+name,ro)
+    return result
 got={x["Destination"]:(x["Source"],not x["RW"]) for x in c["Mounts"] if x["Type"]=="bind"}
-assert got==expected, "Unexpected bind mount set: "+str(set(got)^set(expected))
+assert got in (layout(legacy),layout(current)), "Unexpected bind mount set"
 ' "$root" "$workspace" "$auth" || die "Dev container differs from approved configuration; unchanged."
   old_running="$(r inspect -f '{{.State.Running}}' "$dev")"
 fi
@@ -62,8 +69,16 @@ python3 /opt/panolab/recipes/litex-bootstrap.py \
   die "Image smoke failed; old dev untouched."
 if (( old_present )); then
   if [[ "$(r inspect -f '{{.Image}}' "$dev")" == "$new_id" ]]; then
-    say "DEV_IMAGE_ALREADY_CURRENT=1; no container replacement."
-    exit 0
+    if r inspect "$dev" | python3 -c '
+import json,sys
+c=json.load(sys.stdin)[0]
+d={x["Destination"] for x in c["Mounts"] if x["Type"]=="bind"}
+sys.exit(0 if "/repo/projects" in d and "/repo/third_party" in d else 1)
+'; then
+      say "DEV_IMAGE_AND_SOURCE_MOUNTS_ALREADY_CURRENT=1; no container replacement."
+      exit 0
+    fi
+    say "Current image uses previous source mounts; controlled source-mount replacement required."
   fi
 fi
 # Do not stack multiple backups; a prior transition must be reviewed first.
@@ -112,19 +127,19 @@ cmd=(run -d --name "$dev" --restart unless-stopped --label panolab.managed=true
   --mount "type=bind,src=$workspace,dst=/workspace"
   --mount "type=bind,src=$auth,dst=/codex-auth"
   --env CODEX_HOME=/codex-auth)
-for spec in gateware:rw agent:rw boards:ro specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
+for spec in projects:ro boards:ro shared:ro third_party:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
   rel="${spec%:*}"; perm="${spec#*:}"
   mount="type=bind,src=$root/$rel,dst=/repo/$rel"
   [[ "$perm" == ro ]] && mount+=",readonly"
   cmd+=(--mount "$mount")
 done
-say "Starting replacement dev with identical mounts, quotas, security and name."
+say "Starting replacement dev with new source mounts, unchanged quotas, security and name."
 r "${cmd[@]}" "$image" sleep infinity >/dev/null
 [[ "$(r inspect -f '{{.State.Running}}' "$dev")" == true ]]
 [[ "$(r inspect -f '{{.Image}}' "$dev")" == "$new_id" ]]
 say "Testing new dev tools, source, Codex credentials and firmware."
 r exec -e PYTHONDONTWRITEBYTECODE=1 "$dev" /bin/sh -ec '
-test -d /repo/boards && test -d /repo/gateware && test -d /workspace
+test -d /repo/boards && test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /workspace
 test ! -e /repo/docker/private
 command -v yosys; command -v iverilog; command -v verilator
 command -v riscv64-unknown-elf-gcc; command -v meson; command -v ninja
@@ -134,13 +149,13 @@ for pair in 'cpu.max:200000 100000' 'memory.max:4294967296' 'pids.max:256'; do
   key="${pair%%:*}"; expect="${pair#*:}"
   [[ "$(r exec "$dev" cat "/sys/fs/cgroup/$key" | tr -d '\r')" == "$expect" ]]
 done
-r exec -e PYTHONDONTWRITEBYTECODE=1 "$dev" \
-  python3 /repo/boards/pano_g2_rev_b/test_rescue_soc.py >/dev/null
+r exec -e PYTHONDONTWRITEBYTECODE=1 "$dev" /bin/sh -ec \
+  'cd /repo && python3 shared/source_registry.py verify --project projects/rescue/project.toml' >/dev/null
 # No flashing or ISE invocation: source-only BIOS/HDL compilation.
 out="/workspace/panolab-rescue-upgrade-$(date -u +%Y%m%dT%H%M%SZ)"
 r exec -e PANOLAB_LAB_MAC=02:00:00:00:00:fa \
   -e PANOLAB_RESCUE_OUT="$out" -e PYTHONDONTWRITEBYTECODE=1 \
-  "$dev" bash /repo/boards/pano_g2_rev_b/build_probe.sh >/dev/null
+  "$dev" bash /repo/projects/rescue/build.sh >/dev/null
 r exec "$dev" /bin/sh -ec \
   "test -s '$out/software/bios/bios.bin' && test -s '$out/gateware/pano_logic_g2.v' && \
    iverilog -g2012 -i -tnull -s pano_logic_g2 '$out/gateware/pano_logic_g2.v'"

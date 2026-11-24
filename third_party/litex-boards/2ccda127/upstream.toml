@@ -1,0 +1,10 @@
+name = "litex-boards"
+origin = "https://github.com/litex-hub/litex-boards.git"
+revision = "2ccda1274d9a00088af3407bc93f0c7dd4892981"
+snapshot = "2ccda127"
+license = "BSD-2-Clause"
+license_file = "LICENSE"
+file_count = 5
+file_manifest_sha256 = "f6326f694b79d6dd0c2006c717a9917566e6f49ce103051c990936b91f1565b5"
+paths = ["litex_boards/__init__.py", "litex_boards/platforms/__init__.py", "litex_boards/platforms/pano_logic_g2.py", "litex_boards/targets/__init__.py", "litex_boards/targets/pano_logic_g2.py"]
+license_sha256 = "422ee6c9cc839eadb1a4e7e8033e5752499cfe61a95c9558b22cc3d781e05aaa"

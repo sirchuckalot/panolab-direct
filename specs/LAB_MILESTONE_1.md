@@ -51,7 +51,7 @@ An unattended bare-host/bootstrap install; a licensed ISE 14.7 vendor compilatio
 
 **Objective:** Develop and verify a small simulation-only classic Wishbone-style CSR responder while preserving `main`. This is a practice artifact, **not** the accepted FPGA-system M1 Etherbone design.
 
-- RTL: [`gateware/panolab_csr_demo.v`](../gateware/panolab_csr_demo.v) — read-only ID `0x504c4142` (ASCII PLAB), read-only status `1`, byte-enable scratch register, reset, reserved address zero, one ACK for each held classic transaction.
+- RTL: [`tests/fixtures/panolab_csr_demo.v`](../tests/fixtures/panolab_csr_demo.v) — read-only ID `0x504c4142` (ASCII PLAB), read-only status `1`, byte-enable scratch register, reset, reserved address zero, one ACK for each held classic transaction.
 - Self-checking testbench: [`tests/fixtures/panolab_csr_demo_tb.v`](../tests/fixtures/panolab_csr_demo_tb.v) — 44 assertions.
 - Regression runner: [`tests/test_panolab_csr_demo.py`](../tests/test_panolab_csr_demo.py) — Icarus simulation, deliberately mutated low-byte enable expected to FAIL, Yosys process/structural checks.
 - Acceptance requires a repeatable simulator PASS, injected fault FAIL, Yosys PASS, appropriate source tests, a single reviewed `development` commit, and unchanged `main`. No ISE licensing or physical board contact is needed.

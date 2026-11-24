@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Offline/no-network contract tests for the rootless LiteX image recipe."""
 import json
+import tomllib
 import re
 import subprocess
 import sys
@@ -10,19 +11,33 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE = ROOT / "docker" / "modern"
-BOARD = ROOT / "boards" / "pano_g2_rev_b"
+PROJECT = ROOT / "projects" / "rescue"
 
 class LiteXRecipeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.lock = json.loads((IMAGE / "litex-upstream.lock.json").read_text())
-        cls.board_lock = json.loads((BOARD / "upstream.lock.json").read_text())
+        cls.project = tomllib.loads((PROJECT / "project.toml").read_text())
+        cls.registry = tomllib.loads((ROOT / "third_party/registry.toml").read_text())
         cls.dockerfile = (IMAGE / "Dockerfile").read_text()
         cls.installer = (ROOT / "host/rootless-install.sh").read_text()
         cls.requirements = (IMAGE / "litex-requirements.txt").read_text()
 
-    def test_two_locks_identical(self):
-        self.assertEqual(self.lock, self.board_lock)
+    def test_toolchain_and_project_sources_reconcile(self):
+        pins = self.lock["repositories"]
+        expected = {
+            "litex":"litex", "litex-boards":"litex-boards",
+            "liteeth":"liteeth", "litespi":"litespi", "migen":"migen",
+            "picolibc_data":"picolibc",
+            "picolibc_pythondata":"pythondata-software-picolibc",
+        }
+        project_deps = {d["name"]: d["revision"] for d in self.project["dependencies"]}
+        for old, new in expected.items():
+            snap = self.registry["snapshots"][new]
+            self.assertEqual(project_deps[new],snap["revision"])
+            record = tomllib.loads((ROOT/"third_party"/snap["path"]/"upstream.toml").read_text())
+            self.assertEqual(record["revision"], pins[old]["commit"])
+            self.assertEqual(record["origin"], pins[old]["url"])
 
     def test_complete_git_sha_pins(self):
         names = set(self.lock["repositories"])
@@ -63,12 +78,14 @@ class LiteXRecipeTests(unittest.TestCase):
             self.assertIn("!"+allowed,ignored)
 
     def test_build_helper_checks_pins_and_no_flash(self):
-        helper=(BOARD/"build_probe.sh").read_text()
-        for info in self.lock["repositories"].values():
-            self.assertIn(info["commit"],helper)
-        self.assertIn("run", (BOARD/"rescue_soc.py").read_text())
-        self.assertIn("does not fetch, install, flash",helper)
-        self.assertIn("not a production identity", helper.lower())
+        helper = (PROJECT/"build_probe.sh").read_text()
+        entry = (PROJECT/"build.sh").read_text()
+        self.assertIn("PANOLAB_SOURCE_VERIFIED",helper)
+        self.assertIn("shared/source_registry.py run",entry)
+        self.assertIn("run=False",(PROJECT/"soc/rescue_soc.py").read_text())
+        self.assertIn("does not fetch, install, flash",helper.lower())
+        self.assertIn("not a production identity",helper.lower())
+        self.assertIn("PANOLAB_LAB_MAC",entry)
 
     def test_installer_rebuilds_labeled_image_without_deleting_live_dev(self):
         self.assertIn("modern-unified-dev-20261123-v2",self.installer)
@@ -94,7 +111,7 @@ class LiteXRecipeTests(unittest.TestCase):
         self.assertIn('r rename "$dev" "$backup"',upgrade)
         self.assertIn('r rename "$backup" "$dev"',upgrade)
         self.assertIn('--network none --read-only --cap-drop ALL',upgrade)
-        self.assertIn('build_probe.sh',upgrade)
+        self.assertIn('projects/rescue/build.sh',upgrade)
         self.assertIn('no-new-privileges:true',upgrade)
         self.assertNotIn('docker system prune',upgrade)
         self.assertNotIn('docker rm -f',upgrade)

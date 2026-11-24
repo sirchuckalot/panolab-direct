@@ -1,0 +1,10 @@
+name = "pythondata-software-compiler-rt"
+origin = "https://github.com/litex-hub/pythondata-software-compiler-rt"
+revision = "0.0.post6206"
+snapshot = "0.0.post6206"
+license = "NCSA OR MIT"
+license_file = "LICENSE.TXT"
+file_count = 763
+file_manifest_sha256 = "ebab4938ad016902b13b4bd8c113e21d194bc990e4758aaf00eb21b5ea2ee052"
+paths = ["pythondata_software_compiler_rt/__init__.py", "pythondata_software_compiler_rt/data/lib", "pythondata_software_compiler_rt/data/include", "pythondata_software_compiler_rt/data/Makefile", "pythondata_software_compiler_rt/data/LICENSE.TXT", "pythondata_software_compiler_rt/data/CREDITS.TXT"]
+license_sha256 = "83477b0ebd9c4b7e97d236994f1142b072588eaf59556f0cdc5c7684537931aa"

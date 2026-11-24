@@ -1,14 +1,20 @@
 # PanoLab Rescue G2 Rev B — Source-first build and simulation evidence
 
+**Historical evidence notice:** This record captures the first G2 builds before the repository
+source migration. Linked source paths point at their migrated locations,
+but previously observed outputs remain historical results. See
+[SOURCE_MIGRATION_ACCEPTANCE.md](SOURCE_MIGRATION_ACCEPTANCE.md) for
+candidate source-verified build evidence and the separate unverified cutover.
+
 **Record:** PLR-EVID-002 | **Date:** November 23, 2026 (Pacific) | **Status:** First SoC/Bios source milestone verified; NOT an accepted physical FPGA image.
 
-**Related:** [First Rescue SoC](../boards/pano_g2_rev_b/README.md) · [Rescue v1.1.0](../specs/PANOLAB_RESCUE_V1.md) · [BIOS implementation direction](RESCUE_IMPLEMENTATION.md).
+**Related:** [First Rescue SoC](../projects/rescue/README.md) · [Rescue v1.1.0](../specs/PANOLAB_RESCUE_V1.md) · [BIOS implementation direction](RESCUE_IMPLEMENTATION.md).
 
 ## What was actually executed
 
 Environment: existing PanoLab rootless Docker development container, using only `/workspace/panolab-rescue-lab` disposable scratch files and rootless-local package locations. No changes to host packages, existing PanoLab services, live checkout, licenses or hardware. GitHub `main` remains frozen. Python 3.12, GNU Make, Icarus, Verilator and Yosys were available inside the container.
 
-Selected source revisions were read from upstream GitHub on November 23 and cloned at their exact full Git commits. See [lock](../boards/pano_g2_rev_b/upstream.lock.json). Of particular relevance, this uses LiteX `afed66238638fac1d1e13c3edd6568cdccea5356`, LiteX-Boards `2ccda1274d9a00088af3407bc93f0c7dd4892981`, LiteEth `a54c730c323f271e5b5a33d48df54f6ce2d58c0a`, LiteSPI `a5a0090ad16c2bebe0cb01dcc07e843b558ca4f6`, Migen `e19524c963a8342952840983047557707fbe0b6a`.
+Selected source revisions were read from upstream GitHub on November 23 and cloned at their exact full Git commits. See [lock](../third_party/registry.toml). Of particular relevance, this uses LiteX `afed66238638fac1d1e13c3edd6568cdccea5356`, LiteX-Boards `2ccda1274d9a00088af3407bc93f0c7dd4892981`, LiteEth `a54c730c323f271e5b5a33d48df54f6ce2d58c0a`, LiteSPI `a5a0090ad16c2bebe0cb01dcc07e843b558ca4f6`, Migen `e19524c963a8342952840983047557707fbe0b6a`.
 
 The latest LiteX C runtime expected a newer Picolibc layout than the published PyPI `pythondata-software-picolibc 1.7.9.post181` wrapper provided. The workspace build explicitly redirected only its data location to pinned newer [LiteX Picolibc](https://github.com/litex-hub/picolibc/tree/16ff442da4b92e28d0753fabed18ad4a15254498), with no upstream C sources copied into the PanoLab repository. **Historical first-build caveat:** this record describes the original manual workspace proof. The subsequent [versioned environment recipe](RESCUE_ENVIRONMENT_RECIPE.md) now automates source pinning, virtualenv installation and the absolute Picolibc link; it has passed a fresh workspace bootstrap and BIOS build, although the full new Docker image rebuild is not yet accepted.
 
@@ -32,7 +38,7 @@ The latest LiteX C runtime expected a newer Picolibc layout than the published P
 
 ### Reproducible final G2 source artifacts
 
-Example: `PANOLAB_LAB_MAC=02:00:00:00:00:01` (explicit single-device **lab-only placeholder**, not persistent identity). Run the [build helper](../boards/pano_g2_rev_b/build_probe.sh) with pinned sources and workspace tools.
+Example: `PANOLAB_LAB_MAC=02:00:00:00:00:01` (explicit single-device **lab-only placeholder**, not persistent identity). Run the [build helper](../projects/rescue/build_probe.sh) with pinned sources and workspace tools.
 
 | Generated artifact | Exact size | SHA-256 |
 | --- | ---: | --- |

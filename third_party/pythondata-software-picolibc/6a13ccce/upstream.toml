@@ -1,0 +1,10 @@
+name = "pythondata-software-picolibc"
+origin = "https://github.com/litex-hub/pythondata-software-picolibc.git"
+revision = "6a13ccce7c575b32c102dd9dc52178505b81fe39"
+snapshot = "6a13ccce"
+license = "BSD-2-Clause (verify notices)"
+license_file = "LICENSE"
+file_count = 1
+file_manifest_sha256 = "6df9a1b488a7ef60ebb5ceb20c63c583093d720b5ee47deba1424ef0afa38e31"
+paths = ["pythondata_software_picolibc/__init__.py"]
+license_sha256 = "42639b2e5507163d35069be166e37a784f48a5f17e3577c16eb48fab215247cd"

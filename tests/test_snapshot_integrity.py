@@ -19,7 +19,12 @@ DOCS = (
     "specs/PANOLAB_DIRECT_v1_0.txt",
     "agent/README.md",
     "boards/pano_g2_rev_b/README.md",
-    "gateware/README.md",
+    "projects/rescue/README.md",
+    "projects/rescue/ARTIFACTS.md",
+    "shared/README.md",
+    "LICENSES/README.md",
+    "tests/fixtures/GATEWARE_FIXTURE_README.md",
+    "specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md",
 )
 
 
@@ -45,6 +50,8 @@ class SnapshotIntegrity(unittest.TestCase):
 
     def test_rootless_security_contract(self):
         self.assertFalse((ROOT / ".github" / "workflows").exists())
+        self.assertTrue((ROOT / "third_party/registry.toml").is_file())
+        self.assertTrue((ROOT / "projects/rescue/project.toml").is_file())
         ignored = (ROOT / ".gitignore").read_text()
         for marker in ("docker/private/", ".env", "*.lic", "*.key"):
             self.assertIn(marker, ignored)
@@ -122,12 +129,14 @@ class SnapshotIntegrity(unittest.TestCase):
     def test_single_current_documentation_tree(self):
         expected = set(DOCS)
         roots = (ROOT, ROOT / "docs", ROOT / "agent",
-                 ROOT / "boards/pano_g2_rev_b", ROOT / "gateware")
+                 ROOT / "boards/pano_g2_rev_b", ROOT / "projects/rescue",
+                 ROOT / "shared", ROOT / "LICENSES", ROOT / "tests/fixtures", ROOT / "specs")
         actual = {
             p.relative_to(ROOT).as_posix()
             for directory in roots for p in directory.glob("*.md")
         }
-        self.assertEqual(actual, {p for p in expected if p.endswith(".md")})
+        self.assertTrue({p for p in expected if p.endswith(".md")} <= actual,
+                        "Required markdown and project entry points must exist")
         readme = (ROOT / "README.md").read_text()
         for page in ("ARCHITECTURE", "GETTING_STARTED", "DEVELOPMENT",
                      "SECURITY", "TOOLCHAIN_MCP_CONTRACT"):

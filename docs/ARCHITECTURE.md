@@ -89,8 +89,13 @@ acceptance are **not yet proven**. See the
 
 The detailed functional requirements live in
 [`specs/PANOLAB_DIRECT_v1_0.txt`](../specs/PANOLAB_DIRECT_v1_0.txt).
-The board directory now includes a [source-level G2 Rescue SoC](../boards/pano_g2_rev_b/README.md),
-not yet an ISE-built bitstream or hardware-accepted design. `gateware/panolab_csr_demo.v` is a standalone
+The [Rescue project](../projects/rescue/README.md) now owns its
+source-level SoC/BIOS integration and build entry point; the G2
+[board BSP](../boards/pano_g2_rev_b/README.md) owns physical board behavior.
+The selected original LiteX G2 [platform](../third_party/litex-boards/2ccda127/src/litex_boards/platforms/pano_logic_g2.py)
+and [target](../third_party/litex-boards/2ccda127/src/litex_boards/targets/pano_logic_g2.py)
+are tracked under their upstream identity. This is not yet an ISE-built
+bitstream or hardware-accepted design. `tests/fixtures/panolab_csr_demo.v` is a standalone
 simulation-only verification fixture, **not** the G2 Rev B Etherbone
 or LiteX implementation. FPGA board integration remains unverified.
 
@@ -111,7 +116,7 @@ The normal Etherbone application may remain CPU-less. Rescue and an
 application cannot execute concurrently in one reconfigured FPGA.
 Independent power-cycle/button recovery from a hung application must
 be physically demonstrated; Spartan-6 ICAP alone does not guarantee it.
-**First implementation is now source-level:** [G2 Rev B Rescue SoC](../boards/pano_g2_rev_b/README.md) elaborates VexRiscv/LiteEth/LiteSPI, compiles standard LiteX BIOS and produces Verilog/UCF; a generic upstream LiteX Verilator simulation reached the BIOS prompt. [Evidence](RESCUE_BUILD_EVIDENCE.md) distinguishes these PASS results from still-missing ICAP, per-board identity, A/B firmware policy, network update API, vendor bitstream and physical hardware proof. The broader v1.1 standard remains **not hardware-qualified**.
+**First implementation is now source-level:** [G2 Rev B Rescue SoC](../projects/rescue/README.md) elaborates VexRiscv/LiteEth/LiteSPI, compiles standard LiteX BIOS and produces Verilog/UCF; a generic upstream LiteX Verilator simulation reached the BIOS prompt. [Evidence](RESCUE_BUILD_EVIDENCE.md) distinguishes these PASS results from still-missing ICAP, per-board identity, A/B firmware policy, network update API, vendor bitstream and physical hardware proof. The broader v1.1 standard remains **not hardware-qualified**.
 
 ## Next capabilities and acceptance gates
 
@@ -146,10 +151,13 @@ ISE or measurements on the real board.
 | LiteSPI (active G2 Rescue SPI driver) | https://github.com/litex-hub/litespi |
 
 Do not vendor unverified upstream master archives into this repo.
-The current **Rescue source build dependencies are pinned** at exact
-Git revisions and Python package versions under
-[`docker/modern/`](../docker/modern/) and checked against the G2 BSP
-lock. This establishes a reproducible *software build recipe*, not a
+The **Rescue project source dependencies are selected** by
+[`project.toml`](../projects/rescue/project.toml) and
+[`third_party/registry.toml`](../third_party/registry.toml), with
+a complete per-snapshot file-hash manifest. `docker/modern/` still
+pins the existing *toolchain bootstrap* source and Python versions;
+the product resolver verifies and imports its committed source instead
+of silently falling back to those bootstrap checkouts. This establishes a reproducible *software build recipe*, not a
 qualified FPGA image. Before claiming repeatable FPGA results, also
 validate image digests on an actual new Docker build, vendor ISE,
 generated constraints, device variant and hardware test artifacts.

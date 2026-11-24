@@ -1,0 +1,38 @@
+# Approved selective upstream snapshots. Exact selected bytes are validated by files.sha256.
+# Update project and tested registry together; never float source branches.
+
+[snapshots."litex"]
+revision = "afed6623"
+path = "litex/afed6623"
+
+[snapshots."litex-boards"]
+revision = "2ccda127"
+path = "litex-boards/2ccda127"
+
+[snapshots."liteeth"]
+revision = "a54c730c"
+path = "liteeth/a54c730c"
+
+[snapshots."litespi"]
+revision = "a5a0090a"
+path = "litespi/a5a0090a"
+
+[snapshots."migen"]
+revision = "e19524c9"
+path = "migen/e19524c9"
+
+[snapshots."picolibc"]
+revision = "16ff442d"
+path = "picolibc/16ff442d"
+
+[snapshots."pythondata-software-picolibc"]
+revision = "6a13ccce"
+path = "pythondata-software-picolibc/6a13ccce"
+
+[snapshots."pythondata-cpu-vexriscv"]
+revision = "1.0.1.post407"
+path = "pythondata-cpu-vexriscv/1.0.1.post407"
+
+[snapshots."pythondata-software-compiler-rt"]
+revision = "0.0.post6206"
+path = "pythondata-software-compiler-rt/0.0.post6206"

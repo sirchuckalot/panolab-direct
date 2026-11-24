@@ -9,7 +9,7 @@ import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-BOARD = ROOT / "boards/pano_g2_rev_b"
+BOARD = ROOT / "projects/rescue/soc"
 LITEX_PRESENT = importlib.util.find_spec("litex") is not None
 
 @unittest.skipUnless(LITEX_PRESENT, "Needs pinned LiteX dev container")
@@ -67,7 +67,7 @@ class CleanBIOSOverlayTests(unittest.TestCase):
                 self.assertNotIn("FNALIAS(" + alias, rewritten)
 
     def test_g2_wrapper_rejects_build_warnings_and_rwx(self):
-        content = (BOARD/"build_probe.sh").read_text()
+        content = (BOARD.parent/"build_probe.sh").read_text()
         self.assertIn("BIOS_BUILD_DIAGNOSTICS=ZERO", content)
         self.assertIn("BIOS_ELF_NO_RWX=PASS", content)
         self.assertIn("grep -Ei \"warning:|error:\"", content)

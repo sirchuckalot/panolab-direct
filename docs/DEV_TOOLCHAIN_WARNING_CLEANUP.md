@@ -12,7 +12,7 @@ The existing [rootless installer](../host/rootless-install.sh) and [dev-only upg
 
 ## BIOS warnings — root cause and verified fixes
 
-The last fully successful unified-image installation built the G2 Rescue BIOS with warnings about Compiler-RT function declarations, unused LiteSPI helpers, the no-SFP stub prototype and a genuinely RWX ELF program segment. These warnings were in **pinned upstream sources**, not evidence that a newer version was required. Rather than mutating upstream checkouts or disabling warning flags, PanoLab now uses [six pinned-context source overlays](../boards/pano_g2_rev_b/bios_source_overlay.py), staged under the build output's `source_overlays` directory. Each overlay verifies the exact SHA-256 of its upstream input, then changes only a local working copy.
+The last fully successful unified-image installation built the G2 Rescue BIOS with warnings about Compiler-RT function declarations, unused LiteSPI helpers, the no-SFP stub prototype and a genuinely RWX ELF program segment. These warnings were in **pinned upstream sources**, not evidence that a newer version was required. Rather than mutating upstream checkouts or disabling warning flags, PanoLab now uses [six pinned-context source overlays](../projects/rescue/soc/bios_source_overlay.py), staged under the build output's `source_overlays` directory. Each overlay verifies the exact SHA-256 of its upstream input, then changes only a local working copy.
 
 | Origin | Actual cause | Targeted correction |
 | --- | --- | --- |

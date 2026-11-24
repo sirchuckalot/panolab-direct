@@ -1,0 +1,500 @@
+#
+# This file is part of LiteSPI
+#
+# Copyright (c) 2020 Antmicro <www.antmicro.com>
+# Copyright (c) 2024 Matthias Breithaupt <m.breithaupt@vogl-electronic.com>
+# SPDX-License-Identifier: BSD-2-Clause
+
+from migen import *
+
+from litex.gen import *
+
+from litex.gen.genlib.misc import WaitTimer
+
+from litex.soc.interconnect import wishbone, stream
+from litex.gen.common import reverse_bytes
+from litex.soc.interconnect.csr import *
+
+from litespi.common import *
+from litespi.opcodes import SpiNorFlashOpCodes
+from migen.genlib.cdc import MultiReg
+
+oe_mask  = {
+    1: 0b00000001,
+    2: 0b00000011,
+    4: 0b00001111,
+    8: 0b11111111,
+}
+cmd_oe_mask  = oe_mask
+addr_oe_mask = oe_mask
+
+def get_opcode_widths(opcode):
+    cfg      = SpiNorFlashOpCodes()
+    cfg.name = SpiNorFlashOpCodes.name_from_value(SpiNorFlashOpCodes, opcode)
+    return (
+        int(cfg.cmd_width),
+        int(cfg.addr_width),
+        int(cfg.data_width),
+        32 if "4B" in cfg.name else 24,
+    )
+
+class LiteSPIMMAP(LiteXModule):
+    """Memory-mapped SPI Flash controller.
+
+    The ``LiteSPIMMAP`` class provides a Wishbone slave that must be connected to a LiteSPI PHY.
+
+    It supports sequential accesses so that command and address is only sent when necessary.
+
+    Parameters
+    ----------
+    endianness : string
+        If endianness is set to ``little`` then byte order of each 32-bit word coming from flash will be reversed.
+
+    with_csr : bool
+        The number of dummy bits can be configure when set to True.
+
+    with_write : bool or string "csr"
+        MMAP writes are supported when set to True or "csr". When set to "csr", they are disabled by default but
+        can be enabled on demand using a CSR.
+
+        Please note that only False and "csr" should be used with flash chips! True is only meant for RAM.
+
+        When using "csr" with a flash chip, make sure to erase the corresponding pages of the flash beforehand
+        using the LiteSPI master. It is also recommended to disable mmap writing once it is not required anymore.
+
+        With "csr" (flash), each program command is preceded by a write enable command (WREN, 0x06),
+        and the status register is polled (RDSR, 0x05, until WIP reads 0) after it, before the next
+        MMAP command and when the write burst ends. True (RAM) sends the program commands alone.
+
+    Attributes
+    ----------
+    source : Endpoint(spi_core2phy_layout), out
+        PHY control interface.
+
+    sink : Endpoint(spi_phy2core_layout), in
+        PHY data interface.
+
+    bus : Interface(), out
+        Wishbone interface for memory-mapped flash access.
+
+    cs : Signal(), out
+        CS signal for the flash chip, should be connected to cs signal of the PHY.
+
+    dummy_bits : CSRStorage
+        Register which holds the number of dummy bits to send during transmission.
+
+    write_config : CSRStorage
+        Optional register holding configuration bits for the write mode.
+    """
+    def __init__(self, flash, clock_domain="sys", endianness="big", with_csr=True, with_write=False, cs_width=1, cs_mask=1):
+        self.source = source = stream.Endpoint(spi_core2phy_layout)
+        self.sink   = sink   = stream.Endpoint(spi_phy2core_layout)
+        self.bus    = bus    = wishbone.Interface(mode="rw" if with_write else "r")
+        self.cs              = Signal(cs_width)
+        self.request = cs    = Signal()
+
+        # Burst Control.
+        burst_cs      = Signal()
+        burst_adr     = Signal(len(bus.adr), reset_less=True)
+        self.burst_timeout = burst_timeout = WaitTimer(MMAP_DEFAULT_TIMEOUT)
+
+        write_mask = Signal(len(bus.sel))
+
+        cmd_bits  = 8
+        data_bits = 32
+
+        self.clk_divisor = clk_divisor = CSRStorage(len(source.clk_div))
+
+        self._default_dummy_bits = flash.dummy_cycles * flash.addr_width if flash.fast_mode else 0
+
+        self._spi_dummy_bits = spi_dummy_bits = Signal(8)
+
+        # The dummy phase is one transfer, whose length field is narrower than the register: limit
+        # it to the largest whole number of dummy cycles that fits (instead of a silent modulo).
+        max_dummy_bits  = ((2**len(source.len) - 1)//flash.addr_width)*flash.addr_width
+        spi_dummy_len   = Signal(len(source.len))
+        if self._default_dummy_bits > max_dummy_bits:
+            raise ValueError(f"MMAP dummy bits ({self._default_dummy_bits}) above the transfer length limit ({max_dummy_bits}).")
+        self.comb += If(spi_dummy_bits > max_dummy_bits,
+            spi_dummy_len.eq(max_dummy_bits),
+        ).Else(
+            spi_dummy_len.eq(spi_dummy_bits),
+        )
+
+        if with_csr:
+            self.dummy_bits = dummy_bits = CSRStorage(8, reset=self._default_dummy_bits)
+            if clock_domain != "sys":
+                self.specials += MultiReg(dummy_bits.storage, spi_dummy_bits, clock_domain)
+            else:
+                self.comb += spi_dummy_bits.eq(dummy_bits.storage)
+        else:
+            self.comb += spi_dummy_bits.eq(self._default_dummy_bits)
+
+        dummy = Signal(data_bits, reset=0xdead)
+
+        if with_write and with_write == "csr":
+            write_enabled = Signal()
+            self.write_config = write_config = CSRStorage(fields=[
+                CSRField("write_enable", size=1, reset=0, description="MMAP write enable"),
+            ])
+            if clock_domain != "sys":
+                self.specials += MultiReg(write_config.fields.write_enable, write_enabled, clock_domain)
+            else:
+                self.comb += write_enabled.eq(write_config.fields.write_enable)
+        else:
+            write_enabled = Constant(with_write == True)
+        
+        if with_write:
+            write = Signal()
+            self.data_write = Signal(32)
+            program_cmd_width, program_addr_width, program_data_width, program_addr_bits = get_opcode_widths(flash.program_opcode)
+            page_words = flash.page_size // (data_bits//8)
+            if flash.page_size % (data_bits//8) == 0 and page_words & (page_words - 1) == 0:
+                write_page_boundary = Signal()
+                if page_words == 1:
+                    self.comb += write_page_boundary.eq(1)
+                else:
+                    self.comb += write_page_boundary.eq(bus.adr[:log2_int(page_words)] == 0)
+            else:
+                write_page_boundary = Constant(0)
+        else:
+            write = Constant(0)
+
+        # Flash writes: WREN before each program command, WIP polling after it.
+        flash_write = (with_write == "csr")
+        if flash_write:
+            wip_poll        = Signal() # A program command was sent: poll WIP before the next command.
+            wip_poll_return = Signal() # Continue with a program command after the poll.
+
+        self.byte_count = byte_count = Signal(2, reset_less=True)
+
+        self.comb += If(self.request, self.cs.eq(cs_mask))
+
+        # FSM.
+        self.fsm = fsm = FSM(reset_state="IDLE")
+        fsm.act("IDLE",
+            # Keep CS active after Burst for Timeout.
+            burst_timeout.wait.eq(1),
+            NextValue(source.clk_div, clk_divisor.storage),
+            NextValue(burst_cs, burst_cs & ~burst_timeout.done),
+            cs.eq(burst_cs),
+            If(bus.cyc & bus.stb,
+                NextValue(byte_count, 0),
+                # On Bus Read access...
+                If(~bus.we,
+                    # If CS is still active, Bus address matches previous Burst address and previous access was reading:
+                    # Just continue the current Burst.
+                    If(burst_cs & (bus.adr == burst_adr) & ~write,
+                        NextState("BURST-REQ")
+                    # Otherwise initialize a new Burst.
+                    ).Else(
+                        cs.eq(0),
+                        NextState("BURST-CMD")
+                    ),
+                )
+            )
+        )
+
+        if flash_write:
+            # Poll WIP once the write burst ends (timeout) or before a read; a write that starts a
+            # new program command polls from PRE-BURST-CMD-WRITE.
+            fsm.act("IDLE",
+                If(wip_poll & (~burst_cs | (bus.cyc & bus.stb & ~bus.we)),
+                    cs.eq(0),
+                    NextValue(wip_poll_return, 0),
+                    NextState("WIP-CMD"),
+                )
+            )
+
+        if not with_write:
+            # Read-only: end bus writes at once with an error (instead of a bus timeout).
+            fsm.act("IDLE",
+                If(bus.cyc & bus.stb & bus.we,
+                    bus.err.eq(1),
+                )
+            )
+
+        if with_write:
+            # Bytes are programmed from the lowest flash address up: with big endianness the lowest
+            # address is the MSB of the bus word (as on reads), so reverse the data and select bytes.
+            write_dat = {"big": reverse_bytes(bus.dat_w), "little": bus.dat_w}[endianness]
+            write_sel = {"big": Cat(*reversed(list(bus.sel))), "little": bus.sel}[endianness]
+            fsm.act("IDLE",
+                If(bus.cyc & bus.stb,
+                    # On Bus Read access...
+                    If(~bus.we,
+                        NextValue(write, 0)
+                    # On Bus Write access (if enabled)...
+                    ).Elif(write_enabled,
+                        # If CS is still active, Bus address matches previous Burst address and previous access was writing:
+                        # Just continue the current Burst.
+                        NextValue(write_mask, write_sel),
+                        NextValue(self.data_write, write_dat),
+                        If(burst_cs & (bus.adr == burst_adr) & write_sel[0] & write & ~write_page_boundary,
+                            NextState("WRITE")
+                        # Otherwise initialize a new Burst.
+                        ).Else(
+                            cs.eq(0),
+                            NextState("PRE-BURST-CMD-WRITE"),
+                        ),
+                        NextValue(write, 1)
+                    ).Else(
+                        bus.ack.eq(1),
+                        NextValue(write, 0),
+                    )
+                )
+            )
+
+            if flash_write:
+                write_cmd = If(wip_poll,
+                    NextValue(wip_poll_return, 1),
+                    NextState("WIP-CMD"),
+                ).Else(
+                    NextState("WREN"),
+                )
+            else:
+                write_cmd = NextState("BURST-CMD")
+            fsm.act("PRE-BURST-CMD-WRITE",
+                cs.eq(0),
+                If(write_mask[0],
+                    write_cmd,
+                    NextValue(write, 1)
+                ).Elif(byte_count == 3,
+                    bus.ack.eq(1),
+                    NextValue(burst_adr, burst_adr + 1),
+                    NextState("IDLE"),
+                    NextValue(write, 0)
+                ).Else(
+                    NextValue(byte_count, byte_count + 1),
+                    NextValue(write_mask, Cat(write_mask[1:len(bus.sel)], Signal(1))),
+                    NextValue(self.data_write, self.data_write >> 8),
+                )
+            )
+
+        fsm.act("BURST-CMD",
+            cs.eq(1),
+            source.valid.eq(1),
+            source.data.eq(flash.read_opcode.code), # send command.
+            source.len.eq(cmd_bits),
+            source.width.eq(flash.cmd_width),
+            source.mask.eq(cmd_oe_mask[flash.cmd_width]),
+            NextValue(burst_adr, bus.adr),
+            If(source.ready,
+                NextState("CMD-RET"),
+            )
+        )
+
+        if with_write:
+            fsm.act("BURST-CMD",
+                If(write_enabled & write,
+                    source.data.eq(flash.program_opcode.code), # send command.
+                    source.width.eq(program_cmd_width),
+                    source.mask.eq(cmd_oe_mask[program_cmd_width]),
+                )
+            )
+
+        fsm.act("CMD-RET",
+            cs.eq(1),
+            sink.ready.eq(1),
+            If(sink.valid,
+                NextState("BURST-ADDR"),
+            )
+        )
+
+        fsm.act("BURST-ADDR",
+            cs.eq(1),
+            source.valid.eq(1),
+            source.width.eq(flash.addr_width),
+            source.mask.eq(addr_oe_mask[flash.addr_width]),
+            source.data.eq(Cat(byte_count, bus.adr)), # send address.
+            source.len.eq(flash.addr_bits),
+            NextValue(burst_cs, 1),
+            NextValue(burst_adr, bus.adr),
+            If(source.ready,
+                NextState("ADDR-RET"),
+            )
+        )
+
+        if with_write:
+            fsm.act("BURST-ADDR",
+                If(write_enabled & write,
+                    source.width.eq(program_addr_width),
+                    source.mask.eq(addr_oe_mask[program_addr_width]),
+                    source.len.eq(program_addr_bits),
+                )
+            )
+
+        fsm.act("ADDR-RET",
+            cs.eq(1),
+            sink.ready.eq(1),
+            If(sink.valid,
+                If(spi_dummy_bits == 0,
+                    NextState("BURST-REQ"),
+                ).Else(
+                    NextState("DUMMY"),
+                )
+            )
+        )
+
+        if with_write:
+            fsm.act("ADDR-RET",
+                If(sink.valid & write_enabled & write,
+                    NextState("WRITE"),
+                )
+            )
+
+        fsm.act("DUMMY",
+            cs.eq(1),
+            source.valid.eq(1),
+            source.width.eq(flash.addr_width),
+            source.mask.eq(0),
+            source.data.eq(dummy),
+            source.len.eq(spi_dummy_len),
+            If(source.ready,
+                NextState("DUMMY-RET"),
+            )
+        )
+
+        fsm.act("DUMMY-RET",
+            cs.eq(1),
+            sink.ready.eq(1),
+            If(sink.valid,
+                NextState("BURST-REQ"),
+            )
+        )
+
+        fsm.act("BURST-REQ",
+            cs.eq(1),
+            source.valid.eq(1),
+            source.width.eq(flash.bus_width),
+            source.len.eq(data_bits),
+            source.mask.eq(0),
+            If(source.ready,
+                NextState("BURST-DAT"),
+            )
+        )
+
+        fsm.act("BURST-DAT",
+            cs.eq(1),
+            sink.ready.eq(1),
+            bus.dat_r.eq({"big": sink.data, "little": reverse_bytes(sink.data)}[endianness]),
+            If(sink.valid,
+                bus.ack.eq(1),
+                NextValue(burst_adr, burst_adr + 1),
+                NextState("IDLE"),
+            )
+        )
+
+        if with_write:
+            fsm.act("WRITE",
+                cs.eq(1),
+                source.valid.eq(1),
+                source.width.eq(program_data_width),
+                source.mask.eq(oe_mask[program_data_width]),
+                source.data.eq(self.data_write),
+                source.len.eq(8),
+                If(source.ready,
+                    NextState("WRITE-RET"),
+                )
+            )
+
+            if flash_write:
+                # Write Enable (WREN): own command, before each program command.
+                fsm.act("WREN",
+                    cs.eq(1),
+                    source.valid.eq(1),
+                    source.data.eq(SpiNorFlashOpCodes.WREN.code),
+                    source.len.eq(cmd_bits),
+                    source.width.eq(program_cmd_width),
+                    source.mask.eq(cmd_oe_mask[program_cmd_width]),
+                    If(source.ready,
+                        NextState("WREN-RET"),
+                    )
+                )
+                fsm.act("WREN-RET",
+                    cs.eq(1),
+                    sink.ready.eq(1),
+                    If(sink.valid,
+                        NextState("WREN-END"),
+                    )
+                )
+                fsm.act("WREN-END",
+                    cs.eq(0),
+                    NextValue(wip_poll, 1),
+                    NextState("BURST-CMD"),
+                )
+
+                # WIP Polling (RDSR): read the status register until WIP (bit 0) reads 0, CS low.
+                fsm.act("WIP-CMD",
+                    cs.eq(1),
+                    NextValue(burst_cs, 0),
+                    source.valid.eq(1),
+                    source.data.eq(SpiNorFlashOpCodes.RDSR.code),
+                    source.len.eq(cmd_bits),
+                    source.width.eq(program_cmd_width),
+                    source.mask.eq(cmd_oe_mask[program_cmd_width]),
+                    If(source.ready,
+                        NextState("WIP-CMD-RET"),
+                    )
+                )
+                fsm.act("WIP-CMD-RET",
+                    cs.eq(1),
+                    sink.ready.eq(1),
+                    If(sink.valid,
+                        NextState("WIP-REQ"),
+                    )
+                )
+                fsm.act("WIP-REQ",
+                    cs.eq(1),
+                    source.valid.eq(1),
+                    source.len.eq(8),
+                    source.width.eq(program_cmd_width),
+                    source.mask.eq(0),
+                    If(source.ready,
+                        NextState("WIP-DAT"),
+                    )
+                )
+                fsm.act("WIP-DAT",
+                    cs.eq(1),
+                    sink.ready.eq(1),
+                    If(sink.valid,
+                        If(sink.data[0],
+                            NextState("WIP-REQ"),
+                        ).Else(
+                            NextValue(wip_poll, 0),
+                            NextState("WIP-END"),
+                        )
+                    )
+                )
+                fsm.act("WIP-END",
+                    cs.eq(0),
+                    If(wip_poll_return,
+                        NextState("WREN"),
+                    ).Else(
+                        NextState("IDLE"),
+                    )
+                )
+
+            fsm.act("WRITE-RET",
+                cs.eq(1),
+                sink.ready.eq(1),
+                If(sink.valid,
+                    If(byte_count != 3,
+                        NextValue(write_mask, Cat(write_mask[1:len(bus.sel)], Signal(1))),
+                        NextValue(byte_count, byte_count + 1),
+                        NextValue(self.data_write, self.data_write >> 8),
+                        If(write_mask[1],
+                            NextState("WRITE"),
+                        ).Else(
+                            cs.eq(0),
+                            NextValue(write, 0),
+                            NextState("PRE-BURST-CMD-WRITE"),
+                        ),
+
+                    ).Else(
+                        bus.ack.eq(1),
+                        NextValue(burst_adr, burst_adr + 1),
+                        NextState("IDLE"),
+                    ),
+                )
+            )

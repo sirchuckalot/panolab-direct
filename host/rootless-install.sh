@@ -241,7 +241,7 @@ if ! new_exists "$dev"; then
     --mount "type=bind,src=$PANOLAB_WORKSPACE_HOST,dst=/workspace"
     --mount "type=bind,src=$PANOLAB_CODEX_AUTH_HOST,dst=/codex-auth"
     --env CODEX_HOME=/codex-auth)
-  for spec in gateware:rw agent:rw boards:ro specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
+  for spec in projects:ro boards:ro shared:ro third_party:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
     rel="${spec%:*}"; perm="${spec#*:}"
     mount="type=bind,src=$root/$rel,dst=/repo/$rel"
     [[ "$perm" == ro ]] && mount+=",readonly"
@@ -253,10 +253,10 @@ else
   # its host mounts point at this checkout and these private inputs.
   current_workspace="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/workspace"}}{{.Source}}{{end}}{{end}}' "$dev")"
   current_codex="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/codex-auth"}}{{.Source}}{{end}}{{end}}' "$dev")"
-  current_gateware="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/gateware"}}{{.Source}}{{end}}{{end}}' "$dev")"
+  current_projects="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/projects"}}{{.Source}}{{end}}{{end}}' "$dev")"
   [[ "$current_workspace" == "$PANOLAB_WORKSPACE_HOST" &&
      "$current_codex" == "$PANOLAB_CODEX_AUTH_HOST" &&
-     "$current_gateware" == "$root/gateware" ]] ||
+     "$current_projects" == "$root/projects" ]] ||
     fail "Existing dev container has unexpected bind mounts; inspect before recovery."
 fi
 # Repair pre-policy dev containers in place; never recreate or discard work.
@@ -281,7 +281,7 @@ else
     fail "New development image lacks the pinned LiteX toolchain."
 fi
 r exec "$dev" /bin/sh -ec \
-  'test -d /repo/gateware && test -d /workspace && test ! -e /repo/docker/private && command -v yosys && command -v iverilog && command -v verilator && test -x /usr/local/bin/codex' >/dev/null ||
+  'test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /workspace && test ! -e /repo/docker/private && command -v yosys && command -v iverilog && command -v verilator && test -x /usr/local/bin/codex' >/dev/null ||
   fail "Rootless development toolchain/source mounts failed."
 for pair in 'cpu.max:200000 100000' 'memory.max:4294967296' 'pids.max:256'; do
   key="${pair%%:*}"; expect="${pair#*:}"

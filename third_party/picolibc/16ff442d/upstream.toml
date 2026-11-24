@@ -1,0 +1,10 @@
+name = "picolibc"
+origin = "https://github.com/litex-hub/picolibc.git"
+revision = "16ff442da4b92e28d0753fabed18ad4a15254498"
+snapshot = "16ff442d"
+license = "BSD-family/mixed; see COPYING.picolibc and file headers"
+license_file = "COPYING.picolibc"
+file_count = 2955
+file_manifest_sha256 = "8b33001df9a62f21c4ac4153a25410a80e148e69526d793fb381143eb1df05c9"
+paths = ["libc", "libm", "picocrt", "semihost", "meson.build", "meson_options.txt", "picolibc.h.in", "picolibc.ld.in"]
+license_sha256 = "33131a7e244548678f2a9cf05a1c0028275f59323c9a37ef2088c641ae8c3d4e"

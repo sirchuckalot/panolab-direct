@@ -17,9 +17,9 @@ CONTAINER_DEV_USER="0:0" if ROOTLESS_MODE else "1000:1000"
 # names and restores the prior dev container if the replacement fails.
 STAGE="panolab-direct-dev-stage"
 BACKUP="panolab-direct-dev-backup"
-SOURCE_MOUNTS=(("gateware","rw"),("agent","rw"),("boards","ro"),
-               ("specs","ro"),("tests","ro"),("docs","ro"),
-               ("host","ro"),("docker/modern","ro"))
+SOURCE_MOUNTS=(("projects","ro"),("boards","ro"),("shared","ro"),
+               ("third_party","ro"),("agent","rw"),("specs","ro"),
+               ("tests","ro"),("docs","ro"),("host","ro"),("docker/modern","ro"))
 DEV="panolab-direct-dev-1"
 NAMES=(DEV,"panolab-direct-connect-setup-1","panolab-direct-connect-tunnel-1")
 IMAGES=("panolab-direct-modern:local","python:3.12-slim","ubuntu:24.04")
@@ -65,7 +65,8 @@ def repo_configured(name):
     out=command(["docker","inspect","--format","{{json .Mounts}}",name],15)
     if not out["ok"]: return False
     mounts=json.loads(out["stdout"])
-    return any(m.get("Destination")=="/repo/gateware" and m.get("Source")==os.path.join(REPO,"gateware") for m in mounts)
+    active={m.get("Destination"):(m.get("Source"),not m.get("RW")) for m in mounts if m.get("Type")=="bind"}
+    return all(active.get("/repo/"+name)==(os.path.join(REPO,name),mode=="ro") for name,mode in SOURCE_MOUNTS)
 
 def migrate_dev(image):
     image_allowed(image)
@@ -79,7 +80,7 @@ def migrate_dev(image):
     prepared=launch_dev(STAGE,image)
     if not prepared["ok"]: return prepared
     probe=command(["docker","exec","--user",CONTAINER_DEV_USER,STAGE,
-                   "/bin/sh","-c","test -d /repo/gateware && test -d /repo/boards && test ! -e /repo/docker/private"],30)
+                   "/bin/sh","-c","test -d /repo/projects && test -d /repo/boards && test -d /repo/shared && test -d /repo/third_party && test ! -e /repo/docker/private"],30)
     command(["docker","rm","-f",STAGE],30)
     if not probe["ok"]:
         return {"ok":False,"error":"staged container cannot see approved source mounts"}
@@ -96,7 +97,7 @@ def migrate_dev(image):
         command(["docker","start",DEV],30)
         return {"ok":False,"error":"new container failed; original container restored","detail":deployed}
     verified=command(["docker","exec","--user",CONTAINER_DEV_USER,DEV,
-                      "/bin/sh","-c","test -d /repo/gateware && test -d /workspace"],30)
+                      "/bin/sh","-c","test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /workspace"],30)
     if not verified["ok"]:
         command(["docker","rm","-f",DEV],30)
         command(["docker","rename",BACKUP,DEV],20)

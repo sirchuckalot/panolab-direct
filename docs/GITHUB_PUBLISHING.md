@@ -8,7 +8,12 @@ PanoLab Direct's GitHub repository is [sirchuckalot/panolab-direct](https://gith
 
 This project has used the **connected GitHub integration** for real server-side Git commits and non-force ref updates, followed by fast-forward synchronization of the laptop checkout. That method is already authenticated and works. The historical failure `fatal: could not read Username for 'https://github.com': terminal prompts disabled` affected the **separate Git push operation inside the existing laptop `repo-git` gateway** before owner credential setup. It has since been resolved. It was never evidence that GitHub commits had not been published.
 
-This repository deliberately does **not vendor the entire LiteX/Migen/LiteEth/LiteSPI codebases**: the [Docker development recipe](../docker/modern/Dockerfile) clones pinned upstream source revisions specified in [the lock](../docker/modern/litex-upstream.lock.json). Their full checkout appears inside the modern image at `/opt/panolab/litex/upstream/`, not as thousands of duplicated GitHub files. Our own G2 source is under [`boards/pano_g2_rev_b/`](../boards/pano_g2_rev_b/) and the recovery architecture is [`specs/PANOLAB_RESCUE_V1.md`](../specs/PANOLAB_RESCUE_V1.md).
+**Migration notice:** The source-visible `third_party/` snapshots are now
+selected by `projects/rescue/project.toml`. The original statement below
+describes the **pre-migration image bootstrap strategy**, not how
+the new Rescue project resolves source.
+
+Historically this repository did **not vendor the entire LiteX/Migen/LiteEth/LiteSPI codebases**: the [Docker development recipe](../docker/modern/Dockerfile) clones pinned upstream source revisions specified in [the lock](../docker/modern/litex-upstream.lock.json). Their full checkout appears inside the modern image at `/opt/panolab/litex/upstream/`, not as thousands of duplicated GitHub files. Our own G2 source is under [`boards/pano_g2_rev_b/`](../boards/pano_g2_rev_b/) and the recovery architecture is [`specs/PANOLAB_RESCUE_V1.md`](../specs/PANOLAB_RESCUE_V1.md).
 
 ## Dedicated write credentials for the existing repository gateway
 

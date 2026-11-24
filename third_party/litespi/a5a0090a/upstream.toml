@@ -1,0 +1,10 @@
+name = "litespi"
+origin = "https://github.com/litex-hub/litespi.git"
+revision = "a5a0090ad16c2bebe0cb01dcc07e843b558ca4f6"
+snapshot = "a5a0090a"
+license = "BSD-2-Clause"
+license_file = "LICENSE"
+file_count = 25
+file_manifest_sha256 = "3a01000c63c06a6676dabcf98490480a5048204f859a11c49c2645974056ef4f"
+paths = ["litespi"]
+license_sha256 = "18a4b59e7e05af0c85153961a5d083154996740a3b7debbe37592e335f6e8e05"

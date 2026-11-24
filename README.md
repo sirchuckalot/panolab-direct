@@ -22,7 +22,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [LM1 first working lab milestone](specs/LAB_MILESTONE_1.md) | Software acceptance evidence, design lessons and LM2 demonstration |
 | [PanoLab Rescue v1 standard](specs/PANOLAB_RESCUE_V1.md) | Cross-platform boot, A/B update, identity, BSP, trust profiles and qualification contract |
 | [LiteX BIOS Rescue implementation](docs/RESCUE_IMPLEMENTATION.md) | Startup timeout/button behavior, Ethernet management, unpaired Trusted-LAN profile and validation gates |
-| [G2 Rev B first Rescue SoC](boards/pano_g2_rev_b/README.md) | Pinned LiteX BIOS/VexRiscv/LiteEth/LiteSPI implementation and build helper |
+| [G2 Rev B first Rescue SoC](projects/rescue/README.md) | Pinned LiteX BIOS/VexRiscv/LiteEth/LiteSPI implementation and build helper |
 | [G2 Rescue test evidence](docs/RESCUE_BUILD_EVIDENCE.md) | Actual generated BIOS/Verilog, nine tests, live LiteX simulation and unproven hardware gates |
 | [Rootless LiteX environment recipe](docs/RESCUE_ENVIRONMENT_RECIPE.md) | Container packages, immutable source locks, clean bootstrap evidence and safe image refresh |
 | [Unified development image upgrade](docs/UNIFIED_DEV_IMAGE_UPGRADE.md) | One modern FPGA development image, explicit laptop rebuild, source reconciliation and rollback plan |
@@ -84,24 +84,30 @@ outputs stay in private ignored locations.
 
 ## Source organization
 
-The table below describes the **existing checkout**, not the future
-[source and project architecture](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
-That standard is authoritative for the agreed target layout
-(`projects/`, `boards/`, `shared/`, selected `third_party/` sources),
-dependency and build provenance, and the selected GPL-3.0-or-later
-direction for original PanoLab code. Those folders and license changes
-have **not** been implemented by documenting the design.
+PanoLab's [Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md) governs source ownership. The source organization is migrated in this development candidate; **a live laptop service cutover is a separate acceptance gate**. The unified modern development image still contains historical bootstrap checkouts, but project builds intentionally resolve the verified committed snapshots in `third_party/`, not the image copies.
 
 | Directory | Active role |
 | --- | --- |
-| `host/` | Rootless user-level installer and Compose overlay |
-| `docker/` | Compose recipes, modern toolchain, broker, Git gateway, manager and ISE sources |
-| `tests/` | Laptop-local source/protocol tests and external ISE fixture |
-| `specs/` | G2 functional design baseline |
-| `boards/` | Active G2 Rev B LiteX Rescue source, source lock and rootless build helper |
-| `agent/` | Agent integration design and ongoing capabilities |
-| `gateware/` | G2 implementation placeholder and a simulation-only CSR demonstration |
-| `docs/` | Architecture, operation, toolchain, Rescue implementation and verification records |
+| `projects/rescue/` | Complete Rescue project: `project.toml`, SoC, BIOS integration, build and tests |
+| `boards/pano_g2_rev_b/` | Reusable physical G2 Rev B BSP and board-specific constraints |
+| `shared/` | Common PanoLab project source resolver and future reusable RTL/components |
+| `third_party/` | Selected, versioned LiteX, Migen, LiteEth, LiteSPI, Picolibc and VexRiscv source snapshots with licenses and checksums |
+| `docker/` | Container images, modern toolchain, broker, Git gateway, manager and isolated vendor ISE sources |
+| `host/` | Rootless installation, lifecycle and guarded dev-image upgrade |
+| `tests/` | Cross-project regression tests and simulation fixtures |
+| `agent/` | Agent integration policy and capabilities |
+| `specs/` | Engineering and product standards |
+| `docs/` | Operations, architecture and verified evidence |
+
+**G2 Rescue source build** (inside the verified modern development environment with a checked-out source tree):
+
+```bash
+export PANOLAB_LAB_MAC=02:00:00:00:00:01  # single isolated lab only
+bash projects/rescue/test.sh
+bash projects/rescue/build.sh
+```
+
+Source-verifier enforcement selects the committed snapshots from the central registry. Outputs are generated outside the repository, by default under `/workspace/panolab-projects/rescue-g2b/`. The actual LiteX BIOS C source is versioned in `third_party/litex/afed6623/src/litex/soc/software/bios/`. The output `bios.bin` is not a committed source file and is not a hardware-ready image. See [Rescue artifacts](projects/rescue/ARTIFACTS.md) and [candidate migration acceptance](docs/SOURCE_MIGRATION_ACCEPTANCE.md).
 
 **Publish only working milestones:** experiment and verify inside the
 laptop's local containers, review changes, then make one coherent

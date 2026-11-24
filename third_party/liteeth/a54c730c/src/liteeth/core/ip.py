@@ -1,0 +1,377 @@
+#
+# This file is part of LiteEth.
+#
+# Copyright (c) 2015-2023 Florent Kermarrec <florent@enjoy-digital.fr>
+# SPDX-License-Identifier: BSD-2-Clause
+
+from litex.gen import *
+
+from liteeth.common import *
+from liteeth.crossbar import LiteEthCrossbar
+from liteeth.core.igmp import igmp_protocol
+
+from litex.soc.interconnect.packet import Depacketizer, Packetizer
+
+# IP Crossbar --------------------------------------------------------------------------------------
+
+class LiteEthIPV4MasterPort:
+    def __init__(self, dw):
+        self.dw     = dw
+        self.source = stream.Endpoint(eth_ipv4_user_description(dw))
+        self.sink   = stream.Endpoint(eth_ipv4_user_description(dw))
+
+
+class LiteEthIPV4SlavePort:
+    def __init__(self, dw):
+        self.dw     = dw
+        self.sink   = stream.Endpoint(eth_ipv4_user_description(dw))
+        self.source = stream.Endpoint(eth_ipv4_user_description(dw))
+
+
+class LiteEthIPV4UserPort(LiteEthIPV4SlavePort):
+    def __init__(self, dw):
+        LiteEthIPV4SlavePort.__init__(self, dw)
+
+
+class LiteEthIPV4Crossbar(LiteEthCrossbar):
+    def __init__(self, dw=8):
+        LiteEthCrossbar.__init__(self, LiteEthIPV4MasterPort, "protocol", dw)
+
+    def get_port(self, protocol, dw=8):
+        if protocol in self.users.keys():
+            raise ValueError("Protocol {0:#x} already assigned".format(protocol))
+        port = LiteEthIPV4UserPort(dw)
+        self.users[protocol] = port
+        return port
+
+# IP Checksum --------------------------------------------------------------------------------------
+
+@ResetInserter()
+@CEInserter()
+class LiteEthIPV4Checksum(LiteXModule):
+    def __init__(self, words_per_clock_cycle=1, skip_checksum=False, with_parallel=False):
+        self.header = Signal(ipv4_header.length*8)
+        self.value  = Signal(16)
+        self.done   = Signal()
+
+        # # #
+
+        if with_parallel:
+            # Wide packet paths can receive an entire IP header in one beat. Sum it with a
+            # balanced tree, then register the carry fold instead of waiting ten cycles.
+            words = [self.header[i*16:(i + 1)*16] for i in range(ipv4_header.length//2)
+                if not (skip_checksum and i == ipv4_header.fields["checksum"].byte//2)]
+            while len(words) > 1:
+                level = []
+                for i in range(0, len(words), 2):
+                    if i + 1 == len(words):
+                        level.append(words[i])
+                    else:
+                        value = Signal(max(len(words[i]), len(words[i + 1])) + 1)
+                        self.comb += value.eq(words[i] + words[i + 1])
+                        level.append(value)
+                words = level
+            total  = Signal.like(words[0], reset_less=True)
+            folded = Signal(17, reset_less=True)
+            result = Signal(16)
+            count  = Signal(max=3)
+            self.sync += If(~self.done,
+                total.eq(words[0]),
+                folded.eq(total[:16] + total[16:]),
+                count.eq(count + 1),
+            )
+            self.comb += [
+                result.eq(folded[:16] + folded[16]),
+                self.value.eq(~Cat(result[8:16], result[:8])),
+                self.done.eq(count == 2),
+            ]
+            return
+
+        s = Signal(17, reset_less=True)
+        r = Signal(17, reset_less=True)
+        n_cycles = 0
+        for i in range(ipv4_header.length//2):
+            if skip_checksum and (i == ipv4_header.fields["checksum"].byte//2):
+                pass
+            else:
+                s_next = Signal(17, reset_less=True)
+                r_next = Signal(17, reset_less=True)
+                self.comb += s_next.eq(r + self.header[i*16:(i+1)*16])
+                r_next_eq = r_next.eq(Cat(s_next[:16]+s_next[16], Signal()))
+                if (i%words_per_clock_cycle) != 0:
+                    self.comb += r_next_eq
+                else:
+                    self.sync += If(~self.done, r_next_eq)
+                    n_cycles += 1
+                s, r = s_next, r_next
+        self.comb += self.value.eq(~Cat(r[8:16], r[:8]))
+
+        if not skip_checksum:
+            n_cycles += 1
+        counter    = Signal(max=n_cycles+1)
+        counter_ce = Signal()
+        self.sync += If(counter_ce, counter.eq(counter + 1))
+        self.comb += counter_ce.eq(~self.done)
+        self.comb += self.done.eq(counter == n_cycles)
+
+# IP TX --------------------------------------------------------------------------------------------
+
+class LiteEthIPV4Packetizer(Packetizer):
+    def __init__(self, dw=8):
+        Packetizer.__init__(self,
+            eth_ipv4_description(dw),
+            eth_mac_description(dw),
+            ipv4_header
+        )
+
+
+class LiteEthIPTX(LiteXModule):
+    def __init__(self, mac_address, ip_address, arp_table, dw=8, with_buffer=True,
+        gateway_ip = None,
+        netmask    = None,
+    ):
+        ip_address = convert_ip(ip_address)
+        assert (gateway_ip is None) == (netmask is None)
+        if gateway_ip is not None:
+            gateway_ip = convert_ip(gateway_ip)
+            netmask    = convert_ip(netmask)
+
+        self.sink   = sink   = stream.Endpoint(eth_ipv4_user_description(dw))
+        self.source = source = stream.Endpoint(eth_mac_description(dw))
+        self.target_unreachable = Signal()
+
+        # # #
+
+        # Buffer.
+        if with_buffer:
+            self.buffer = buffer = stream.Buffer(eth_ipv4_user_description(dw))
+            self.comb += sink.connect(buffer.sink)
+            sink = buffer.source
+
+        # Checksum.
+        self.checksum = checksum = LiteEthIPV4Checksum(skip_checksum=True, with_parallel=dw > 64)
+        self.comb += checksum.ce.eq(sink.valid)
+
+        # Packetizer.
+        self.packetizer = packetizer = LiteEthIPV4Packetizer(dw)
+        # Dropped packets also complete the checksum transaction (for example after ARP failure).
+        self.comb += checksum.reset.eq(
+            packetizer.source.valid & packetizer.source.last & packetizer.source.ready)
+        self.comb += [
+            sink.connect(packetizer.sink, keep={
+                "last",
+                "be",
+                "protocol",
+                "data",
+            }),
+            packetizer.sink.valid.eq(sink.valid & checksum.done),
+            sink.ready.eq(packetizer.sink.ready & checksum.done),
+            packetizer.sink.target_ip.eq(sink.ip_address),
+            packetizer.sink.total_length.eq(ipv4_header.length + sink.length),
+            packetizer.sink.version.eq(0x4),     # ipv4
+            packetizer.sink.ihl.eq(ipv4_header.length//4),
+            packetizer.sink.identification.eq(0),
+            packetizer.sink.flags_offset.eq(0),  # No fragmentation (DF not set).
+            # TTL: 1 for IGMP (RFC 2236: reports are link-local), 128 otherwise.
+            packetizer.sink.ttl.eq(Mux(sink.protocol == igmp_protocol, 1, 0x80)),
+            packetizer.sink.sender_ip.eq(ip_address),
+            checksum.header.eq(packetizer.header),
+            packetizer.sink.checksum.eq(checksum.value)
+        ]
+
+        target_mac = Signal(48, reset_less=True)
+
+        # FSM.
+        self.fsm = fsm = FSM(reset_state="IDLE")
+        self.comb += [
+            packetizer.source.connect(source, omit={"valid", "ready", "ethernet_type", "target_mac", "sender_mac"}),
+            source.valid.eq(packetizer.source.valid & fsm.ongoing("SEND")),
+            packetizer.source.ready.eq(fsm.ongoing("DROP") | (fsm.ongoing("SEND") & source.ready)),
+            source.ethernet_type.eq(ethernet_type_ip),
+            source.target_mac.eq(target_mac),
+            source.sender_mac.eq(mac_address),
+        ]
+        # Resolve wide-path destinations while computing the checksum. SEND gates the
+        # packetizer's first transfer, keeping the input parameters stable during lookup.
+        start = sink.valid if dw > 64 else packetizer.source.valid
+        fsm.act("IDLE",
+            If(start,
+                # Broadcast.
+                If(sink.ip_address[0:8] == bcast_ip_mask,
+                    NextValue(target_mac, bcast_mac_address),
+                    NextState("SEND")
+                # Multicast.
+                ).Elif(sink.ip_address[28:] == mcast_ip_mask,
+                    NextValue(target_mac, Cat(sink.ip_address[:23], 0, mcast_oui)),
+                    NextState("SEND")
+                # Unicast.
+                ).Else(
+                    NextState("SEND_MAC_ADDRESS_REQUEST")
+                )
+            )
+        )
+        if gateway_ip is not None:
+            self.comb += If((sink.ip_address & netmask) == (ip_address & netmask),
+                arp_table.request.ip_address.eq(sink.ip_address)
+            ).Else(
+                arp_table.request.ip_address.eq(gateway_ip)
+            )
+        else:
+            self.comb += arp_table.request.ip_address.eq(sink.ip_address)
+        fsm.act("SEND_MAC_ADDRESS_REQUEST",
+            arp_table.request.valid.eq(1),
+            If(arp_table.request.valid & arp_table.request.ready,
+                NextState("WAIT_MAC_ADDRESS_RESPONSE")
+            )
+        )
+        fsm.act("WAIT_MAC_ADDRESS_RESPONSE",
+            If(arp_table.response.valid,
+                NextValue(target_mac, arp_table.response.mac_address),
+                arp_table.response.ready.eq(1),
+                If(arp_table.response.failed,
+                    self.target_unreachable.eq(1),
+                    NextState("DROP"),
+                ).Else(
+                    NextState("SEND")
+                )
+            )
+        )
+        fsm.act("SEND",
+            If(source.valid & source.last & source.ready,
+                NextState("IDLE")
+            )
+        )
+        fsm.act("DROP",
+            If(packetizer.source.valid &
+               packetizer.source.last &
+               packetizer.source.ready,
+                NextState("IDLE")
+            )
+        )
+
+# IP RX --------------------------------------------------------------------------------------------
+
+class LiteEthIPV4Depacketizer(Depacketizer):
+    def __init__(self, dw=8):
+        Depacketizer.__init__(self,
+            eth_mac_description(dw),
+            eth_ipv4_description(dw),
+            ipv4_header
+        )
+
+
+class LiteEthIPRX(LiteXModule):
+    """Receive nonempty IPv4 payloads without options or fragment reassembly.
+
+    ``with_broadcast=False`` accepts only the configured destination IP. For compatibility, the
+    default ``True`` bypasses destination-IP filtering entirely, including multicast and DHCP
+    replies addressed to an offered IP. It is not a broadcast-only address filter.
+    """
+    def __init__(self, mac_address, ip_address, with_broadcast=True, dw=8):
+        self.sink   = sink   = stream.Endpoint(eth_mac_description(dw))
+        self.source = source = stream.Endpoint(eth_ipv4_user_description(dw))
+
+        # # #
+
+        # Depacketizer.
+        self.depacketizer = depacketizer = LiteEthIPV4Depacketizer(dw)
+        self.comb += sink.connect(depacketizer.sink)
+
+        # Checksum.
+        self.checksum = checksum = LiteEthIPV4Checksum(skip_checksum=False, with_parallel=dw > 64)
+        self.comb += [
+            checksum.header.eq(depacketizer.header),
+            checksum.reset.eq(~depacketizer.source.valid),
+            checksum.ce.eq(1)
+        ]
+
+        # FSM.
+        self.fsm = fsm = FSM(reset_state="IDLE")
+        accepted  = Signal()
+        receiving = Signal()
+        self.comb += accepted.eq(
+            ((depacketizer.source.target_ip == ip_address) | with_broadcast) &
+            (depacketizer.source.version == 0x4) &
+            (depacketizer.source.ihl == 0x5) &
+            # Reject empty payloads and fragments before forwarding any data.
+            (depacketizer.source.total_length > ipv4_header_length) &
+            ((depacketizer.source.flags_offset & ipv4_mf_offset_mask) == 0) &
+            (checksum.value == 0))
+        if dw > 64:
+            self.comb += receiving.eq(fsm.ongoing("RECEIVE") |
+                (fsm.ongoing("IDLE") & checksum.done & accepted))
+            fsm.act("IDLE",
+                If(depacketizer.source.valid & checksum.done & ~accepted, NextState("DROP")),
+                If(source.valid & source.ready & ~source.last, NextState("RECEIVE")),
+            )
+        else:
+            self.comb += receiving.eq(fsm.ongoing("RECEIVE"))
+            fsm.act("IDLE",
+                If(depacketizer.source.valid & checksum.done,
+                    NextState("DROP"),
+                    If(accepted, NextState("RECEIVE")),
+                ),
+            )
+        self.comb += [
+            source.valid.eq(depacketizer.source.valid & receiving),
+            depacketizer.source.ready.eq(fsm.ongoing("DROP") | (receiving & source.ready)),
+        ]
+        self.comb += [
+            depacketizer.source.connect(source, keep={
+                "last",
+                "protocol",
+                "data",
+                "error",
+                "be"}),
+            source.length.eq(depacketizer.source.total_length - ipv4_header_length),
+            source.ip_address.eq(depacketizer.source.sender_ip),
+        ]
+        fsm.act("RECEIVE",
+            If(source.valid & source.ready,
+                If(source.last,
+                    NextState("IDLE")
+                )
+            )
+        )
+        fsm.act("DROP",
+            If(depacketizer.source.valid &
+               depacketizer.source.last &
+               depacketizer.source.ready,
+                NextState("IDLE")
+            )
+        )
+
+# IP -----------------------------------------------------------------------------------------------
+
+class LiteEthIP(LiteXModule):
+    def __init__(self, mac, mac_address, ip_address, arp_table, with_broadcast=True, dw=8,
+        gateway_ip = None,
+        netmask    = None,
+    ):
+        self.tx = tx = LiteEthIPTX(
+            mac_address = mac_address,
+            ip_address  = ip_address,
+            arp_table   = arp_table,
+            dw          = dw,
+            gateway_ip  = gateway_ip,
+            netmask     = netmask,
+        )
+        self.rx = rx = LiteEthIPRX(mac_address, ip_address, with_broadcast, dw=dw)
+        mac_port = mac.crossbar.get_port(ethernet_type_ip, dw)
+        self.comb += [
+            tx.source.connect(mac_port.sink),
+            mac_port.source.connect(rx.sink)
+        ]
+        # RX Buffer: registers valid/data and ready between IP RX and the upper layers to break the
+        # long combinational paths through the stack (ex: ready path from MAC TX to MAC RX through
+        # Etherbone) when the core runs in the sys clock domain.
+        self.rx_buffer = rx_buffer = stream.Buffer(eth_ipv4_user_description(dw),
+            pipe_valid = True,
+            pipe_ready = True,
+        )
+        self.crossbar = crossbar = LiteEthIPV4Crossbar(dw)
+        self.comb += [
+            crossbar.master.source.connect(tx.sink),
+            rx.source.connect(rx_buffer.sink),
+            rx_buffer.source.connect(crossbar.master.sink),
+        ]

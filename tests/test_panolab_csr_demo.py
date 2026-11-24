@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-RTL = ROOT / "gateware/panolab_csr_demo.v"
+RTL = ROOT / "tests/fixtures/panolab_csr_demo.v"
 TB = ROOT / "tests/fixtures/panolab_csr_demo_tb.v"
 
 

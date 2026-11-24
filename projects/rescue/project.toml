@@ -1,0 +1,49 @@
+# The project manifest selects sources; the central registry selects exact paths.
+schema = "panolab-project-v1"
+name = "rescue"
+version = "0.1.0-source-prototype"
+description = "PanoLab Rescue G2 Rev B source-level LiteX BIOS/SoC demonstration"
+license_policy = "GPL-3.0-or-later for PanoLab-owned code; upstream licenses are preserved"
+board = "pano_g2_rev_b"
+fpga = "xc6slx150-2-fgg484"
+toolchain = "modern-source-build"
+vendor_implementation = "ISE 14.7; not yet qualified"
+build_entry = "projects/rescue/build.sh"
+test_entry = "projects/rescue/test.sh"
+artifacts = ["software/bios/bios.bin", "software/bios/bios.elf", "gateware/pano_logic_g2.v", "gateware/pano_logic_g2.ucf", "csr.json"]
+
+[[dependencies]]
+name = "litex"
+revision = "afed6623"
+
+[[dependencies]]
+name = "litex-boards"
+revision = "2ccda127"
+
+[[dependencies]]
+name = "liteeth"
+revision = "a54c730c"
+
+[[dependencies]]
+name = "litespi"
+revision = "a5a0090a"
+
+[[dependencies]]
+name = "migen"
+revision = "e19524c9"
+
+[[dependencies]]
+name = "picolibc"
+revision = "16ff442d"
+
+[[dependencies]]
+name = "pythondata-software-picolibc"
+revision = "6a13ccce"
+
+[[dependencies]]
+name = "pythondata-cpu-vexriscv"
+revision = "1.0.1.post407"
+
+[[dependencies]]
+name = "pythondata-software-compiler-rt"
+revision = "0.0.post6206"

@@ -1,6 +1,6 @@
 # PanoLab Source and Project Architecture Standard
 
-**Status:** Selected engineering design baseline; repository migration and licensing implementation are not yet complete  
+**Status:** Adopted source/project authority; candidate source migration tested, live service cutover remains unverified
 **Date:** 2026-11-23  
 **Scope:** PanoLab Direct repository organization, source ownership, third-party integration, build provenance, project packaging, and licensing  
 **Implementation boundary:** This document records decisions; it does not itself authorize moving source, rewriting builds, installing tools, flashing hardware, or promoting `main`.
@@ -11,7 +11,7 @@ PanoLab Direct is the **engineering platform**: rootless containers, developer a
 
 This standard is the **source-and-project organization authority** for subsequent PanoLab engineering. Follow it when designing new source trees, importing dependencies, creating projects, changing shared code, or planning the migration. The root [AGENTS.md](../AGENTS.md) directs engineering agents here.
 
-It is a **target architecture**, not a description of folders that already exist. The current deployed layout and tested operational boundaries remain documented in [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md). Rescue's on-device boot, update, security, and image-manifest requirements remain governed by [PANOLAB_RESCUE_V1.md](PANOLAB_RESCUE_V1.md). If implementation work exposes a conflict, record it and obtain review; do not silently redefine this standard or change the working system.
+It is a **target architecture**, originally a target rather than a description of folders that already exist. The current deployed layout and tested operational boundaries remain documented in [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md). Rescue's on-device boot, update, security, and image-manifest requirements remain governed by [PANOLAB_RESCUE_V1.md](PANOLAB_RESCUE_V1.md). If implementation work exposes a conflict, record it and obtain review; do not silently redefine this standard or change the working system.
 
 Goals:
 
@@ -73,7 +73,9 @@ panolab-direct/
   LICENSES/                  # Relevant complete third-party license texts (planned)
 ```
 
-This is an **illustrative target tree**, not permission to create all these folders now. Names selected for the target architecture: **`projects/` rather than `products/`**, since each item is an engineering implementation and may or may not become a commercial product. `products/` is not a second source root. A release or manufactured product is built *from* a project.
+This tree is the approved source-ownership model. The migration
+candidate now contains the implementation paths, but live host mount and
+Docker-service acceptance remains a separate gate. Names selected for the target architecture: **`projects/` rather than `products/`**, since each item is an engineering implementation and may or may not become a commercial product. `products/` is not a second source root. A release or manufactured product is built *from* a project.
 
 Do not create another general development environment per board, tool, or project. One modern pinned development image remains the default. Legacy licensed Xilinx ISE 14.7 remains an isolated vendor worker. Board adaptations belong in BSPs, not duplicate Docker toolchains.
 
@@ -128,7 +130,9 @@ A standalone distributable source package must include the project's redistribut
 
 ## 8. Licensing and attribution
 
-**Selected direction:** **GNU GPL-3.0-or-later** for original PanoLab framework code, including PanoLab-authored Python/Migen/LiteX generators, firmware, and HDL/RTL where PanoLab has the rights and license compatibility permits. This is a selected policy, **not a claim that a `LICENSE` file or a completed licensing audit has already been published**.
+**Selected direction:** **GNU GPL-3.0-or-later** for original PanoLab framework code, including PanoLab-authored Python/Migen/LiteX generators, firmware, and HDL/RTL where PanoLab has the rights and license compatibility permits. The migration candidate includes a top-level `LICENSE` and keeps third-party
+license files with each imported snapshot. **This is not a claim of a completed
+redistribution or generated-hardware licensing audit**.
 
 - Every upstream component retains its **own** copyright, license terms, required notices, and documented origin. A top-level PanoLab license does not relicense third-party files. Record per-file exceptions, not just repository-root license guesses.
 - Use clear SPDX file identifiers/copyright records and retained original license texts and notices; include compliant third-party notices in releases.
@@ -139,7 +143,9 @@ A standalone distributable source package must include the project's redistribut
 - A future signed commercial consumer appliance must account for GPLv3 installation-information requirements when applicable. Device authentication and secure update design must not silently conflict with the covered software's license.
 - AI-assisted contributions require the same authorship/provenance and third-party rights scrutiny as other contributions; do not invent copyright ownership or assume generated output is free of inherited licensing.
 
-Actual license placement, attribution inventory and compatibility review require a **separate, specifically approved documentation/licensing change**. Do not silently modify source headers or relicense upstream files as part of a repository-layout migration.
+The repository-migration approval encompasses initial license placement and
+source attribution; a further file-level compatibility and generated-hardware
+redistribution audit remains necessary before commercial appliance releases. Do not silently modify source headers or relicense upstream files as part of a repository-layout migration.
 
 ## 9. Development, migration and change control
 

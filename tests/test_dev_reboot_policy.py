@@ -35,12 +35,17 @@ r() {
           [[ "$CASE" == bad_workspace ]] && echo /unexpected/ws || echo /test/ws;;
         *'/codex-auth'*)
           [[ "$CASE" == bad_auth ]] && echo /unexpected/auth || echo /test/auth;;
-        *'/repo/gateware'*)
-          [[ "$CASE" == bad_source ]] && echo /unexpected/repo || echo /test/repo/gateware;;
+        *'/repo/projects'*)
+          [[ "$CASE" == bad_source ]] && echo /unexpected/repo || echo /test/repo/projects;;
         *'RestartPolicy.Name'*)
           [[ "$CASE" == existing_correct ]] && echo unless-stopped || echo no;;
+        *'.Image'*)
+          echo sha256:example-id;;
         *) echo "mock inspect unsupported: $*" >&2; return 4;;
       esac;;
+    image)
+      [[ "$2" == inspect ]] && { echo sha256:example-id; return 0; }
+      echo "unrecognized image call: $*" >&2; return 4;;
     run|update)
       printf '%s\n' "$*" >> "$log";;
     start)
@@ -57,7 +62,7 @@ class RestartPolicyContract(unittest.TestCase):
     def setUpClass(cls):
         source = INSTALLER.read_text()
         beginning = 'if ! new_exists "$dev"; then'
-        ending = 'r exec "$dev" /bin/sh -ec'
+        ending = 'current_modern_image='
         cls.snippet = source.split(beginning, 1)[1].split(ending, 1)[0]
         assert cls.snippet and ending in source
         cls.snippet = beginning + cls.snippet
