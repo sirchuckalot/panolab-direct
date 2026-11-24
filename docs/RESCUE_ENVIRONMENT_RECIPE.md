@@ -1,6 +1,6 @@
 # PanoLab Rescue — Rootless LiteX Development Environment Recipe
 
-**Record:** PLR-ENV-001 | **Date:** 2026-11-23 (US Pacific) | **Status:** Versioned Docker recipe; fresh isolated bootstrap + G2 BIOS source build validated; rebuilt full Docker image not yet accepted. The [unified development image and controlled migration](UNIFIED_DEV_IMAGE_UPGRADE.md) supersedes the original image-refresh note and provides the explicit owner-laptop upgrade command.
+**Record:** PLR-ENV-001 | **Date:** 2026-11-23 (US Pacific) | **Status:** Versioned Docker recipe; fresh isolated bootstrap + G2 BIOS source build validated; rebuilt full Docker image **laptop-verified** (2026-11-24 UTC); see [acceptance evidence](UNIFIED_DEV_IMAGE_ACCEPTANCE.md). The [unified development image and controlled migration](UNIFIED_DEV_IMAGE_UPGRADE.md) supersedes the original image-refresh note and provides the explicit owner-laptop upgrade command.
 
 **Source of truth:** [modern Dockerfile](../docker/modern/Dockerfile), [bootstrap utility](../docker/modern/litex-bootstrap.py), [upstream lock](../docker/modern/litex-upstream.lock.json), [Python package pins](../docker/modern/litex-requirements.txt), [rootless installer](../host/rootless-install.sh). The identical [G2 reference lock](../boards/pano_g2_rev_b/upstream.lock.json) is checked by [offline unit tests](../tests/test_litex_recipe.py).
 
@@ -72,7 +72,7 @@ In the existing rootless development container, from a fresh source and virtuale
 - The existing nine G2 source/simulation tests passed, and Icarus parsed the generated Verilog using black boxes for Xilinx and VexRiscv primitives.
 - The upstream generic LiteX live Verilator BIOS/SPI simulation had already reached the `litex>` prompt. The restricted rootless network simulator is **not** claimed to run over Ethernet.
 
-**Not yet verified:** an actual rebuilt Docker image using this committed Dockerfile on the laptop's rootless Docker engine; a clean GitHub runner build; Spartan-6 ISE placement/routing/bitstream; physical Pano G2 boot, PHY, button/recovery, or Ethernet A/B updater. A valid source/BIOS build must not be represented as proven FPGA hardware.
+**Laptop Docker image rebuilt and verified:** `panolab-direct-modern:local` was accepted on the rootless laptop with 23 tests and a simulated LiteX BIOS prompt; see [PLR-ENV-003](UNIFIED_DEV_IMAGE_ACCEPTANCE.md). **Not yet verified:** clean GitHub runner build; Spartan-6 ISE placement/routing/bitstream; physical Pano G2 boot, PHY, button/recovery, or Ethernet A/B updater. A valid source/BIOS build must not be represented as proven FPGA hardware.
 
 ## Drift prevention and qualification
 

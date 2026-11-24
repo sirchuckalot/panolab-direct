@@ -34,8 +34,9 @@ into seven functional sections. Board-specific hardware adaptation
 belongs in BSPs, not new per-tool Docker images. The legacy/licensed
 ISE 14.7 stack remains isolated in its separate vendor environment.
 The new LiteX recipe and [guarded developer-image refresh](UNIFIED_DEV_IMAGE_UPGRADE.md)
-are published; the currently running laptop container still needs its
-explicit owner-executed migration. A stopped rollback container is
+were **accepted on the actual laptop** following a rootless image rebuild,
+23 passing tests, an unchanged six-service system and live generic
+LiteX BIOS simulation. See the [acceptance evidence](UNIFIED_DEV_IMAGE_ACCEPTANCE.md). A stopped rollback container is
 retained temporarily during acceptance, not promoted to another service.
 
 The deployment merges `docker/compose.setup.yaml`,

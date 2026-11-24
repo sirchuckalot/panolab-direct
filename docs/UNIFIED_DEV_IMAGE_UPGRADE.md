@@ -1,6 +1,6 @@
 # Unified PanoLab Development Image — Build and Controlled Upgrade
 
-**Record:** PLR-ENV-002 | **Date:** 2026-11-23 | **Status:** GitHub-ready, offline source/unit validation passed. **Actual owner-laptop Docker image build and swap remain to be run by the owner.**
+**Record:** PLR-ENV-002 | **Date:** 2026-11-23 | **Status:** **LAPTOP_VERIFIED** on 2026-11-24 UTC. The full owner-run rootless image build, same-container-name migration, 23 tests and independent live BIOS simulation passed. See [acceptance evidence](UNIFIED_DEV_IMAGE_ACCEPTANCE.md).
 
 ## System architecture (accepted decision)
 
@@ -11,9 +11,9 @@ The `docker/modern/Dockerfile` now has seven clearly documented functional secti
 ## Current installation states
 
 - **GitHub `development`:** unified modern image definition; installer and tests are committed.
-- **Existing running laptop container:** uses the previously built modern image and was deliberately not destroyed or silently modified.
-- **Existing workspace-local LiteX install:** remains under the already mounted persistent `/workspace`; it was used for the original source/BIOS/simulation proofs.
-- **New image recipe:** the same `panolab-direct-modern:local` Docker image will be rebuilt at a new internal image ID with the pinned LiteX stack. This is a version of the **same** development image, not a new product/service.
+- **Current laptop development container:** runs the *rebuilt unified image* under the original `panolab-direct-dev-1` name; the former container is preserved stopped for rollback.
+- **Persistent workspace:** retains the previous local LiteX experiments and the accepted new BIOS/HDL artifacts.
+- **Modern image:** `panolab-direct-modern:local` was rebuilt and qualified at image ID `sha256:c5799cd625d42ff4bd8158767a0917a5cda18082e2dc1976869400c93b5b1479`. This is a new revision of the **same** existing development image, not an added image role or service.
 
 Container image layers and a stopped rollback container may temporarily coexist during acceptance. These are safety artifacts, not separately maintained developer tool environments.
 
@@ -36,7 +36,7 @@ An ordinary `bash ./panolab-install.sh` remains available for established full-s
 
 **Completed in the existing rootless container before publication:** the current pinned LiteX installation created a 39,156-byte BIOS binary, G2 Rev B HDL and UCF, nine G2 SoC unit/simulation tests, HDL syntax check and an upstream generic LiteX BIOS Verilator session. The versioned dependency recipe passed clean workspace installation and eight offline recipe tests. The unified layout and guarded upgrade added four offline contract tests and three disposable-Git history cases (equal tree/backup/advance, dirty checkout refusal, mismatched-tree refusal). Shell scripts pass `bash -n`.
 
-**Not yet completed:** the new whole Docker image has **not** been rebuilt through the owner's actual rootless Docker daemon, and the service migration/rollback path has not been exercised against live host Docker. That is why the final operator command is necessary and why its result will be inspected before declaring this an accepted environment milestone. FPGA hardware, ISE BitGen, Ethernet TAP and all G2 A/B/ICAP features remain separately pending.
+**Laptop acceptance completed:** the owner-built whole modern Docker image and its dev-only migration passed. Independent MCP verification confirmed 23 tests, exact package/source pins, generated BIOS/HDL artifacts, all six services and generic simulated BIOS console. See [PLR-ENV-003](UNIFIED_DEV_IMAGE_ACCEPTANCE.md). Rollback to the old container was *not exercised*, though the stopped previous container is retained. FPGA hardware, ISE BitGen, Ethernet TAP and all G2 A/B/ICAP features remain separately pending.
 
 ### What the operator should return
 

@@ -25,10 +25,11 @@ owner approval for physical writes through the laptop MCP agent.
   clean project reinstall, authenticated MCP and post-reboot service
   recovery passed on that **already provisioned** laptop.
 - The unified modern image recipe pins LiteX, LiteEth, LiteSPI, Migen,
-  VexRiscv, RISC-V C tools and BIOS; source-level G2 BIOS compilation and
-  simulation passed. The **new complete rootless Docker image rebuild**,
-  licensed ISE implementation, physical FPGA operation and fresh host
-  provisioning remain **PENDING**. A
+  VexRiscv, RISC-V C tools and BIOS. The unified rootless Docker image
+  **was rebuilt and laptop-verified** with 23 tests and a live generic LiteX
+  BIOS session ([PLR-ENV-003](docs/UNIFIED_DEV_IMAGE_ACCEPTANCE.md)).
+  Licensed ISE implementation, physical FPGA and fresh host provisioning
+  remain **PENDING**. A
   laptop reboot test passed only after setting the standalone dev
   container restart policy; source tests or CI alone cannot prove it.
 - Target Pano Logic **G2 Rev B**, XC6SLX150-2-FGG484. Planned
