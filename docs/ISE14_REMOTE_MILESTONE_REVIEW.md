@@ -165,3 +165,21 @@ or physical FPGA programming.
 5. Continue G2-specific BSP/constraints integration, simulation and
    genuine vendor implementation. Do not program a board without
    independent owner authorization and recovery qualification.
+
+
+## Follow-up acceptance: on-demand ISE setup (2026-11-24)
+
+The preceding eight-container inventory is a **historical checkpoint**,
+not the current service count. The subsequent
+[on-demand setup stress test](ISE14_SETUP_ONDEMAND_STRESS.md) proved an
+existing setup container can remain stopped while the licensed ISE
+worker completes a fresh six-stage build; ordinary authenticated
+PanoLab operations passed 20 concurrent setup-status requests and
+three complete stop/start cycles. The setup container now has restart
+policy `no`, is protected by the opt-in `ise-setup` Compose profile,
+and the manager/tunnel no longer depend on it for normal startup.
+**Seven containers remain active**, of which one is the temporary
+trusted-maintenance sidecar. The proposed permanent six-service
+topology remains unqualified until that sidecar is retired under a
+tested restricted updater, and full reboot/fresh-host setup creation
+are separately proven.

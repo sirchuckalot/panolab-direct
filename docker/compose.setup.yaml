@@ -3,6 +3,10 @@
 # both files and the rootless overlay are required by the installer.
 services:
   setup:
+    # Commissioning / repair only. A pre-provisioned stopped service can
+    # be started through the normal PanoLab lab_lifecycle API.
+    # The manager, tunnel and licensed worker must never require it online.
+    profiles: ["ise-setup"]
     build: {context: ./ise14, target: setup-runtime}
     image: panolab-direct-ise14-setup:local
     platform: linux/amd64
@@ -20,7 +24,7 @@ services:
     tmpfs: ["/tmp:rw,nosuid,nodev,size=32m"]
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
-    restart: unless-stopped
+    restart: "no"
   tunnel:
     image: ghcr.io/openai/tunnel-client:v0.0.21
     entrypoint: ["/usr/bin/tunnel-client", "run"]
@@ -41,6 +45,5 @@ services:
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     restart: unless-stopped
-    depends_on: {setup: {condition: service_started}}
 networks:
   lab-backend: {}

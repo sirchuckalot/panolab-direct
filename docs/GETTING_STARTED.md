@@ -81,16 +81,21 @@ confirmation that remote `lab_status` and `repo_status` work.
 ## 4. Operate and inspect
 
 The original LM1 deployment ran `tunnel`, `manager`,
-`docker-broker`, `repo-git`, `setup` and `dev`.
-As of 2026-11-24 the approved owner laptop also runs the persistent
-`panolab-direct-ise14-worker-1` and the **temporary**
-`panolab-direct-trusted-maintenance` sidecar (**eight active development-phase containers**, not a permanent
-eight-service target; stopped backups preserved). The proposed final
-six-service operating set is tunnel, manager, broker, repo-git, dev and
-ISE worker, with installer setup started only for commissioning/repairs.
-This reduction has **not been deployed or reboot-accepted** because the
-manager still depends on setup in the existing Compose files. Inspect with authenticated PanoLab
-MCP `lab_status` / `repo_status` or the read-only `--status` command.
+`docker-broker`, `repo-git`, `setup` and `dev`. The ISE bring-up
+temporarily ran eight containers. The subsequent
+[on-demand setup acceptance](ISE14_SETUP_ONDEMAND_STRESS.md) removed
+the manager/tunnel startup dependencies on setup and placed it behind
+the opt-in `ise-setup` profile. Setup is now **stopped**, with
+`restart: no`. The active configuration has **seven running
+containers**: tunnel, manager, broker, repo-git, modern dev, licensed
+ISE worker, and the explicitly temporary trusted-maintenance sidecar.
+The proposed six-service steady state removes that last temporary
+sidecar; it has **not** been reboot-accepted. The setup container must
+already exist for normal `lab_lifecycle start`; creation from absence
+and fresh-host installation are still separate work.
+
+Inspect with authenticated PanoLab MCP `lab_status` / `repo_status`
+or the read-only `--status` command.
 The ordinary installer is **not yet** a clean-room reproducer of this
 expanded configuration; see [the ISE milestone review](ISE14_REMOTE_MILESTONE_REVIEW.md). The user Docker socket is
 `/run/user/$(id -u)/docker.sock`; never manage PanoLab through

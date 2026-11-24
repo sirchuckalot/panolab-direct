@@ -6,6 +6,7 @@ The MCP manager communicates through private RPC, not via direct Docker access.
 import json, os, socket, subprocess, threading, importlib
 import ise_proxy
 import ise_staging
+import ise_setup
 S="/rpc/panolab.sock"
 W=os.environ["PANOLAB_WORKSPACE_HOST"]
 REPO=os.environ["PANOLAB_REPO_HOST"]
@@ -149,6 +150,18 @@ def dispatch(r):
         return command(["docker",op,name],90)
     if a=="logs":
         return command(["docker","logs","--tail","100",checked(r.get("container"))],30)
+    if a=="ise_setup":
+        # Setup is on-demand and not part of routine vendor compilation.
+        # This path uses the ordinary manager's authenticated setup proxy;
+        # no temporary maintenance service, installer action or Docker shell.
+        return ise_setup.call_setup(r,command)
+    if a=="exec" and isinstance(r.get("argv"),list) and r["argv"][:1]==["@setup"]:
+        argv=r["argv"]
+        if len(argv)!=2:
+            raise ValueError("invalid setup inspection request")
+        if TRUSTED_MAINTENANCE:
+            importlib.reload(ise_setup)
+        return ise_setup.call_setup({"operation":argv[1]},command)
     if a=="ise_rpc":
         # Remote iteration: import the currently mounted Python modules for
         # each authenticated call. Broker core policy remains startup-loaded.

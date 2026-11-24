@@ -21,6 +21,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [ISE 14.7 licensed implementation evidence](docs/ISE14_REMOTE_BRINGUP_EVIDENCE.md) | Two successful real six-stage Spartan-6 builds, hashes and node-locked network repair |
 | [Remote iteration architecture](docs/REMOTE_ITERATION_ARCHITECTURE.md) | Live source staging, temporary trusted maintenance, recovery boundaries and retirement plan |
 | [ISE remote milestone review](docs/ISE14_REMOTE_MILESTONE_REVIEW.md) | Permanent-versus-temporary file inventory, checkpointed images and acceptance gaps |
+| [ISE setup on-demand stress test](docs/ISE14_SETUP_ONDEMAND_STRESS.md) | Real stop/start, media and installer guards, licensed build with setup offline, and outstanding provisioning tests |
 | [Agent instructions](AGENTS.md) | Rules for automated engineering sessions |
 | [LM1 first working lab milestone](specs/LAB_MILESTONE_1.md) | Software acceptance evidence, design lessons and LM2 demonstration |
 | [PanoLab Rescue v1 standard](specs/PANOLAB_RESCUE_V1.md) | Cross-platform boot, A/B update, identity, BSP, trust profiles and qualification contract |
@@ -67,18 +68,21 @@ Spartan-6 bitstreams with SHA-256 records. The existing node-locked license
 works using a Docker-**internal** network with the licensed virtual Ethernet
 identity; the license and laptop network interfaces were not modified.
 The authenticated remote ISE interface and temporary trusted maintenance
-capability are operational. **Eight containers are currently running as a
-temporary engineering configuration**, not the decided permanent count.
-The proposed **six-service steady state** retains tunnel, manager, broker,
-repo-git, modern development and licensed ISE worker; it would retire the
-temporary maintenance sidecar and make ISE setup an on-demand service.
-This six-service revision has **not** yet been deployed or tested.
-Prior worker rollback containers are retained stopped. See
+capability are operational. On-demand setup operation was **accepted for
+the existing, already-provisioned setup container**: three complete
+stop/start cycles, 20 concurrent status requests, a full media inspection,
+invalid-install rejection, and a real licensed six-stage bitstream build
+while setup was stopped. The setup service is now stopped with `restart: no`;
+its Compose profile is optional, and manager/tunnel startup dependencies
+on setup have been removed. **Seven containers are currently active**:
+the proposed six steady-state services plus the *temporary* trusted-
+maintenance sidecar. Full six-service reboot and fresh-host provisioning
+are still unverified. Prior worker rollback containers remain stopped. See
 [licensed implementation evidence](docs/ISE14_REMOTE_BRINGUP_EVIDENCE.md)
 and [remote iteration decisions](docs/REMOTE_ITERATION_ARCHITECTURE.md).
 
 **Still unverified:** a completely unprovisioned host installation,
-reboot recovery of the expanded eight-container system, a Pano G2 Rev B
+reboot recovery of the revised on-demand system, a Pano G2 Rev B
 **board-constrained** bitstream, actual G2 boot, physical Etherbone traffic,
 and programming/flash. No physical FPGA programming was performed.
 The historical [LM1 milestone](specs/LAB_MILESTONE_1.md) remains the accepted

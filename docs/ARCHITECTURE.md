@@ -28,16 +28,18 @@ development (Ubuntu 24.04): ONE modern tools image; Codex, Python,
    Yosys, Icarus, Verilator, LiteX/BIOS, LiteEth/SPI, Migen, RISC-V
 ```
 
-The prior LM1 baseline was **six running containers**. On 2026-11-24,
-the expanded engineering system was observed with **eight active application
-containers**, including the persistent licensed ISE worker and temporary
-trusted-maintenance sidecar. **Eight is not the chosen final appliance
-topology.** The proposed steady-state design has **six active services**:
-tunnel, manager, docker-broker, repo-git, modern dev and licensed ISE worker.
-It would remove the temporary maintenance sidecar and make ISE setup an
-on-demand commissioning/repair service. The current Compose manager has
-a startup dependency on setup, so the six-service design remains untested
-until that dependency and the relevant setup operations are migrated safely. The development container
+The prior LM1 baseline was **six running containers**. The 2026-11-24
+ISE bring-up initially expanded this to **eight active engineering
+containers** (including setup and temporary trusted maintenance).
+A subsequent [on-demand setup stress test](ISE14_SETUP_ONDEMAND_STRESS.md)
+proved that setup can stay offline while normal development and licensed
+ISE compilation continue. Setup is now stopped with `restart: no`;
+Compose gives it an opt-in `ise-setup` profile, and manager/tunnel
+no longer have setup startup dependencies. **Seven containers are now
+active:** the proposed six steady-state services plus temporary maintenance.
+The final **six-service** topology (tunnel, manager, docker-broker, repo-git,
+modern dev and ISE worker) is a target, not a reboot-accepted deployment.
+The missing-from-scratch setup provisioning path also remains unqualified. The development container
 continues to use approved source mounts and a private Codex volume with
 **2 CPUs, 4 GiB memory, 256 PIDs**. The normal manager and developer
 container have no Docker socket; the broker and, **temporarily**, the

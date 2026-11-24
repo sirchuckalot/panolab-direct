@@ -8,23 +8,28 @@ Spartan-6 bitstream build have passed on the rootless laptop. See
 The permanent self-upgrade controller and board-specific hardware acceptance
 are still outstanding. No FPGA programming was performed.
 
-## Runtime service count: temporary eight, proposed steady six
+## Runtime service count: tested on-demand setup, proposed steady six
 
-The first accepted, pre-ISE laboratory ran six containers. The currently
-working engineering configuration has eight active containers because it
-retains the always-running `setup` installer service and adds both the
-licensed ISE worker and temporary trusted-maintenance sidecar.
+The first accepted, pre-ISE laboratory ran six containers; early ISE
+development used eight, including an always-running `setup` and temporary
+`trusted-maintenance`. The later
+[on-demand setup stress test](ISE14_SETUP_ONDEMAND_STRESS.md) demonstrated
+three normal-MCP stop/start cycles, 20 concurrent status probes, a full
+vendor-media inspection, and a genuine six-stage licensed implementation
+while `setup` was stopped. The installer now has an opt-in
+`ise-setup` Compose profile and `restart: no`. Manager/tunnel setup
+startup dependencies have been removed. The active engineering
+configuration is now **seven** containers: six regular laboratory roles
+plus the separate temporary maintenance sidecar.
 
-The **proposed six-service steady-state topology** is:
+The **proposed six-service steady-state topology** remains
 `tunnel`, `manager`, `docker-broker`, `repo-git`,
-`dev`, and the persistent licensed `ise-worker`.
-That proposal moves `setup` into a separately activated commissioning,
-installer-repair or upgrade profile, and removes `trusted-maintenance`
-after a bounded remote update/recovery mechanism is accepted. The exact
-number is a target, **not a tested topology**. Current Compose manager
-startup explicitly depends on `setup`; that dependency and any necessary
-setup RPC/lifecycle calls must be reworked before six can be claimed as
-operational. No service is stopped by merely documenting this target.
+`dev` and persistent licensed `ise-worker`. It requires retiring
+`trusted-maintenance` after a bounded remote update/recovery mechanism
+has been independently accepted. Full reboot recovery, first-time setup
+provisioning if no setup container exists, and clean installation from
+an unprovisioned host remain distinct acceptance gates. The target
+six-service topology is **not yet reboot-qualified**.
 
 ## Temporary owner-trusted remote maintenance bootstrap
 

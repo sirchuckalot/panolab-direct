@@ -117,8 +117,6 @@ services:
         condition: service_started
       repo-git:
         condition: service_started
-      setup:
-        condition: service_started
   tunnel:
     command:
       - "--control-plane.api-key=file:/run/secrets/tunnel-api-key"
