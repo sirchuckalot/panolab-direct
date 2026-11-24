@@ -129,6 +129,42 @@ Docker-internal node-locked ISE network, and trusted maintenance bridge
 test does not prove unattended headless startup before login or a
 fresh-host installation.
 
+### Disposable unattended ISE 14.7 acceptance
+
+The **normal authenticated PanoLab interface**, not `@maintenance`,
+owns the disposable acceptance test. The owner-approved
+[ISE 14.7 acceptance policy](../docker/ise14/acceptance-policy.json)
+pins the approved System Edition vendor archive by SHA-256 and
+records the limited authorization to accept its known batch-installer
+terms without an interactive prompt. New media or changed terms
+require separate review.
+
+The remote PanoLab connector's `dev_exec` supports these **fixed,
+broker-intercepted argument arrays**, not general shell commands:
+
+```text
+["@ise-e2e", "preflight"]
+["@ise-e2e", "start"]
+["@ise-e2e", "status", "<12-hex-run-id>"]
+["@ise-e2e", "result", "<12-hex-run-id>"]
+```
+
+`start` provisions fresh Docker **named volumes** and a separate
+setup service, runs actual unattended installation and a separate
+licensed worker build, validates six tool stages and their artifacts,
+and deletes only that run's labeled Docker resources. Result metadata
+and SHA-256 hashes are preserved in the broker's private management
+volume. `@ise-e2e` never invokes the temporary maintenance route
+and requires no laptop-side manual terminal steps after the approved
+inputs are provisioned. The existing installation, license, normal
+setup and persistent worker are never writable test inputs.
+
+The successful end-to-end evidence and limitations are recorded in
+[disposable ISE acceptance](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md).
+This capability proves a **fresh ISE vendor installation on the
+already-provisioned laptop**, not an untouched-host installation of
+Docker, a new entitlement, the tunnel, or Pano G2 hardware programming.
+
 ## 5. Source synchronization boundary
 
 The canonical checkout is `~/Projects/repos/panolab-direct-main`,

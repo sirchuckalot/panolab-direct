@@ -22,6 +22,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [Remote iteration architecture](docs/REMOTE_ITERATION_ARCHITECTURE.md) | Live source staging, temporary trusted maintenance, recovery boundaries and retirement plan |
 | [ISE remote milestone review](docs/ISE14_REMOTE_MILESTONE_REVIEW.md) | Permanent-versus-temporary file inventory, checkpointed images and acceptance gaps |
 | [ISE setup on-demand stress test](docs/ISE14_SETUP_ONDEMAND_STRESS.md) | Real stop/start, media and installer guards, licensed build with setup offline, and outstanding provisioning tests |
+| [Disposable unattended ISE installation acceptance](docs/ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md) | Normal MCP-driven fresh vendor installation, scoped terms approval, real bitstream and automatic test-only disposal |
 | [Agent instructions](AGENTS.md) | Rules for automated engineering sessions |
 | [LM1 first working lab milestone](specs/LAB_MILESTONE_1.md) | Software acceptance evidence, design lessons and LM2 demonstration |
 | [PanoLab Rescue v1 standard](specs/PANOLAB_RESCUE_V1.md) | Cross-platform boot, A/B update, identity, BSP, trust profiles and qualification contract |
@@ -80,6 +81,21 @@ maintenance sidecar. Full six-service reboot and fresh-host provisioning
 are still unverified. Prior worker rollback containers remain stopped. See
 [licensed implementation evidence](docs/ISE14_REMOTE_BRINGUP_EVIDENCE.md)
 and [remote iteration decisions](docs/REMOTE_ITERATION_ARCHITECTURE.md).
+
+**Separately accepted on the actual laptop:** The normal PanoLab
+manager/broker ran **two complete disposable ISE 14.7 installations**
+from fresh named install/work volumes, with no manual EULA interaction
+or temporary maintenance test execution. Both archive checks,
+unattended native vendor installations and genuine six-stage
+Spartan-6 bitstream builds succeeded. Each generated a separate
+4,220,305-byte bitstream, and **all eight resources per run were
+deleted and independently checked absent**. The private license,
+persistent ISE installation, stopped normal setup and running worker
+were unchanged. The accepted media and owner authorization are pinned
+by a SHA-256 policy file; different terms/media require new approval.
+See [the real disposable installation evidence](docs/ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md).
+This proves vendor installation on the provisioned rootless laptop,
+**not** a complete unprovisioned-host appliance install.
 
 **Still unverified:** a completely unprovisioned host installation,
 reboot recovery of the revised on-demand system, a Pano G2 Rev B

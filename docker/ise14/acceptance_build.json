@@ -1,0 +1,8 @@
+{
+  "top": "panolab_ise_acceptance",
+  "part": "xc6slx150-fgg484-2",
+  "verilog": [
+    "design.v"
+  ],
+  "ucf": ""
+}

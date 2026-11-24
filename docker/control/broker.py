@@ -7,6 +7,7 @@ import json, os, socket, subprocess, threading, importlib
 import ise_proxy
 import ise_staging
 import ise_setup
+import ise_acceptance
 S="/rpc/panolab.sock"
 W=os.environ["PANOLAB_WORKSPACE_HOST"]
 REPO=os.environ["PANOLAB_REPO_HOST"]
@@ -150,6 +151,21 @@ def dispatch(r):
         return command(["docker",op,name],90)
     if a=="logs":
         return command(["docker","logs","--tail","100",checked(r.get("container"))],30)
+    if a=="ise_e2e":
+        # Authenticated manager -> broker -> disposable vendor setup/worker.
+        # No trusted-maintenance route or source of Docker authority is used.
+        if TRUSTED_MAINTENANCE:
+            importlib.reload(ise_acceptance)
+        return ise_acceptance.interface(r.get("operation"),r.get("id"))
+    if a=="exec" and isinstance(r.get("argv"),list) and r["argv"][:1]==["@ise-e2e"]:
+        if TRUSTED_MAINTENANCE:
+            importlib.reload(ise_acceptance)
+        argv=r["argv"]
+        if len(argv)==2 and argv[1] in ("start","preflight"):
+            return ise_acceptance.interface(argv[1])
+        if len(argv)==3 and argv[1] in ("status","result"):
+            return ise_acceptance.interface(argv[1],argv[2])
+        raise ValueError("invalid disposable ISE acceptance operation")
     if a=="ise_setup":
         # Setup is on-demand and not part of routine vendor compilation.
         # This path uses the ordinary manager's authenticated setup proxy;

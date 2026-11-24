@@ -74,4 +74,22 @@ published. This preserves node-locked vendor behavior, but does not
 make the legacy environment or temporary maintenance control
 production-safe. [Real build evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md).
 
+**Owner-authorized unattended vendor installation is narrowly scoped.**
+The disposable ISE acceptance route uses the normal authenticated
+manager/rootless broker, **not** `@maintenance`. It requires the exact
+approved System Edition 14.7 archive SHA-256 and size from the reviewed
+[acceptance policy](../docker/ise14/acceptance-policy.json) before sending
+the existing vendor-install confirmation. It creates uniquely labeled,
+Docker-internal / network-none disposable setup and worker containers
+with fresh private Docker volumes, dropped capabilities, and read-only
+vendor media/license mounts. It deletes **only** test-tagged resources
+after verifying real six-stage bitstream artifacts. Results preserve
+hashes, not license keys or host MAC identities. This does not authorize
+other EULAs, new license entitlements, host changes or FPGA programming.
+A temporary maintenance sidecar can still inspect/correct the framework,
+but **its participation as a test executor invalidates acceptance**.
+See [independent installation evidence](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md).
+The regular broker's Docker-socket authority still requires long-term
+hardening independently of the temporary maintenance retirement.
+
 [Deployment and inputs](GETTING_STARTED.md) · [Vendor MCP worker](TOOLCHAIN_MCP_CONTRACT.md)

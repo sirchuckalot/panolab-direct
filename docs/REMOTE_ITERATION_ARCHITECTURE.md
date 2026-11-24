@@ -31,6 +31,29 @@ provisioning if no setup container exists, and clean installation from
 an unprovisioned host remain distinct acceptance gates. The target
 six-service topology is **not yet reboot-qualified**.
 
+## Normal-path disposable ISE installation acceptance
+
+A separate [disposable installation acceptance controller](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md)
+has now proved a genuine fresh ISE 14.7 System Edition installation and
+six-stage licensed Spartan-6 compilation using the **normal authenticated
+manager → rootless Docker broker** path. The normal `@ise-e2e` compatibility
+interface creates uniquely labeled, private setup/worker containers, a
+Docker-internal licensed network, and five independent named volumes.
+It verifies the exact approved vendor archive SHA-256 and the owner's
+package-scoped unattended EULA authorization, stages an unconstrained RTL
+fixture, checks the generated bitstream/report hashes, and disposes of
+all eight run-specific resources while retaining only private summary
+evidence. No installed vendor volume, original license, persistent worker,
+or existing on-demand setup state is modified.
+
+This is a test/commissioning capability outside the temporary
+`trusted-maintenance` route. That sidecar was used only to review
+candidate source, correct the live broker registration, and inspect
+installation progress; it never executed the acceptance workflow.
+This test does **not** claim a new laptop's Docker, Git, or private-media
+provisioning is automated, nor does it qualify any Pano G2 hardware pinout.
+The exact accepted result IDs and hashes are recorded in the linked evidence.
+
 ## Temporary owner-trusted remote maintenance bootstrap
 
 **Temporary implementation activated and independently tested.** To eliminate repeated

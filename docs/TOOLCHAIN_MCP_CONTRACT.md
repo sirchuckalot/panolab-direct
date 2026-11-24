@@ -56,4 +56,17 @@ owner-approved `@ise14` compatibility route and temporary maintenance
 bridge provide remote control; see
 [remote iteration design](REMOTE_ITERATION_ARCHITECTURE.md).
 
+**Disposable installation acceptance is a separate normal control-plane
+workflow, not a sixth mandatory vendor worker tool.** The authenticated
+`@ise-e2e` broker adapter creates a disposable setup and vendor worker
+using the same canonical MCP contracts, verifies the exact
+[owner-authorized vendor archive policy](../docker/ise14/acceptance-policy.json),
+performs the genuine six-stage pipeline, and then removes only its
+labeled test resources. Successful artifacts are recorded by SHA-256
+in the normal broker's private state volume. The existing persistent
+worker is not modified or reinstalled. See
+[the full acceptance contract](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md).
+This framework must remain independent of the temporary
+`trusted-maintenance` route.
+
 [Architecture and acceptance gates](ARCHITECTURE.md) · [Security](SECURITY.md)

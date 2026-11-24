@@ -155,3 +155,23 @@ Related documents:
 [remote architecture](REMOTE_ITERATION_ARCHITECTURE.md),
 [ISE implementation evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md),
 [previous milestone review](ISE14_REMOTE_MILESTONE_REVIEW.md).
+
+
+## Follow-up — fresh disposable vendor installation (2026-11-24)
+
+A separate [normal-MCP disposable acceptance controller](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md)
+now **passed twice**: each run created its own setup container and empty
+vendor installation/work volumes, verified the owner-authorized archive
+SHA-256, installed ISE 14.7 unattended, started an isolated licensed
+worker, built a real Spartan-6 bitstream and timing report, and deleted
+all eight test-specific Docker resources. Neither run executed through
+temporary maintenance. The original installed vendor files and license
+were independently confirmed unchanged.
+
+This closes the **disposable vendor-install-from-empty-volume** acceptance
+gap, not the entire clean-host appliance setup. The normal `@setup`
+operation still cannot recreate the *persistent named setup service*
+if that service was deleted, and current acceptance preflight still
+uses known-good image tags and the existing normal setup container to
+resolve the approved private media mounts. A completely unprovisioned
+laptop and cold reboot remain separate acceptance targets.

@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "product": "Xilinx ISE Design Suite 14.7 System Edition",
+  "archive_sha256": "cee0b046c1bbcfafcae59a96c7596c55c5477628c39bafefff8992cb8d33adaa",
+  "archive_bytes": 6538618880,
+  "unattended_terms_acceptance": true,
+  "approval_scope": "Only the owner-authorized Xilinx ISE 14.7 System Edition archive matching this exact SHA-256; any other version/terms requires separate authorization",
+  "cleanup_mode": "dispose-test-only",
+  "fixture": "panolab_ise_acceptance",
+  "part": "xc6slx150-fgg484-2"
+}
