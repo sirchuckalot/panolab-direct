@@ -6,8 +6,16 @@ set -Eeuo pipefail
 umask 077
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
 mode="${1:---install}"
-case "$mode" in --install|--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help]" >&2; exit 2;; esac
-if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help]"; exit 0; fi
+case "$mode" in --install|--check|--status|--fresh-host-check|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--fresh-host-check|--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help]" >&2; exit 2;; esac
+if [[ "$mode" == --fresh-host-check ]]; then
+  # Read-only prerequisite inventory, BEFORE requiring Docker or private inputs.
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "FRESH_HOST_PREREQUISITES=BLOCKED missing=python3" >&2
+    exit 10
+  fi
+  exec python3 "$root/host/fresh-host-audit.py" "$root"
+fi
+if [[ "$mode" == --help ]]; then echo "Usage: bash ./panolab-install.sh [--fresh-host-check|--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help]"; exit 0; fi
 fail() { echo "PANOLAB ROOTLESS BLOCKED: $*" >&2; exit 9; }
 say() { echo "PanoLab rootless: $*"; }
 [[ "$(id -u)" != 0 ]] || fail "Run as ordinary laptop user, never sudo."
@@ -121,7 +129,9 @@ export PANOLAB_WORKSPACE_HOST="$(realpath "$private/agent-workspace")"
 export PANOLAB_CODEX_AUTH_HOST="$(realpath "$private/codex-auth")"
 export PANOLAB_REPO_HOST="$root"
 export PANOLAB_ISE_TARBALL="$(realpath "${media[0]}")"
-"${compose[@]}" config --format json | python3 -c '
+# Evaluate the optional setup service for preflight validation, but do
+# not automatically activate the setup profile during ordinary startup.
+"${compose[@]}" --profile ise-setup config --format json | python3 -c '
 import json,sys
 d=json.load(sys.stdin)["services"]; s=sys.argv[1]
 v=[x for x in d["docker-broker"]["volumes"] if x.get("target")=="/var/run/docker.sock"]
@@ -216,11 +226,11 @@ need_build=0
 for image in "${images[@]}"; do if ! r image inspect "$image" >/dev/null 2>&1; then need_build=1; fi; done
 if [[ "$need_build" == 1 ]]; then
   say "Building management images on the laptop rootless Engine."
-  DOCKER_BUILDKIT=1 "${compose[@]}" build setup docker-broker repo-git manager
+  DOCKER_BUILDKIT=1 "${compose[@]}" --profile ise-setup build setup docker-broker repo-git manager
 fi
-say "Starting rootless management services before tunnel acceptance."
-"${compose[@]}" up -d --no-build --no-recreate setup docker-broker repo-git manager
-for n in "$project-setup-1" "$project-docker-broker-1" "$project-repo-git-1" "$project-manager-1"; do
+say "Starting rootless core management; on-demand ISE setup stays offline."
+"${compose[@]}" up -d --no-build --no-recreate docker-broker repo-git manager
+for n in "$project-docker-broker-1" "$project-repo-git-1" "$project-manager-1"; do
   running_new "$n" || fail "Rootless $n not running."
 done
 broker="$project-docker-broker-1"

@@ -27,6 +27,20 @@ old-development-rollback cleanup, see the
 The installer now builds images with BuildKit and fails rather than
 falling back to Docker's deprecated legacy builder.
 
+### Clean-host prerequisite admission
+
+Use `bash ./panolab-install.sh --fresh-host-check` before attempting
+an installation on a new host. This **read-only** check reports missing
+Docker/Compose/Buildx, rootless/user-session/cgroup requirements,
+subordinate UID/GID mappings, checkout identity and private-input
+presence. It does not start services, provision operating-system packages,
+download vendor media, read secret values or accept license terms.
+A missing-prerequisite report returns exit code `10`; even a `READY`
+report establishes **prerequisite readiness only**, not a working
+installation. A genuinely new host may require a reviewed OS
+administrator provisioning step and owner-provided private media.
+Read [the actual test and remaining gates](FRESH_HOST_ACCEPTANCE.md).
+
 ## 2. Owner-private inputs
 
 Copy `docker/.env.example` to ignored `docker/.env` and supply
@@ -50,6 +64,7 @@ credential, archive, host ID or private directory contents.
 From the repository checkout on the laptop:
 
 ```bash
+bash ./panolab-install.sh --fresh-host-check  # read-only missing-prerequisite inventory, even before Docker
 bash ./panolab-install.sh --status   # read-only status
 bash ./panolab-install.sh --check    # local configuration preflight
 bash ./panolab-install.sh            # build missing/stale-labeled images; start/reuse services
@@ -59,12 +74,16 @@ bash ./panolab-install.sh --enable-github-push  # opt-in GitHub direct push for 
 
 The launcher verifies the user rootless Engine and private inputs,
 merges the three Compose recipes, builds missing images **on the
-laptop**, brings up setup/broker/repo/manager, creates the bounded
-development container if absent, checks available HDL tools,
-resource quotas and Codex login, probes authenticated MCP (including
-anonymous denial), then starts the outbound tunnel. Nothing in this
-recipe touches the system/rootful Docker Engine, installs host
-packages, changes unrelated containers or programs an FPGA.
+laptop**, and brings up broker/repo/manager **without activating the
+optional `ise-setup` profile**. It creates the bounded development
+container if absent, checks available HDL tools, resource quotas
+and Codex login, probes authenticated MCP (including anonymous denial),
+then starts the outbound tunnel. The optional setup image can be built
+but its container is not started during ordinary deployment.
+This adjusted startup path has passed source/Compose tests, **not
+an independent fresh-host installation**. Nothing in this recipe
+touches the system/rootful Docker Engine, installs host packages,
+changes unrelated containers or programs an FPGA.
 
 GitHub publishes through the connected integration even without a laptop PAT.
 To enable direct `repo_push` through the existing container, use the

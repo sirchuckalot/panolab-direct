@@ -25,10 +25,14 @@ runtime acceptance gates pass.
 
 ## What is real, and what is planned
 
-- The owner's laptop operates six rootless Docker PanoLab services:
-  authenticated tunnel, manager, broker, Git gateway, ISE setup and
-  modern HDL/Codex development. Local remote MCP and resource-limit
-  evidence exist.
+- The owner's laptop currently runs **seven** rootless PanoLab
+  containers: authenticated tunnel, manager, broker, Git gateway,
+  modern HDL/Codex development, persistent licensed ISE worker, and
+  **temporary trusted maintenance**. The optional ISE setup container
+  is **stopped** with `restart: no`. The proposed steady state has
+  six services after independently qualifying and retiring the
+  temporary maintenance bridge. Local authenticated MCP, licensed
+  builds and resource-limit evidence exist.
 - GitHub `main` at `006b6ee` is the accepted software lab baseline.
   The owner's canonical checkout at `~/Projects/repos/panolab-direct-main`
   is now on `development`, tracking GitHub `development`; source tests,
@@ -38,10 +42,14 @@ runtime acceptance gates pass.
   VexRiscv, RISC-V C tools and BIOS. The unified rootless Docker image
   **was rebuilt and laptop-verified** with 23 tests and a live generic LiteX
   BIOS session ([PLR-ENV-003](docs/UNIFIED_DEV_IMAGE_ACCEPTANCE.md)).
-  Licensed ISE implementation, physical FPGA and fresh host provisioning
-  remain **PENDING**. A
-  laptop reboot test passed only after setting the standalone dev
-  container restart policy; source tests or CI alone cannot prove it.
+  Licensed ISE 14.7 has now completed multiple genuine six-stage
+  Spartan-6 implementations, including **two unattended disposable
+  vendor installations entirely through the normal MCP path**.
+  Physical FPGA acceptance, **completely unprovisioned-host installation**
+  and the revised six-service reboot test remain **PENDING**. The
+  historical six-service laptop reboot test passed only after setting
+  the standalone dev container restart policy; source tests or CI
+  alone cannot prove the expanded operating state.
 - Target Pano Logic **G2 Rev B**, XC6SLX150-2-FGG484. Planned
   CPU-less LiteX/LiteEth/Etherbone, bounded CSR access, then LiteScope
   and coherent framebuffer observation. USB3300 is not baseline RTL.
@@ -126,6 +134,19 @@ material in chat, mount it in `dev`, or publish it in logs.
    debug rootless namespaces, cgroups, Docker connectivity, private
    MCP, ISE installation or hardware. If CI is justified, state
    its narrow test purpose, budget and what success establishes.
+
+## Fresh-host admission versus acceptance
+
+The read-only `panolab-install.sh --fresh-host-check` inventories
+prerequisites before Docker or private credentials exist. It reports
+missing facilities and **does not install packages or provision secrets**.
+The [fresh-host admission report](docs/FRESH_HOST_ACCEPTANCE.md)
+documents an isolated empty-checkout/home check and installer corrections.
+This is **not** an accepted clean laptop deployment: the normal
+environment cannot create an independent KVM/QEMU host, and first-time
+OS/runtime/private-credential provisioning is still unresolved.
+Do not claim a fresh-host PASS from the read-only fixture or the
+separately successful disposable ISE vendor-install runs.
 
 ## Security and change boundaries
 

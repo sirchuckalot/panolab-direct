@@ -22,6 +22,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [Remote iteration architecture](docs/REMOTE_ITERATION_ARCHITECTURE.md) | Live source staging, temporary trusted maintenance, recovery boundaries and retirement plan |
 | [ISE remote milestone review](docs/ISE14_REMOTE_MILESTONE_REVIEW.md) | Permanent-versus-temporary file inventory, checkpointed images and acceptance gaps |
 | [ISE setup on-demand stress test](docs/ISE14_SETUP_ONDEMAND_STRESS.md) | Real stop/start, media and installer guards, licensed build with setup offline, and outstanding provisioning tests |
+| [Clean-host admission and remaining blockers](docs/FRESH_HOST_ACCEPTANCE.md) | Read-only missing-prerequisite report, isolated empty-host test, launcher corrections and strict unprovisioned-host acceptance gates |
 | [Disposable unattended ISE installation acceptance](docs/ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md) | Normal MCP-driven fresh vendor installation, scoped terms approval, real bitstream and automatic test-only disposal |
 | [Agent instructions](AGENTS.md) | Rules for automated engineering sessions |
 | [LM1 first working lab milestone](specs/LAB_MILESTONE_1.md) | Software acceptance evidence, design lessons and LM2 demonstration |
@@ -96,6 +97,15 @@ by a SHA-256 policy file; different terms/media require new approval.
 See [the real disposable installation evidence](docs/ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md).
 This proves vendor installation on the provisioned rootless laptop,
 **not** a complete unprovisioned-host appliance install.
+
+**Fresh-host admission check (2026-11-24):** The normal launcher now
+offers `--fresh-host-check`, a read-only prerequisite inventory that works
+before Docker or private credentials are configured. Eight clean-room
+admission/launcher tests passed, and the on-demand setup Compose assumptions
+in the main installer were corrected. An isolated empty-home simulation
+correctly **blocked** on missing prerequisites; a separate clean Linux
+VM/laptop has **not yet been provisioned or tested**. See
+[clean-host acceptance evidence](docs/FRESH_HOST_ACCEPTANCE.md).
 
 **Still unverified:** a completely unprovisioned host installation,
 reboot recovery of the revised on-demand system, a Pano G2 Rev B
