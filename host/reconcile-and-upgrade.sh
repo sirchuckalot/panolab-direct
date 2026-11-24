@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# HISTORICAL / REVISION-LOCKED. DO NOT RERUN ON CURRENT DEVELOPMENT.
+# Preserved solely for audit/recovery provenance; use the current
+# panolab-install.sh and authenticated repository gateway instead.
+# See host/README.md and docs/TEMPORARY_COMPONENTS.md.
 # Safe one-shot bridge from the historically local development commit to
 # the published GitHub development branch, then upgrade ONLY the dev image.
 # Run through: git fetch origin development; bash <(git show FETCH_HEAD:host/reconcile-and-upgrade.sh)

@@ -1,8 +1,11 @@
 # Install and operate the rootless laptop laboratory
 
 This describes the **current supported deployment recipe** and its
-explicit prerequisites. It does not perform host Docker installation
-and has not been validated as an unattended fresh-machine install.
+explicit prerequisites. Read the [engineering baseline](ENGINEERING_BASELINE.md)
+for current acceptance results and the
+[host script index](../host/README.md) before running an old helper.
+The installer does not perform host Docker installation and has not
+been validated as an unattended fresh-machine install.
 
 ## 1. Host prerequisites
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# HISTORICAL / REVISION-LOCKED. DO NOT RERUN ON CURRENT DEVELOPMENT.
+# The ISE bridge is already active; see host/README.md and
+# docs/TEMPORARY_COMPONENTS.md for its current ownership.
 # Controlled one-time activation of the scoped ISE MCP bridge.
 # The setup, vendor worker, development checkout, and FPGA are untouched.
 set -Eeuo pipefail

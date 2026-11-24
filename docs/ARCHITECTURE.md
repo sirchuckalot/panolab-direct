@@ -14,6 +14,12 @@ development candidate with board and third-party snapshot directories.
 **This file describes the operational deployment**; source-layout changes
 and the live service/mount cutover have separate acceptance evidence.
 
+The current handoff, checked-in recipes and temporary-component lifecycle
+are indexed in [the engineering baseline](ENGINEERING_BASELINE.md) and
+[temporary-component register](TEMPORARY_COMPONENTS.md).
+Dated acceptance documents record historical snapshots, not competing
+operational authorities.
+
 ## Implemented and observed on the laptop
 
 ```text
@@ -22,10 +28,12 @@ ChatGPT
    ▼
 tunnel ─── manager (Go MCP endpoint, private RPC)
                ├── repo-git (Python, constrained source checkout)
-               ├── docker-broker (Python, allowlisted rootless Docker operations)
-               └── setup (CentOS 6.10 ISE media/license inspection)
+               └── docker-broker (rootless Docker/ISE broker)
+                       └── licensed ISE 14.7 worker (persistent)
 development (Ubuntu 24.04): ONE modern tools image; Codex, Python,
    Yosys, Icarus, Verilator, LiteX/BIOS, LiteEth/SPI, Migen, RISC-V
+optional on demand: setup (stopped; vendor media and install inspection)
+temporary, retained: trusted-maintenance sidecar (rootless Docker access)
 ```
 
 The prior LM1 baseline was **six running containers**. The 2026-11-24
@@ -39,8 +47,12 @@ no longer have setup startup dependencies. **Seven containers are now
 active:** the proposed six steady-state services plus temporary maintenance.
 The final **six-service** topology (tunnel, manager, docker-broker, repo-git,
 modern dev and ISE worker) is a target, not a reboot-accepted deployment.
-The missing-from-scratch setup provisioning path also remains unqualified. The development container
-continues to use approved source mounts and a private Codex volume with
+Provisioning the persistent setup service from complete absence, and
+fresh-machine installation, are not yet proven. The independent **disposable**
+ISE installation/build/cleanup path has passed twice through normal MCP
+([evidence](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md)); it does not establish
+full host provisioning. The development container continues to use
+approved source mounts and a private Codex volume with
 **2 CPUs, 4 GiB memory, 256 PIDs**. The normal manager and developer
 container have no Docker socket; the broker and, **temporarily**, the
 owner-approved trusted-maintenance sidecar do. That temporary sidecar
@@ -71,10 +83,11 @@ provisioned** laptop on 2026-11-23: project-only teardown and
 unmodified-installer rebuild, local/remote authenticated MCP acceptance,
 and all six services auto-recovering after reboot. The standalone
 development container required the `unless-stopped` restart policy.
-The canonical source checkout is on `development`, matching GitHub
-`main` at the LM1 freeze `006b6ee`. New work must not modify `main`.
-A brand-new host install and physical FPGA acceptance are **not yet
-proven**. However, later **licensed ISE execution passed** with two
+At the LM1 freeze, the laptop `development` checkout matched
+GitHub `main` at `006b6ee`; later engineering commits continued only on
+`development`. New work must not modify `main`. A brand-new host install
+and physical FPGA acceptance are not yet proven. However, later
+**licensed ISE execution passed** with two
 real six-stage Spartan-6 builds and distinct bitstream hashes on
 2026-11-24. See [the ISE acceptance evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md);
 the original [LM1 record](../specs/LAB_MILESTONE_1.md) remains historical

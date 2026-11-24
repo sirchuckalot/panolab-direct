@@ -12,6 +12,8 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 
 | Read | What it covers |
 | --- | --- |
+| [Current engineering baseline and G2 handoff](docs/ENGINEERING_BASELINE.md) | Tested source/configuration inventory, running services, publication gates and G2 handoff |
+| [Temporary components and retirement register](docs/TEMPORARY_COMPONENTS.md) | Preserve accelerated maintenance, old one-time scripts and rollback assets until a tested replacement exists |
 | [Architecture and baseline decisions](docs/ARCHITECTURE.md) | What exists, system boundaries, G2 design and planned capabilities |
 | [Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md) | Authoritative planned ownership and layout for projects, BSPs, upstream source, manifests, licensing and releases |
 | [Install and operate](docs/GETTING_STARTED.md) | Host prerequisites, private inputs, rootless deployment, status and recovery limits |
@@ -38,9 +40,12 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [Upstream Rescue adoption review](specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Verified upstream bootloader examples, source reuse boundaries and outstanding proof |
 
 The selected [FPGA system specification](specs/PANOLAB_DIRECT_v1_0.txt)
-is the companion concise functional requirements file. These documents
-describe the **current baseline and forward design**, not an experiment
-log or chronology of past engineering attempts.
+is the companion concise functional requirements file. Read
+[Engineering Baseline](docs/ENGINEERING_BASELINE.md) for **current status**
+and [Temporary Components](docs/TEMPORARY_COMPONENTS.md) for intentionally
+retained non-production infrastructure. Dated acceptance reports and
+migration records preserve **historical** observations, not competing
+current operational instructions.
 
 ## Operational baseline
 
@@ -130,11 +135,16 @@ tokens, bitstreams or host identifiers belong in Git. Consult
 [the reviewed temporary controls and rollback plan](docs/ISE14_REMOTE_MILESTONE_REVIEW.md)
 before changing the profile.
 
-Two previously used one-time scripts,
-`host/ise14-repair.py` and `host/activate-ise-bridge.sh`,
-are retained for historical recovery evidence only. Their old revision and
-migration preflights are deliberately not reusable against a new commit;
-**do not rerun them** to manage the current running installation.
+The temporary bridge remains **intentionally operational**
+for rapid owner-approved inspection and correction during G2 development.
+It is **not** the executor of normal `@ise14`, `@setup` or
+`@ise-e2e` acceptance flows. Its removal is gated on a tested
+restricted updater and independent rollback. Historical one-time
+scripts such as `host/ise14-repair.py`,
+`host/activate-ise-bridge.sh`, `host/apply-source-migration.sh`
+and `host/reconcile-and-upgrade.sh` are preserved, clearly classified
+in [the host script index](host/README.md), and **must not be rerun**
+against the current commit.
 
 ## Entrypoint
 
@@ -142,6 +152,7 @@ Run as the ordinary laptop user, with rootless Docker and private inputs
 already provisioned (see [setup](docs/GETTING_STARTED.md)):
 
 ```sh
+bash ./panolab-install.sh --fresh-host-check  # read-only prerequisite inventory
 bash ./panolab-install.sh --status
 bash ./panolab-install.sh --check
 bash ./panolab-install.sh --upgrade-dev   # explicit, guarded dev-only image upgrade

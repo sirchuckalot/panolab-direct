@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# HISTORICAL / REVISION-LOCKED. DO NOT RERUN ON CURRENT DEVELOPMENT.
+# Preserved for source-migration provenance; see host/README.md and
+# docs/TEMPORARY_COMPONENTS.md for the current controlled path.
 # PanoLab Source and Project Architecture migration — owner-controlled laptop cutover.
 # This launches on the owner's laptop AS THE ORDINARY USER, after the source
 # candidate has been prepared and tested inside the existing PanoLab dev container.

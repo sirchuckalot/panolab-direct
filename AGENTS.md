@@ -1,8 +1,10 @@
 # PanoLab Direct — agent engineering contract
 
-This file is the executable-session guidance for the **current
+This file is executable-session guidance for the **current
 baseline**, not an experiment log. Start at the repository
-[README](README.md), then read [architecture](docs/ARCHITECTURE.md),
+[README](README.md), the [engineering handoff](docs/ENGINEERING_BASELINE.md)
+and the [temporary-component register](docs/TEMPORARY_COMPONENTS.md);
+then read [architecture](docs/ARCHITECTURE.md),
 [installation/operations](docs/GETTING_STARTED.md),
 [development](docs/DEVELOPMENT.md), [security](docs/SECURITY.md),
 and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).

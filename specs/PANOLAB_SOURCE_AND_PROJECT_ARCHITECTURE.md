@@ -1,6 +1,9 @@
 # PanoLab Source and Project Architecture Standard
 
-**Status:** Adopted source/project authority; candidate source migration tested, live service cutover remains unverified
+**Status:** Adopted source/project authority. Selected source snapshots,
+PanoLab licensing files and project entrypoints are committed in
+`development`; a full new-host or live source-mount/worker migration
+acceptance is separate and still unverified.
 **Date:** 2026-11-23  
 **Scope:** PanoLab Direct repository organization, source ownership, third-party integration, build provenance, project packaging, and licensing  
 **Implementation boundary:** This document records decisions; it does not itself authorize moving source, rewriting builds, installing tools, flashing hardware, or promoting `main`.
@@ -69,8 +72,8 @@ panolab-direct/
   tests/                     # Platform and cross-project test infrastructure
   specs/                     # Cross-project standards (including this file)
   docs/                      # Operational architecture, procedures, evidence
-  LICENSE                    # Selected license for PanoLab-owned covered code (not yet added)
-  LICENSES/                  # Relevant complete third-party license texts (planned)
+  LICENSE                    # Existing PanoLab-owned GPL-3.0-or-later terms
+  LICENSES/                  # Existing license/attribution index; upstream full texts retained in snapshots
 ```
 
 This tree is the approved source-ownership model. The migration

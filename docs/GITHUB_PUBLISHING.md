@@ -4,7 +4,11 @@
 
 ## Two working paths, not two GitHub repositories
 
-PanoLab Direct's GitHub repository is [sirchuckalot/panolab-direct](https://github.com/sirchuckalot/panolab-direct). GitHub's **default branch is `main`**, an accepted software baseline, while all current Rescue implementation work is on **[`development`](https://github.com/sirchuckalot/panolab-direct/tree/development)**. GitHub `main` has 44 tracked files; `development` has 77 (as of `04632b4`), including new source, test, recipe and specification files.
+PanoLab Direct's GitHub repository is [sirchuckalot/panolab-direct](https://github.com/sirchuckalot/panolab-direct). GitHub's **default branch is `main`**, an accepted software baseline, while all current Rescue implementation work is on **[`development`](https://github.com/sirchuckalot/panolab-direct/tree/development)**. **Historical counts:** at `04632b4`, GitHub `main` had 44 tracked files
+and `development` had 77. These are **not current file counts**; the
+`development` tree now includes thousands of selective, versioned
+third-party source files and vendor/toolchain test recipes. Compare
+current branches via Git rather than relying on the dated counts.
 
 This project has used the **connected GitHub integration** for real server-side Git commits and non-force ref updates, followed by fast-forward synchronization of the laptop checkout. That method is already authenticated and works. The historical failure `fatal: could not read Username for 'https://github.com': terminal prompts disabled` affected the **separate Git push operation inside the existing laptop `repo-git` gateway** before owner credential setup. It has since been resolved. It was never evidence that GitHub commits had not been published.
 
@@ -41,10 +45,25 @@ cd "$HOME/Projects/repos/panolab-direct-main" && bash ./panolab-install.sh --ena
 
 ## Completed local prerequisites and remaining work
 
-Already completed and independently verified: repository `development` synchronization, the unified modern development-image rebuild (`--upgrade-dev`), rootless Buildx installation and exact old rollback-container removal (`--finalize-maintenance`), live LiteX BIOS/HDL compilation, and six active PanoLab services. **These commands do not need to be rerun.**
+**Historical setup acceptance (2026-11-23):** repository
+`development` synchronization, unified modern image rebuild
+(`--upgrade-dev`), rootless Buildx installation and exact old rollback
+cleanup (`--finalize-maintenance`) were verified with six active
+services at that time. Those commands **must not be rerun merely to
+republish Git**, and the old six-service count is not the later ISE
+development configuration. See the [current baseline](ENGINEERING_BASELINE.md).
 
 **GitHub setup completed:** the owner executed `--enable-github-push`, the Buildx-powered rebuild and replacement of **only** the existing repository gateway succeeded, `GITHUB_SECRET_MOUNT_SCOPE=PASS`, `GITHUB_SECRET_AND_ASKPASS=PASS`, and `GITHUB_PUSH_AUTH=PASS` were reported. An independent PanoLab `repo_push` completed with `Everything up-to-date` and no secret exposure. This document serves as the reviewed source change for an actual local commit/push qualification; confirm the resulting GitHub branch SHA following publication.
 
-Separate tasks, *not prerequisites for source sync*: licensed ISE 14.7 bitstream implementation, actual Pano G2 hardware bring-up, physical Ethernet/SPI identity, and the unimplemented A/B/ICAP recovery firmware. These require separate approval and qualification; do not treat them as missing general development-image packages.
+**Updated qualification boundaries:** genuine licensed ISE 14.7 vendor
+implementation and **two unattended disposable vendor installs** now
+pass on the provisioned rootless laptop. Actual Pano G2 constrained
+bitstream, physical Ethernet/SPI identity and A/B/ICAP recovery firmware
+remain **separate, unqualified** tasks. The scoped credential mount
+continues to authorize only non-force pushes of `development`; it
+never authorizes changes to `main`. Follow the
+[current engineering handoff](ENGINEERING_BASELINE.md) and
+[temporary-component register](TEMPORARY_COMPONENTS.md) for the latest
+state.
 
 The connected GitHub integration remains a valid publishing path regardless of whether owner-local direct Git push is enabled.

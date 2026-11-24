@@ -1,8 +1,19 @@
 # Source and Project Migration — Candidate Acceptance
 
-**Status:** Isolated laptop development-container candidate verified.
-**Not yet established:** canonical laptop checkout cutover, GitHub branch publication,
-reconfigured live broker/Git service containers, licensed ISE bitstream or physical G2 test.
+**Historical evidence (2026-11-23):** This document captures the original
+isolated development-container **candidate**, *before* the source paths were
+committed to the canonical `development` checkout and before the
+2026-11-24 licensed ISE implementation. Its pending gates below are
+**historical**, not current instructions or a current status report.
+For present source/configuration authority and gaps, see
+[Engineering Baseline](ENGINEERING_BASELINE.md),
+[Architecture](ARCHITECTURE.md) and
+[ISE build evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md).
+
+**Original candidate status:** Isolated laptop development-container
+candidate verified. **Not established at that earlier point:**
+canonical checkout cutover, branch publication, live broker/Git container
+cutover, licensed ISE bitstream or physical G2 test.
 
 ## Candidate scope
 
@@ -31,3 +42,14 @@ reconfigured live broker/Git service containers, licensed ISE bitstream or physi
 - Complete vendor/IP/generated-binary license and physical G2 qualification separately.
 
 **Do not equate a candidate source-build PASS with a completed live deployment.**
+
+**Later evidence, without rewriting the original candidate record:**
+The current `development` source now includes `projects/rescue/`,
+`boards/pano_g2_rev_b/`, `shared/`, the selective `third_party/`
+snapshots, manifests and all related source tests. The licensed ISE
+worker has independently produced real bitstreams from generic smoke
+fixtures, and the ordinary remote control path has passed two fully
+disposable fresh ISE installations. Actual G2 board-constrained
+implementation, live hardware verification and fresh-host installation
+remain open. The source publication status is determined by the
+verified GitHub branch, not by this historical candidate report.

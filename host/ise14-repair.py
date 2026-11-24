@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Guarded recovery of the known GNU tar ownership failure in rootless ISE setup.
+"""HISTORICAL / ONE-TIME REPAIR. DO NOT RERUN ON CURRENT DEVELOPMENT.
+
+See host/README.md and docs/TEMPORARY_COMPONENTS.md. This source is
+preserved as prior incident evidence, not a supported installer.
+
+Guarded recovery of the known GNU tar ownership failure in rootless ISE setup.
 
 This is a ONE-TIME owner-user operation, not a general installation reset.
 Preserves the failed state and extracted data; only replaces PanoLab setup

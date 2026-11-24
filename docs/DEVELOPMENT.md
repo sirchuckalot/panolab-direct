@@ -4,6 +4,13 @@
 GitHub is the source/review system; publication happens only at a
 verified logical stopping point, not per experiment.
 
+For the current working state and known outstanding gates, consult the
+[engineering baseline](ENGINEERING_BASELINE.md) and the
+[temporary-component register](TEMPORARY_COMPONENTS.md). The
+temporary maintenance bridge is deliberately retained for rapid
+diagnosis and infrastructure repair; it does not execute the
+normal-path vendor acceptance tests.
+
 For source ownership, project manifests, selective upstream imports,
 version isolation, build provenance, and license/attribution rules,
 follow the [Source and Project Architecture Standard](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
