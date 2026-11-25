@@ -113,7 +113,7 @@ Target: **XC6SLX150-2-FGG484**, nominal 16 MiB external SPI NOR and Rev B-specif
 | B6: Trust profiles | Unpaired trusted-lan works and is clearly marked; protected regions stay unreachable; paired/production deny anonymous access |
 | B7: Multi-board BSP | Same manifest, CLI and update lifecycle operate on another physically qualified board |
 
-None of B1–B7 is established as passed for PanoLab Rescue. Simulations or upstream prebuilt files are not our own G2 hardware acceptance. Implementation/deployment changes go on `development` only; `main` remains the accepted baseline. GitHub publication of this document does not synchronize the laptop's distinct local `development` commit.
+Current checkpoint: the source/BIOS generation portion of B1 and the diagnostic vendor implementation/timing portion of B2 have passed for named candidates. B2's actual protected slot map and B3–B7 physical and integration requirements remain open. The [iteration-15 checkpoint](../projects/rescue/experiments/iteration-15/README.md) records separate native, RTL, CPU/GMII and vendor evidence; the [stock research](../research/pano-stock/README.md) records real stock access, not Rescue qualification. Implementation changes go on `development` only; `main` remains the accepted baseline.
 
 ## Upstream source pointers
 

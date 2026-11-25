@@ -1,0 +1,317 @@
+
+=== storage-core ===
+make: Entering directory '<disposable-copy>/storage-core'
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Werror -pedantic -UNDEBUG rescue_storage.c test_rescue_storage.c -o build/test_rescue_storage
+mkdir -p build
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Werror -pedantic -ffreestanding -march=rv32im -mabi=ilp32 -c rescue_storage.c -o build/rescue_storage.rv32.o
+./build/test_rescue_storage
+storage-core tests passed
+make: Leaving directory '<disposable-copy>/storage-core'
+
+=== journal-core ===
+make: Entering directory '<disposable-copy>/journal-core'
+mkdir -p build
+cc   -std=c11 -Wall -Wextra -Wpedantic -Werror rescue_journal.c test_rescue_journal.c -o build/test_rescue_journal
+./build/test_rescue_journal
+PASS: 794 interruption and read-error cases, 16 readback mismatches, 216 single-byte corruption cases, state mapping and selection checks
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -c rescue_journal.c -o build/rescue_journal.rv32.o
+make: Leaving directory '<disposable-copy>/journal-core'
+
+=== flash-probe ===
+make: Entering directory '<disposable-copy>/flash-probe'
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Werror -O2  test_rescue_flash_probe.c rescue_flash_probe.c ../storage-core/rescue_storage.c -o build/test_rescue_flash_probe
+./build/test_rescue_flash_probe
+SPI JEDEC probe tests passed
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Werror -O2 -march=rv32i2p0_m -mabi=ilp32 -D__vexriscv__ -ffreestanding -c rescue_flash_probe.c -o build/rescue_flash_probe.o
+make: *** No rule to make target '../bios-integration/build-s5.oTprq0/software/include/generated/csr.h', needed by 'build/rescue_flash_probe_litex.o'.  Stop.
+make: Leaving directory '<disposable-copy>/flash-probe'
+
+=== flash-probe ===
+make: Entering directory '<disposable-copy>/flash-probe'
+./build/test_rescue_flash_probe
+SPI JEDEC probe tests passed
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Werror -O2 -std=gnu11 -march=rv32i2p0_m -mabi=ilp32 -D__vexriscv__ -ffreestanding \
+	-isystem <original-workspace>/bios-integration/build-s5.oTprq0/software/include -isystem /repo/third_party/litex/afed6623/src/litex/soc/software/include \
+	-isystem /repo/third_party/litex/afed6623/src/litex/soc/cores/cpu/vexriscv -c rescue_flash_probe_litex.c -o build/rescue_flash_probe_litex.o
+make: Leaving directory '<disposable-copy>/flash-probe'
+
+=== image-core ===
+make: Entering directory '<disposable-copy>/image-core'
+mkdir -p build
+cc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin -c image_core.c -o build/image_core.o
+cc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes  test_image_core.c build/image_core.o -o build/test_image_core
+riscv64-unknown-elf-gcc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin -march=rv32im -mabi=ilp32 -c image_core.c -o build/image_core.rv32.o
+./build/test_image_core
+image core tests passed
+make: Leaving directory '<disposable-copy>/image-core'
+
+=== flash-transaction ===
+make: Entering directory '<disposable-copy>/flash-transaction'
+mkdir -p build
+cc   -std=c11 -Wall -Wextra -Wpedantic -Werror rescue_flash_transaction.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c test_rescue_flash_transaction.c -o build/test_rescue_flash_transaction
+./build/test_rescue_flash_transaction
+flash transaction tests passed
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -c rescue_flash_transaction.c -o build/rescue_flash_transaction.rv32.o
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -c ../storage-core/rescue_storage.c -o build/rescue_storage.rv32.o
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -c ../journal-core/rescue_journal.c -o build/rescue_journal.rv32.o
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -c ../image-core/image_core.c -o build/image_core.rv32.o
+make: Leaving directory '<disposable-copy>/flash-transaction'
+
+=== trial-core ===
+make: Entering directory '<disposable-copy>/trial-core'
+mkdir -p build
+cc  -I../journal-core  -std=c11 -Wall -Wextra -Wpedantic -Werror rescue_trial.c ../journal-core/rescue_journal.c test_rescue_trial.c -o build/test_rescue_trial
+./build/test_rescue_trial
+rescue trial tests passed
+riscv64-unknown-elf-gcc -I../journal-core -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -c rescue_trial.c -o build/rescue_trial.rv32.o
+riscv64-unknown-elf-gcc -I../journal-core -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -c ../journal-core/rescue_journal.c -o build/rescue_journal.rv32.o
+make: Leaving directory '<disposable-copy>/trial-core'
+
+=== manifest-core ===
+make: Entering directory '<disposable-copy>/manifest-core'
+mkdir -p build
+python3 fixtures.py > build/fixtures.h
+cc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin  test_manifest.c manifest_core.c ../image-core/image_core.c -o build/test_manifest
+riscv64-unknown-elf-gcc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin -march=rv32im -mabi=ilp32 -c manifest_core.c -o build/manifest_core.rv32.o
+riscv64-unknown-elf-gcc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin -march=rv32im -mabi=ilp32 -c ../image-core/image_core.c -o build/image_core.rv32.o
+riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -nostdlib -r build/manifest_core.rv32.o build/image_core.rv32.o -o build/manifest.rv32.o
+riscv64-unknown-elf-nm -u build/manifest.rv32.o > build/rv32-undefined.txt
+test ! -s build/rv32-undefined.txt
+./build/test_manifest
+manifest tests passed
+make: Leaving directory '<disposable-copy>/manifest-core'
+
+=== manifest-store ===
+make: Entering directory '<disposable-copy>/manifest-store'
+mkdir -p build
+python3 fixtures.py > build/fixtures.h
+cc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin  test_store.c manifest_store.c ../manifest-core/manifest_core.c ../image-core/image_core.c -o build/test_store
+riscv64-unknown-elf-gcc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin -march=rv32im -mabi=ilp32 -c manifest_store.c -o build/manifest_store.rv32.o
+riscv64-unknown-elf-gcc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin -march=rv32im -mabi=ilp32 -c ../manifest-core/manifest_core.c -o build/manifest_core.rv32.o
+riscv64-unknown-elf-gcc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wstrict-prototypes -ffreestanding -fno-builtin -march=rv32im -mabi=ilp32 -c ../image-core/image_core.c -o build/image_core.rv32.o
+riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -nostdlib -r build/manifest_store.rv32.o build/manifest_core.rv32.o build/image_core.rv32.o -o build/core.rv32.o
+riscv64-unknown-elf-nm -u build/core.rv32.o > build/rv32-undefined.txt
+test ! -s build/rv32-undefined.txt
+./build/test_store
+manifest store checks passed (430 body bytes, all cut points)
+make: Leaving directory '<disposable-copy>/manifest-store'
+
+=== update-controller ===
+make: Entering directory '<disposable-copy>/update-controller'
+mkdir -p build
+python3 fixtures.py > build/fixtures.h
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../journal-core -O2 rescue_update.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c test_update.c -o build/test_update
+./build/test_update
+PASS: integrated staging, protected bytes, 9 interrupted callback positions, reverify, trial, mocked confirmation, rollback and failed-reset recovery
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c rescue_update.c -o build/rescue_update.rv32.o
+make: Leaving directory '<disposable-copy>/update-controller'
+
+=== identity-record ===
+make: Entering directory '<disposable-copy>/identity-record'
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror identity_record.c ../storage-core/rescue_storage.c test_identity.c -o build/test_identity
+./build/test_identity
+PASS: normalized identity decode, 1528 single-bit corruptions, all truncated prefixes, duplicate MAC rejection
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32im -mabi=ilp32 -ffreestanding -c identity_record.c -o build/identity_record.rv32.o
+make: Leaving directory '<disposable-copy>/identity-record'
+
+=== host-diag ===
+make: Entering directory '<disposable-copy>/host-diag'
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Werror -shared -fPIC ../bios-network-probe/firmware/rescue_diag.c -o build/diag.so
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v test_client
+test_mock_transport (test_client.Tests.test_mock_transport) ... ok
+test_real_c_handler (test_client.Tests.test_real_c_handler) ... ok
+test_wrong_id_and_truncations (test_client.Tests.test_wrong_id_and_truncations) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+make: Leaving directory '<disposable-copy>/host-diag'
+
+=== spi-nor ===
+make: Entering directory '<disposable-copy>/spi-nor'
+mkdir -p build
+cc   -std=c11 -Wall -Wextra -Werror -pedantic -O2 -UNDEBUG test_spi_nor.c rescue_spi_nor.c ../flash-probe/rescue_flash_probe.c ../storage-core/rescue_storage.c  -o build/test_spi_nor
+./build/test_spi_nor
+SPI NOR tests passed
+riscv64-unknown-elf-gcc  -std=c11 -Wall -Wextra -Werror -pedantic -O2 -march=rv32i2p0_m -mabi=ilp32 -ffreestanding -c rescue_spi_nor.c -o build/rv32-rescue_spi_nor.o
+riscv64-unknown-elf-gcc  -std=c11 -Wall -Wextra -Werror -pedantic -O2 -march=rv32i2p0_m -mabi=ilp32 -ffreestanding -c ../flash-probe/rescue_flash_probe.c -o build/rv32-rescue_flash_probe.o
+riscv64-unknown-elf-gcc  -std=c11 -Wall -Wextra -Werror -pedantic -O2 -march=rv32i2p0_m -mabi=ilp32 -ffreestanding -c ../storage-core/rescue_storage.c -o build/rv32-rescue_storage.o
+make: Leaving directory '<disposable-copy>/spi-nor'
+
+=== spi-update-integration ===
+make: Entering directory '<disposable-copy>/spi-update-integration'
+mkdir -p build
+cd ../update-controller && python3 -B fixtures.py > ../spi-update-integration/build/fixtures.h.tmp
+mv build/fixtures.h.tmp build/fixtures.h
+cc   -O2 -std=c11 -Wall -Wextra -Wpedantic -Werror \
+	-UNDEBUG -Ibuild -I../spi-nor -I../update-controller -I../journal-core \
+	test_spi_update.c ../update-controller/rescue_update.c ../spi-nor/rescue_spi_nor.c ../flash-probe/rescue_flash_probe.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c   -o build/test_spi_update
+./build/test_spi_update
+PASS: SPI NOR staging/readback, invalid manifest, protected bytes, full journal scans, trial confirmation and rollback
+make: Leaving directory '<disposable-copy>/spi-update-integration'
+
+=== protected-read ===
+make: Entering directory '<disposable-copy>/protected-read'
+mkdir -p build
+TMPDIR=<disposable-copy>/protected-read/build cc   -std=c11 -Wall -Wextra -Wpedantic -Werror rescue_protected_read.c ../storage-core/rescue_storage.c ../identity-record/identity_record.c ../journal-core/rescue_journal.c test_rescue_protected_read.c -o build/test_rescue_protected_read
+./build/test_rescue_protected_read
+PASS: protected persistent state inspection
+TMPDIR=<disposable-copy>/protected-read/build riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32i -mabi=ilp32 -ffreestanding -nostdlib -r rescue_protected_read.c ../storage-core/rescue_storage.c ../identity-record/identity_record.c ../journal-core/rescue_journal.c -o build/rescue_protected_read.rv32.o
+make: Leaving directory '<disposable-copy>/protected-read'
+
+=== upload-session ===
+make: Entering directory '<disposable-copy>/upload-session'
+mkdir -p build
+python3 -B ../update-controller/fixtures.py > build/fixtures.h
+cc   -std=c11 -Wall -Wextra -Wpedantic -Werror -UNDEBUG -O2 upload_session.c ../manifest-core/manifest_core.c ../image-core/image_core.c test_upload_session.c -o build/test_upload_session
+./build/test_upload_session
+upload session tests passed
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -ffreestanding -march=rv32im -mabi=ilp32 -c upload_session.c -o build/upload_session.rv32.o
+make: Leaving directory '<disposable-copy>/upload-session'
+
+=== stream-slot ===
+make: Entering directory '<disposable-copy>/stream-slot'
+mkdir -p build
+python3 -B fixtures.py > build/fixtures.h.tmp
+mv build/fixtures.h.tmp build/fixtures.h
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -Ibuild -I../journal-core -O2  -UNDEBUG rescue_update.c ../upload-session/upload_session.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c test_stream_slot.c -o build/test_stream_slot
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c rescue_update.c -o build/rescue_update.rv32.o
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c ../upload-session/upload_session.c -o build/upload_session.rv32.o
+./build/test_stream_slot
+PASS: 262161-byte cross-sector streaming upload, final-page padding and readback
+PASS: streaming NOR, 9 upload mutation boundaries plus abort, journal safety and readback
+make: Leaving directory '<disposable-copy>/stream-slot'
+
+=== managed-stream ===
+make: Entering directory '<disposable-copy>/managed-stream'
+mkdir -p build
+python3 -B fixtures.py > build/fixtures.h.tmp
+mv build/fixtures.h.tmp build/fixtures.h
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -Ibuild -I../journal-core -O2  -UNDEBUG rescue_update.c ../upload-session/upload_session.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c test_stream_slot.c -o build/test_stream_slot
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c rescue_update.c -o build/rescue_update.rv32.o
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c ../upload-session/upload_session.c -o build/upload_session.rv32.o
+./build/test_stream_slot
+PASS: 262161-byte cross-sector streaming upload, final-page padding and readback
+PASS: managed NOR journal bytes per chunk 262295 -> 302, ownership and lockout
+PASS: streaming NOR, 9 upload mutation boundaries plus abort, journal safety and readback
+make: Leaving directory '<disposable-copy>/managed-stream'
+
+=== managed-spi-integration ===
+make: Entering directory '<disposable-copy>/managed-spi-integration'
+mkdir -p build
+cd ../update-controller && python3 -B fixtures.py > ../managed-spi-integration/build/fixtures.h.tmp
+mv build/fixtures.h.tmp build/fixtures.h
+cc   -O2 -std=c11 -Wall -Wextra -Wpedantic -Werror \
+	-UNDEBUG -Ibuild -I../spi-nor -I../managed-stream -I../journal-core \
+	test_managed_spi.c ../managed-stream/rescue_update.c ../upload-session/upload_session.c ../spi-nor/rescue_spi_nor.c ../flash-probe/rescue_flash_probe.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c   -o build/test_managed_spi
+./build/test_managed_spi
+PASS: managed streaming through SPI NOR, 302 journal bytes/chunk, protected bytes, full journal scans, trial confirmation and rollback
+make: Leaving directory '<disposable-copy>/managed-spi-integration'
+
+=== management-wire ===
+make: Entering directory '<disposable-copy>/management-wire'
+cc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Wstrict-prototypes  -o management_wire_test management_wire.c management_wire_test.c
+riscv64-unknown-elf-gcc  -march=rv32imac -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Wstrict-prototypes -ffreestanding -c -o management_wire.rv32.o management_wire.c
+./management_wire_test
+management wire tests passed
+make: Leaving directory '<disposable-copy>/management-wire'
+
+=== wire-spi-integration ===
+make: Entering directory '<disposable-copy>/wire-spi-integration'
+mkdir -p build
+python3 -B fixtures.py > build/fixtures.h.tmp
+mv build/fixtures.h.tmp build/fixtures.h
+cc   -O2 -std=c11 -Wall -Wextra -Wpedantic -Werror \
+	-UNDEBUG -Ibuild -I../management-wire -I../spi-nor -I../managed-stream -I../journal-core \
+	test_managed_spi.c managed_wire_adapter.c ../management-wire/management_wire.c ../managed-stream/rescue_update.c ../upload-session/upload_session.c ../spi-nor/rescue_spi_nor.c ../flash-probe/rescue_flash_probe.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c   -o build/test_managed_spi
+./build/test_managed_spi
+PASS: encoded management requests -> managed streaming -> SPI NOR, replay/offset rejection, 302 journal bytes/chunk, protected bytes, full journal scans, trial confirmation and rollback
+./build/test_managed_spi product-scale
+PASS: 4221965-byte synthetic image, 4124 encoded chunks, full SPI transport and independent readback; protected bytes intact
+make: Leaving directory '<disposable-copy>/wire-spi-integration'
+
+=== network-session ===
+make: Entering directory '<disposable-copy>/network-session'
+cc   -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Wstrict-prototypes  -o network_session_test network_session_test.c network_session.c ../management-wire/management_wire.c
+riscv64-unknown-elf-gcc  -march=rv32imac -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Wstrict-prototypes -ffreestanding -c -o network_session.rv32.o network_session.c
+riscv64-unknown-elf-gcc  -march=rv32imac -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Wstrict-prototypes -ffreestanding -c -o management_wire.rv32.o ../management-wire/management_wire.c
+./network_session_test
+make: Leaving directory '<disposable-copy>/network-session'
+
+=== host-management-sim ===
+make: Entering directory '<disposable-copy>/host-management-sim'
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Werror -shared -fPIC -O2 bridge.c ../bios-session-ram-sim/firmware/sim_upload.c ../bios-session-ram-sim/firmware/network_session.c ../bios-session-ram-sim/firmware/managed_wire_adapter.c ../bios-session-ram-sim/firmware/management_wire.c ../bios-session-ram-sim/firmware/rescue_update.c ../bios-session-ram-sim/firmware/upload_session.c ../bios-session-ram-sim/firmware/manifest_core.c ../bios-session-ram-sim/firmware/manifest_store.c ../bios-session-ram-sim/firmware/image_core.c ../bios-session-ram-sim/firmware/rescue_flash_transaction.c ../bios-session-ram-sim/firmware/rescue_trial.c ../bios-session-ram-sim/firmware/rescue_storage.c ../bios-session-ram-sim/firmware/rescue_journal.c ../bios-session-ram-sim/firmware/identity_record.c ../bios-session-ram-sim/firmware/rescue_protected_read.c -o build/bridge.so
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v
+test_real_firmware_transport (test_bridge.TestFirmwareBridge.test_real_firmware_transport) ... ok
+test_each_mutation_retries_exact_wire_bytes_after_lost_reply (test_host_management.HostManagementTests.test_each_mutation_retries_exact_wire_bytes_after_lost_reply) ... ok
+test_local_limits (test_host_management.HostManagementTests.test_local_limits) ... ok
+test_missing_seal_offset_is_uncertain (test_host_management.HostManagementTests.test_missing_seal_offset_is_uncertain) ... ok
+test_reset_signal_stops_retries (test_host_management.HostManagementTests.test_reset_signal_stops_retries) ... ok
+test_short_empty_and_long_streams (test_host_management.HostManagementTests.test_short_empty_and_long_streams) ... ok
+test_status_can_follow_definite_rejection (test_host_management.HostManagementTests.test_status_can_follow_definite_rejection) ... ok
+test_stream_stops_on_wrong_acknowledged_offset (test_host_management.HostManagementTests.test_stream_stops_on_wrong_acknowledged_offset) ... ok
+test_timeout_retry_exhaustion (test_host_management.HostManagementTests.test_timeout_retry_exhaustion) ... ok
+test_wrong_response_fields_lock_client_without_retry (test_host_management.HostManagementTests.test_wrong_response_fields_lock_client_without_retry) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.005s
+
+OK
+SIM: verified sealed image; journal unchanged
+PASS: real C session + RAM updater, lost replies, exactly acknowledged offsets, lease cancellation and host lockout
+make: Leaving directory '<disposable-copy>/host-management-sim'
+
+=== reset-recovery-sim ===
+make: Entering directory '<disposable-copy>/reset-recovery-sim'
+mkdir -p build
+python3 -B fixtures.py > build/fixtures.h.tmp
+mv build/fixtures.h.tmp build/fixtures.h
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../managed-stream -Ibuild -I../journal-core -O2  -UNDEBUG ../managed-stream/rescue_update.c ../upload-session/upload_session.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c test_stream_slot.c -o build/test_stream_slot
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../managed-stream -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c ../managed-stream/rescue_update.c -o build/rescue_update.rv32.o
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../managed-stream -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c ../upload-session/upload_session.c -o build/upload_session.rv32.o
+./build/test_stream_slot
+PASS: 18 abrupt process exits at nine NOR mutations, preserved persistent bytes, fresh-process revalidation and restart with supplied high-water ID
+make: Leaving directory '<disposable-copy>/reset-recovery-sim'
+
+=== operation-ledger ===
+make: Entering directory '<disposable-copy>/operation-ledger'
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 op_ledger.c test_ledger.c -o build/test_ledger
+./build/test_ledger
+PASS: 459 interrupted ledger mutations, boot epoch, high-water reservation, terminal binding, corrupt/ambiguous records and read failures
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -ffreestanding -march=rv32im -mabi=ilp32 -c op_ledger.c -o build/op_ledger.rv32.o
+make: Leaving directory '<disposable-copy>/operation-ledger'
+
+=== ledger-reset-integration ===
+make: Entering directory '<disposable-copy>/ledger-reset-integration'
+mkdir -p build
+python3 -B fixtures.py > build/fixtures.h.tmp
+mv build/fixtures.h.tmp build/fixtures.h
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../managed-stream -Ibuild -I../journal-core -O2  -UNDEBUG ../operation-ledger/op_ledger.c ../managed-stream/rescue_update.c ../upload-session/upload_session.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c test_stream_slot.c -o build/test_stream_slot
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../managed-stream -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c ../managed-stream/rescue_update.c -o build/rescue_update.rv32.o
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../managed-stream -Ibuild -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c ../upload-session/upload_session.c -o build/upload_session.rv32.o
+./build/test_stream_slot
+PASS: fresh-process terminal ledger and image reconciliation, corrupted sealed image rejected
+PASS: 18 abrupt process exits at nine NOR mutations, ledger-backed ID recovery without supplied high-water mark
+make: Leaving directory '<disposable-copy>/ledger-reset-integration'
+test_cancelled (test_reconcile.ReconciliationTests.test_cancelled) ... ok
+test_interrupted_even_if_image_valid (test_reconcile.ReconciliationTests.test_interrupted_even_if_image_valid) ... ok
+test_reject_mismatch (test_reconcile.ReconciliationTests.test_reject_mismatch) ... ok
+test_verified_not_activated (test_reconcile.ReconciliationTests.test_verified_not_activated) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK
+PASS: APP A/B ICAP packets and launch interlock
+tb_icap_launch_interlock.v:179: $finish called at 37600000 (1ps)
+PASS: boot policy scenarios including 1 s and 60 s boundaries
+Rescue diagnostic request tests passed
+RV32 freestanding object compiled with riscv64-unknown-elf-gcc
+28 fresh component/integration groups PASS

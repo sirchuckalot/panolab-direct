@@ -1,0 +1,67 @@
+
+=== storage-core ===
+./build/test_rescue_storage
+storage-core tests passed
+
+=== journal-core ===
+./build/test_rescue_journal
+PASS: 794 interruption and read-error cases, 16 readback mismatches, 216 single-byte corruption cases, state mapping and selection checks
+
+=== flash-probe ===
+./build/test_rescue_flash_probe
+SPI JEDEC probe tests passed
+
+=== image-core ===
+./build/test_image_core
+image core tests passed
+
+=== flash-transaction ===
+./build/test_rescue_flash_transaction
+flash transaction tests passed
+
+=== trial-core ===
+./build/test_rescue_trial
+rescue trial tests passed
+
+=== manifest-core ===
+riscv64-unknown-elf-nm -u build/manifest.rv32.o > build/rv32-undefined.txt
+test ! -s build/rv32-undefined.txt
+./build/test_manifest
+manifest tests passed
+
+=== manifest-store ===
+riscv64-unknown-elf-nm -u build/core.rv32.o > build/rv32-undefined.txt
+test ! -s build/rv32-undefined.txt
+./build/test_store
+manifest store checks passed (430 body bytes, all cut points)
+
+=== update-controller ===
+mkdir -p build
+python3 fixtures.py > build/fixtures.h
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../journal-core -O2 rescue_update.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c test_update.c -o build/test_update
+./build/test_update
+PASS: integrated staging, protected bytes, 9 interrupted callback positions, reverify, trial, mocked confirmation, rollback and failed-reset recovery
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c rescue_update.c -o build/rescue_update.rv32.o
+
+=== identity-record ===
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror identity_record.c ../storage-core/rescue_storage.c test_identity.c -o build/test_identity
+./build/test_identity
+PASS: normalized identity decode, 1528 single-bit corruptions, all truncated prefixes, duplicate MAC rejection
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32im -mabi=ilp32 -ffreestanding -c identity_record.c -o build/identity_record.rv32.o
+
+=== host-diag ===
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Werror -shared -fPIC ../bios-network-probe/firmware/rescue_diag.c -o build/diag.so
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v test_client
+test_mock_transport (test_client.Tests.test_mock_transport) ... ok
+test_real_c_handler (test_client.Tests.test_real_c_handler) ... ok
+test_wrong_id_and_truncations (test_client.Tests.test_wrong_id_and_truncations) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+PASS: boot policy scenarios including 1 s and 60 s boundaries
+Rescue diagnostic request tests passed
+RV32 freestanding object compiled with riscv64-unknown-elf-gcc

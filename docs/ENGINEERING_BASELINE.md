@@ -28,6 +28,10 @@ Specific evidence: [LM1](../specs/LAB_MILESTONE_1.md),
 [disposable ISE installation](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md) and
 [fresh-host limitations](FRESH_HOST_ACCEPTANCE.md).
 
+## Rescue engineering stopping point
+
+[Iteration-15 checkpoint](../projects/rescue/experiments/iteration-15/README.md): preserve the local experimental source and evidence; named read-only diagnostic ISE timing pass, 28 component/integration regression groups, later RAM-only simulation and independent ledger tests. No consolidated iteration-15 bitstream or physical Rescue boot. [Stock research](../research/pano-stock/README.md): one physical G2 Rev B, native Ethernet identity and 16 MiB SPI address-space backup; owner-private identity and binary remain outside Git. Next milestone is physical Rescue bring-up, not further speculative feature expansion.
+
 ## Authoritative source/configuration inventory
 
 | Purpose | Canonical source |
@@ -67,7 +71,7 @@ recovery scripts are preserved for provenance but **must not be rerun**.
 
 ## G2 development handoff (next phase)
 
-The actual **Pano G2 Rev B** remains **unqualified** for programming. The
+The actual **Pano G2 Rev B** remains **unqualified** for Rescue programming. The later named diagnostic ISE timing pass and real stock discovery/backup are distinct evidence (see checkpoint above). The
 working generic XC6SLX150 vendor bitstreams have no accepted board pin
 constraints or hardware timing qualification. The next phase should start
 with [G2 BSP](../boards/pano_g2_rev_b/README.md),

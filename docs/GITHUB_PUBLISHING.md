@@ -57,13 +57,13 @@ development configuration. See the [current baseline](ENGINEERING_BASELINE.md).
 
 **Updated qualification boundaries:** genuine licensed ISE 14.7 vendor
 implementation and **two unattended disposable vendor installs** now
-pass on the provisioned rootless laptop. Actual Pano G2 constrained
-bitstream, physical Ethernet/SPI identity and A/B/ICAP recovery firmware
-remain **separate, unqualified** tasks. The scoped credential mount
+pass on the provisioned rootless laptop. A later named G2 diagnostic ISE timing pass is documented in the [Rescue checkpoint](../projects/rescue/experiments/iteration-15/README.md). Stock Ethernet identity and backup passed separately. Physical Rescue boot and A/B/ICAP recovery remain unqualified. The scoped credential mount
 continues to authorize only non-force pushes of `development`; it
 never authorizes changes to `main`. Follow the
 [current engineering handoff](ENGINEERING_BASELINE.md) and
 [temporary-component register](TEMPORARY_COMPONENTS.md) for the latest
 state.
+
+The gateway now recognizes the approved `research/` source root (commit `029141f`). It retains explicit-file commits (maximum 20 paths) and existing parent-directory requirements; a larger atomic milestone needs owner-side local staging and commit before the scoped push.
 
 The connected GitHub integration remains a valid publishing path regardless of whether owner-local direct Git push is enabled.

@@ -1,0 +1,14 @@
+--- a/boards/pano_g2_rev_b/bsp.py
++++ b/boards/pano_g2_rev_b/bsp.py
+@@ -25,6 +25,9 @@
+         self.pll = pll = S6PLL(speedgrade=-2)
+         reset_n = platform.request("rst_n")
+         self.comb += pll.reset.eq(~reset_n | self.rst)
+-        pll.register_clkin(platform.request("clk125"), 125e6)
++        clk125 = platform.request("clk125")
++        pll.register_clkin(clk125, 125e6)
+         pll.create_clkout(self.cd_sys, clk_freq)
+-        platform.add_false_path_constraints(self.cd_sys.clk, pll.clkin)
++        # Register the input period after requesting the board clock.
++        platform.add_period_constraint(clk125, 8.0)
++        platform.add_period_constraint(self.cd_sys.clk, 1e9 / clk_freq)

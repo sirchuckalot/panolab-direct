@@ -9,7 +9,8 @@ then read [architecture](docs/ARCHITECTURE.md),
 [development](docs/DEVELOPMENT.md), [security](docs/SECURITY.md),
 and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
 Read [PanoLab Rescue v1](specs/PANOLAB_RESCUE_V1.md) for the
-approved forward boot/update/recovery standard (not yet implemented).
+approved forward boot/update/recovery standard (not yet fully implemented or physically qualified).
+Read the [iteration-15 Rescue checkpoint](projects/rescue/experiments/iteration-15/README.md) and [stock research](research/pano-stock/README.md) before resuming G2 hardware work. Keep original experimental evidence separate from the canonical project build.
 Read the [LiteX BIOS implementation plan](docs/RESCUE_IMPLEMENTATION.md)
 for the timed/button-held recovery workflow and the deliberately unpaired
 Trusted-LAN appliance profile. That device mode does **not** waive

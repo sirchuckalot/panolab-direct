@@ -1,0 +1,24 @@
+
+=== storage-core ===
+./build/test_rescue_storage
+storage-core tests passed
+
+=== journal-core ===
+./build/test_rescue_journal
+PASS: 794 interruption and read-error cases, 16 readback mismatches, 216 single-byte corruption cases, state mapping and selection checks
+
+=== flash-probe ===
+./build/test_rescue_flash_probe
+SPI JEDEC probe tests passed
+
+=== image-core ===
+./build/test_image_core
+image core tests passed
+
+=== flash-transaction ===
+./build/test_rescue_flash_transaction
+flash transaction tests passed
+
+=== trial-core ===
+./build/test_rescue_trial
+rescue trial tests passed

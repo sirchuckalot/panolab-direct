@@ -1,6 +1,6 @@
 # PanoLab Rescue — Pano Logic G2 Rev B reference SoC (first implementation)
 
-**Status: source elaboration and BIOS generation verified; not a flashable hardware-qualified image.**
+**Status: canonical source prototype retained; later local diagnostic ISE timing and simulation results preserved in the [iteration-15 checkpoint](experiments/iteration-15/README.md). No hardware-qualified Rescue image.**
 **Contract:** [Rescue v1.1.0](../../specs/PANOLAB_RESCUE_V1.md) · [Implementation plan](../../docs/RESCUE_IMPLEMENTATION.md) · [Evidence](../../docs/RESCUE_BUILD_EVIDENCE.md)
 
 This is the initial PanoLab Rescue LiteX SoC, **not a fork of panog2_ldr** or an alternative FPGA bootloader. It directly imports current pinned LiteX, LiteX-Boards, LiteEth, LiteSPI and Migen. The only board-specific logic here is the Rev B clock/reset adaptation and a synchronized/latching recovery-button CSR. It compiles the established LiteX BIOS with [source-hash-guarded, build-output-only compatibility fixes](soc/bios_source_overlay.py). The original LiteX/Migen/LiteEth/LiteSPI and Pythondata installation files remain **unmodified**.
@@ -35,6 +35,8 @@ Outputs are BIOS `bios.bin`, generated LiteX Verilog, UCF and CSR JSON/CSV. The 
 
 ## What is still missing (required before claiming PanoLab Rescue v1 compliance)
 
+The following original baseline gaps are now partially addressed in separate experimental components and diagnostic builds; consult the [checkpoint build and qualification record](experiments/iteration-15/BUILD_RECORD.md) before selecting the next integration task. No experiment is silently enabled in the canonical build.
+
 1. Replace compile-time lab MAC with per-unit factory identity read/validation before LiteEth initialization.
 2. Extend BIOS via minimal upstream-compatible hook for configurable autoboot window, physical button hold and persistent journal policy. The exported button CSRs are the hardware foundation, **not** the completed feature.
 3. Implement Spartan-6 `ICAP_SPARTAN6` FPGA reconfiguration. Upstream `ICAPE2` is incompatible; test the IPROG sequence and boot addressing.
@@ -42,7 +44,7 @@ Outputs are BIOS `bios.bin`, generated LiteX Verilog, UCF and CSR JSON/CSV. The 
 5. Build bounded Ethernet management using LiteX BIOS/LiteEth routines; implement A/B transactional updates, readback/digests, profile-aware access, trial confirmation and rollback. BIOS `netboot` and `flashboot` boot CPU software, **not** FPGA slots.
 6. Run a full pinned vendor ISE build, check timing/resource use, then—with exact owner approval—perform G2 read-only bring-up and power-cycle/button recovery checks before any irreversible flash conversion.
 
-**Factory-history reference only:** the reverse-engineered G2 factory map has a multiboot header near `0x000000`, golden image around `0x040000`, main around `0x480000`, and device identity data around `0x8c0000`. These offsets are not the new PanoLab partition layout. Confirm revision, image header and erase geometry from independent board evidence before destructive action.
+**Factory-history reference only:** the reverse-engineered G2 factory map has a multiboot header near `0x000000`, golden image around `0x040000`, main around `0x480000`, and device identity data around `0x8c0000`. These offsets are not the new PanoLab partition layout. The [stock research milestone](../../research/pano-stock/FLASH_LAYOUT.md) physically acquired that full documented 16 MiB address extent and matched factory identities. Direct JEDEC identification, aliasing exclusion, a new partition map and recovery qualification remain pending.
 
 All implementation lives on `development`, with `main` frozen. No G2 flash operation or deployment is authorized solely by building this source.
 

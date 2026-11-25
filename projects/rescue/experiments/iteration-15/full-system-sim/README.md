@@ -1,0 +1,5 @@
+# Full-system G2 Rev B diagnostic simulation
+
+Run bash run.sh inside the existing development container. The runner checks the exact staged HDL and CPU source hashes before compilation. It uses simulation-only behavioral primitive models, a synthetic SPI JEDEC responder, and a synthetic Ethernet GMII frame. No actual network socket or physical device is used. It executes the embedded BIOS and checks boot, known/unknown JEDEC profiles, held/released startup button, recovery-only mode, and a real RTL/firmware GMII request/reply. The packet verifier checks FCS, IP/UDP checksums, endpoints and the host-client parser.
+
+Original evidence: boot.log, known-held.log, console.log, network.log, network-verification.log, tx.hex. A 550 ms simulation is needed for the existing Ethernet reset delay. The earlier Icarus run only reached the banner. A literal prompt grep failed because ANSI color interrupts the prompt; the prompt is visible in console.log. These models do not verify physical electrical behavior, persistent updates or physical reconfiguration. The staged design was not modified.

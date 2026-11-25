@@ -149,7 +149,7 @@ The normal Etherbone application may remain CPU-less. Rescue and an
 application cannot execute concurrently in one reconfigured FPGA.
 Independent power-cycle/button recovery from a hung application must
 be physically demonstrated; Spartan-6 ICAP alone does not guarantee it.
-**First implementation is now source-level:** [G2 Rev B Rescue SoC](../projects/rescue/README.md) elaborates VexRiscv/LiteEth/LiteSPI, compiles standard LiteX BIOS and produces Verilog/UCF; a generic upstream LiteX Verilator simulation reached the BIOS prompt. [Evidence](RESCUE_BUILD_EVIDENCE.md) distinguishes these PASS results from still-missing ICAP, per-board identity, A/B firmware policy, network update API, vendor bitstream and physical hardware proof. The broader v1.1 standard remains **not hardware-qualified**.
+**Historical first implementation was source-level:** [G2 Rev B Rescue SoC](../projects/rescue/README.md) elaborates VexRiscv/LiteEth/LiteSPI, compiles standard LiteX BIOS and produces Verilog/UCF; a generic upstream LiteX Verilator simulation reached the BIOS prompt. [Evidence](RESCUE_BUILD_EVIDENCE.md) distinguishes these PASS results from still-missing ICAP, per-board identity, A/B firmware policy, network update API, vendor bitstream and physical hardware proof. The broader v1.1 standard remains **not hardware-qualified**. The [iteration-15 checkpoint](../projects/rescue/experiments/iteration-15/README.md) now records subsequent G2-specific diagnostic ISE timing closure and distinct simulation-only components; stock Ethernet access/backup is documented under [research/pano-stock](../research/pano-stock/README.md). Neither establishes physical Rescue operation.
 
 ## Next capabilities and acceptance gates
 

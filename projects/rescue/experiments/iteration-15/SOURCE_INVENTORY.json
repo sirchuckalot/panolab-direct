@@ -1,0 +1,1747 @@
+{
+  "RELEASE_CLOSURE.md": {
+    "original_sha256": "7a527f374875977f157b035f95f9e6f35cf01421805313e769bc80adaa0366b2",
+    "checkpoint_sha256": "7a527f374875977f157b035f95f9e6f35cf01421805313e769bc80adaa0366b2"
+  },
+  "bios-expiry-short-sim/bios_source_overlay.py": {
+    "original_sha256": "8edb2d46a6ab04546c0f9d9ff5c770fdebe6cdccdd0581c0505f55f8115773d2",
+    "checkpoint_sha256": "8edb2d46a6ab04546c0f9d9ff5c770fdebe6cdccdd0581c0505f55f8115773d2"
+  },
+  "bios-expiry-short-sim/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-expiry-short-sim/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-expiry-short-sim/firmware/identity_record.c": {
+    "original_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709",
+    "checkpoint_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709"
+  },
+  "bios-expiry-short-sim/firmware/identity_record.h": {
+    "original_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f",
+    "checkpoint_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f"
+  },
+  "bios-expiry-short-sim/firmware/image_core.c": {
+    "original_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8",
+    "checkpoint_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8"
+  },
+  "bios-expiry-short-sim/firmware/image_core.h": {
+    "original_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71",
+    "checkpoint_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71"
+  },
+  "bios-expiry-short-sim/firmware/managed_stream.h": {
+    "original_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f",
+    "checkpoint_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f"
+  },
+  "bios-expiry-short-sim/firmware/managed_wire_adapter.c": {
+    "original_sha256": "4f06651856380802ac33092a1ac9765d1255cb3a32ba163281278c0040fc517f",
+    "checkpoint_sha256": "4f06651856380802ac33092a1ac9765d1255cb3a32ba163281278c0040fc517f"
+  },
+  "bios-expiry-short-sim/firmware/managed_wire_adapter.h": {
+    "original_sha256": "4d59129c6e52fb038d5e1275ed2af733f1cda4c7fb01eea378091947e926dc81",
+    "checkpoint_sha256": "4d59129c6e52fb038d5e1275ed2af733f1cda4c7fb01eea378091947e926dc81"
+  },
+  "bios-expiry-short-sim/firmware/management_wire.c": {
+    "original_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f",
+    "checkpoint_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f"
+  },
+  "bios-expiry-short-sim/firmware/management_wire.h": {
+    "original_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08",
+    "checkpoint_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08"
+  },
+  "bios-expiry-short-sim/firmware/manifest_core.c": {
+    "original_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10",
+    "checkpoint_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10"
+  },
+  "bios-expiry-short-sim/firmware/manifest_core.h": {
+    "original_sha256": "434bdbdf3df25f35ba2317ce6498597539160a4748f3dec9e019c5deddbd4c33",
+    "checkpoint_sha256": "434bdbdf3df25f35ba2317ce6498597539160a4748f3dec9e019c5deddbd4c33"
+  },
+  "bios-expiry-short-sim/firmware/manifest_store.c": {
+    "original_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc",
+    "checkpoint_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc"
+  },
+  "bios-expiry-short-sim/firmware/manifest_store.h": {
+    "original_sha256": "289abec4314487779877f1e88224e3876e41ae114adc73651df9fb204d91f0a0",
+    "checkpoint_sha256": "289abec4314487779877f1e88224e3876e41ae114adc73651df9fb204d91f0a0"
+  },
+  "bios-expiry-short-sim/firmware/network_session.c": {
+    "original_sha256": "23f5fc0cf76ce6f68cbf0fe1612bb4ae367a544f48d51f42f3b6cbdf0b455e93",
+    "checkpoint_sha256": "23f5fc0cf76ce6f68cbf0fe1612bb4ae367a544f48d51f42f3b6cbdf0b455e93"
+  },
+  "bios-expiry-short-sim/firmware/network_session.h": {
+    "original_sha256": "09bcbb8c09a555cc1f7c84bee7fd2d2f6fc67a4b5356a935bb4149b6c3f39655",
+    "checkpoint_sha256": "09bcbb8c09a555cc1f7c84bee7fd2d2f6fc67a4b5356a935bb4149b6c3f39655"
+  },
+  "bios-expiry-short-sim/firmware/rescue_bios.c": {
+    "original_sha256": "241b5870bf394fe17306e2bd7746085678ef9268fc9e7a535e3c3fef609d3034",
+    "checkpoint_sha256": "241b5870bf394fe17306e2bd7746085678ef9268fc9e7a535e3c3fef609d3034"
+  },
+  "bios-expiry-short-sim/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-expiry-short-sim/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-expiry-short-sim/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-expiry-short-sim/firmware/rescue_diag.c": {
+    "original_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c",
+    "checkpoint_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c"
+  },
+  "bios-expiry-short-sim/firmware/rescue_diag.h": {
+    "original_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b",
+    "checkpoint_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b"
+  },
+  "bios-expiry-short-sim/firmware/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "bios-expiry-short-sim/firmware/rescue_flash_probe.h": {
+    "original_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3",
+    "checkpoint_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3"
+  },
+  "bios-expiry-short-sim/firmware/rescue_flash_probe_litex.c": {
+    "original_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069",
+    "checkpoint_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069"
+  },
+  "bios-expiry-short-sim/firmware/rescue_flash_transaction.c": {
+    "original_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1",
+    "checkpoint_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1"
+  },
+  "bios-expiry-short-sim/firmware/rescue_flash_transaction.h": {
+    "original_sha256": "61e9415cc9c056d6278a5bf33c312b6b11d7570954c8865d3e3009da0bc4636b",
+    "checkpoint_sha256": "61e9415cc9c056d6278a5bf33c312b6b11d7570954c8865d3e3009da0bc4636b"
+  },
+  "bios-expiry-short-sim/firmware/rescue_journal.c": {
+    "original_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd",
+    "checkpoint_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd"
+  },
+  "bios-expiry-short-sim/firmware/rescue_journal.h": {
+    "original_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314",
+    "checkpoint_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314"
+  },
+  "bios-expiry-short-sim/firmware/rescue_protected_read.c": {
+    "original_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7",
+    "checkpoint_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7"
+  },
+  "bios-expiry-short-sim/firmware/rescue_protected_read.h": {
+    "original_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56",
+    "checkpoint_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56"
+  },
+  "bios-expiry-short-sim/firmware/rescue_spi_nor.c": {
+    "original_sha256": "22eda7af7c0341cdb88630a7ac05696c24cafbf21b2ed944fdd4abfc39b8b2c2",
+    "checkpoint_sha256": "ee232769311ff3913b1dc66eaaf65b04b76d96207e6ff84e722d9ea432909a45"
+  },
+  "bios-expiry-short-sim/firmware/rescue_spi_nor.h": {
+    "original_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700",
+    "checkpoint_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700"
+  },
+  "bios-expiry-short-sim/firmware/rescue_storage.c": {
+    "original_sha256": "c8352c0c4f9054934fe334627bc15ec2f56df56ad0066b0a2c30b59edb7c6dcd",
+    "checkpoint_sha256": "c8352c0c4f9054934fe334627bc15ec2f56df56ad0066b0a2c30b59edb7c6dcd"
+  },
+  "bios-expiry-short-sim/firmware/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "bios-expiry-short-sim/firmware/rescue_trial.c": {
+    "original_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46",
+    "checkpoint_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46"
+  },
+  "bios-expiry-short-sim/firmware/rescue_trial.h": {
+    "original_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07",
+    "checkpoint_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07"
+  },
+  "bios-expiry-short-sim/firmware/rescue_update.c": {
+    "original_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e",
+    "checkpoint_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e"
+  },
+  "bios-expiry-short-sim/firmware/rescue_update.h": {
+    "original_sha256": "5deb81306b331d97b0969154d523fdae070a57c13bff78b26e53185b84cbc5c9",
+    "checkpoint_sha256": "5deb81306b331d97b0969154d523fdae070a57c13bff78b26e53185b84cbc5c9"
+  },
+  "bios-expiry-short-sim/firmware/run_tests.sh": {
+    "original_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f",
+    "checkpoint_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f"
+  },
+  "bios-expiry-short-sim/firmware/sim_upload.c": {
+    "original_sha256": "f8bf072697973be1da5dfd3b885f5753cc5840ddacb373a33d260bb53b77e7b4",
+    "checkpoint_sha256": "f8bf072697973be1da5dfd3b885f5753cc5840ddacb373a33d260bb53b77e7b4"
+  },
+  "bios-expiry-short-sim/firmware/sim_upload.h": {
+    "original_sha256": "7ce52ea8c7f86fd1475be069ddc9df74514a1bbb2f732fb9be28b9cb20c4101e",
+    "checkpoint_sha256": "7ce52ea8c7f86fd1475be069ddc9df74514a1bbb2f732fb9be28b9cb20c4101e"
+  },
+  "bios-expiry-short-sim/firmware/stream_slot.h": {
+    "original_sha256": "74522aa8c140865c25b3301a20017ff0ce7e3765796746d5ff76f878c71283f0",
+    "checkpoint_sha256": "74522aa8c140865c25b3301a20017ff0ce7e3765796746d5ff76f878c71283f0"
+  },
+  "bios-expiry-short-sim/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-expiry-short-sim/firmware/test_rescue_diag.c": {
+    "original_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7",
+    "checkpoint_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7"
+  },
+  "bios-expiry-short-sim/firmware/upload_session.c": {
+    "original_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430",
+    "checkpoint_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430"
+  },
+  "bios-expiry-short-sim/firmware/upload_session.h": {
+    "original_sha256": "32c5ef64c0affcf9705e43ff283fd1df68d4258e7f3fae1dd2d5473a00cc7203",
+    "checkpoint_sha256": "32c5ef64c0affcf9705e43ff283fd1df68d4258e7f3fae1dd2d5473a00cc7203"
+  },
+  "bios-expiry-short-sim/rescue_soc.py": {
+    "original_sha256": "8891524cfc5e294d87fa6bb676946897b81fd09cd8e9bc327c16a43b7977276a",
+    "checkpoint_sha256": "8891524cfc5e294d87fa6bb676946897b81fd09cd8e9bc327c16a43b7977276a"
+  },
+  "bios-expiry-short-sim/verify_build.py": {
+    "original_sha256": "c7a6a57d69eb336188bce108f9e746eed4765d44a17d897193212e94ee756f70",
+    "checkpoint_sha256": "c7a6a57d69eb336188bce108f9e746eed4765d44a17d897193212e94ee756f70"
+  },
+  "bios-integration/bios_source_overlay.py": {
+    "original_sha256": "082d676680108f000f5af0e617ad1daf0abd25c557b5782356e8e79202bebc62",
+    "checkpoint_sha256": "082d676680108f000f5af0e617ad1daf0abd25c557b5782356e8e79202bebc62"
+  },
+  "bios-integration/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-integration/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-integration/firmware/rescue_bios.c": {
+    "original_sha256": "244de81be5f07edfece2e9e07a430effac99652df2e05a61c0f622e27b47357f",
+    "checkpoint_sha256": "244de81be5f07edfece2e9e07a430effac99652df2e05a61c0f622e27b47357f"
+  },
+  "bios-integration/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-integration/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-integration/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-integration/firmware/run_tests.sh": {
+    "original_sha256": "94ffdfb856e7ac96d6d65e48a0724346b17d4ea684a5dfcdad2b9a22c460e81e",
+    "checkpoint_sha256": "94ffdfb856e7ac96d6d65e48a0724346b17d4ea684a5dfcdad2b9a22c460e81e"
+  },
+  "bios-integration/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-integration/rescue_soc.py": {
+    "original_sha256": "19ee29f82fa6315274a875a65546cb02ef60c77f445dfe456b4600fb075eb6ee",
+    "checkpoint_sha256": "19ee29f82fa6315274a875a65546cb02ef60c77f445dfe456b4600fb075eb6ee"
+  },
+  "bios-integration/verify_build.py": {
+    "original_sha256": "c87dc233b00730478ae43aa2a70c6a3a4bff1a031574e6578e5490294a4b6cf7",
+    "checkpoint_sha256": "c87dc233b00730478ae43aa2a70c6a3a4bff1a031574e6578e5490294a4b6cf7"
+  },
+  "bios-network-probe/bios_source_overlay.py": {
+    "original_sha256": "5586e3d6503df55bf8fa84ea42393f88a9971fbbf4e3798e22e417774cfe99fc",
+    "checkpoint_sha256": "5586e3d6503df55bf8fa84ea42393f88a9971fbbf4e3798e22e417774cfe99fc"
+  },
+  "bios-network-probe/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-network-probe/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-network-probe/firmware/rescue_bios.c": {
+    "original_sha256": "cfe0e17d1ac62c245a4fc5ace16d6b3a7caaaea44e3d5a545a11ff1867beafd4",
+    "checkpoint_sha256": "cfe0e17d1ac62c245a4fc5ace16d6b3a7caaaea44e3d5a545a11ff1867beafd4"
+  },
+  "bios-network-probe/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-network-probe/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-network-probe/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-network-probe/firmware/rescue_diag.c": {
+    "original_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c",
+    "checkpoint_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c"
+  },
+  "bios-network-probe/firmware/rescue_diag.h": {
+    "original_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b",
+    "checkpoint_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b"
+  },
+  "bios-network-probe/firmware/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "bios-network-probe/firmware/rescue_flash_probe.h": {
+    "original_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3",
+    "checkpoint_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3"
+  },
+  "bios-network-probe/firmware/rescue_flash_probe_litex.c": {
+    "original_sha256": "c7efa7151be3aa60535ad5f314c453db923bae83fcb9638484e2bc067f81e671",
+    "checkpoint_sha256": "c7efa7151be3aa60535ad5f314c453db923bae83fcb9638484e2bc067f81e671"
+  },
+  "bios-network-probe/firmware/rescue_storage.c": {
+    "original_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5",
+    "checkpoint_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5"
+  },
+  "bios-network-probe/firmware/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "bios-network-probe/firmware/run_tests.sh": {
+    "original_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f",
+    "checkpoint_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f"
+  },
+  "bios-network-probe/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-network-probe/firmware/test_rescue_diag.c": {
+    "original_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7",
+    "checkpoint_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7"
+  },
+  "bios-network-probe/rescue_soc.py": {
+    "original_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f",
+    "checkpoint_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f"
+  },
+  "bios-network-probe/verify_build.py": {
+    "original_sha256": "f90f42c494160c528ba8c888f7db7e3901f1a67db896b110b7af6a9e1a81ea29",
+    "checkpoint_sha256": "f90f42c494160c528ba8c888f7db7e3901f1a67db896b110b7af6a9e1a81ea29"
+  },
+  "bios-persistent-probe/bios_source_overlay.py": {
+    "original_sha256": "b4e29a9f583b9c706f03e0226225755cdc38aea746fcce93bb88281022876b5c",
+    "checkpoint_sha256": "b4e29a9f583b9c706f03e0226225755cdc38aea746fcce93bb88281022876b5c"
+  },
+  "bios-persistent-probe/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-persistent-probe/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-persistent-probe/firmware/identity_record.c": {
+    "original_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709",
+    "checkpoint_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709"
+  },
+  "bios-persistent-probe/firmware/identity_record.h": {
+    "original_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f",
+    "checkpoint_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f"
+  },
+  "bios-persistent-probe/firmware/rescue_bios.c": {
+    "original_sha256": "35fe23d84d2bb7529306efe0290b8eaab5cfdbefeb281110f3e64da3fdf07a4b",
+    "checkpoint_sha256": "35fe23d84d2bb7529306efe0290b8eaab5cfdbefeb281110f3e64da3fdf07a4b"
+  },
+  "bios-persistent-probe/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-persistent-probe/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-persistent-probe/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-persistent-probe/firmware/rescue_diag.c": {
+    "original_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c",
+    "checkpoint_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c"
+  },
+  "bios-persistent-probe/firmware/rescue_diag.h": {
+    "original_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b",
+    "checkpoint_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b"
+  },
+  "bios-persistent-probe/firmware/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "bios-persistent-probe/firmware/rescue_flash_probe.h": {
+    "original_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3",
+    "checkpoint_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3"
+  },
+  "bios-persistent-probe/firmware/rescue_flash_probe_litex.c": {
+    "original_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069",
+    "checkpoint_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069"
+  },
+  "bios-persistent-probe/firmware/rescue_journal.c": {
+    "original_sha256": "4d8a7c288719b1371989d7078d7fb45921a642f8b2ba048a91ab2b8cbe39735a",
+    "checkpoint_sha256": "a8f511c3454d93eabf4a0022329285e24568ed8eaf07927b3939ede30a8cdc2e"
+  },
+  "bios-persistent-probe/firmware/rescue_journal.h": {
+    "original_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314",
+    "checkpoint_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314"
+  },
+  "bios-persistent-probe/firmware/rescue_protected_read.c": {
+    "original_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7",
+    "checkpoint_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7"
+  },
+  "bios-persistent-probe/firmware/rescue_protected_read.h": {
+    "original_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56",
+    "checkpoint_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56"
+  },
+  "bios-persistent-probe/firmware/rescue_spi_nor.c": {
+    "original_sha256": "22eda7af7c0341cdb88630a7ac05696c24cafbf21b2ed944fdd4abfc39b8b2c2",
+    "checkpoint_sha256": "ee232769311ff3913b1dc66eaaf65b04b76d96207e6ff84e722d9ea432909a45"
+  },
+  "bios-persistent-probe/firmware/rescue_spi_nor.h": {
+    "original_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700",
+    "checkpoint_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700"
+  },
+  "bios-persistent-probe/firmware/rescue_storage.c": {
+    "original_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5",
+    "checkpoint_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5"
+  },
+  "bios-persistent-probe/firmware/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "bios-persistent-probe/firmware/run_tests.sh": {
+    "original_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f",
+    "checkpoint_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f"
+  },
+  "bios-persistent-probe/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-persistent-probe/firmware/test_rescue_diag.c": {
+    "original_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7",
+    "checkpoint_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7"
+  },
+  "bios-persistent-probe/rescue_soc.py": {
+    "original_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f",
+    "checkpoint_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f"
+  },
+  "bios-persistent-probe/verify_build.py": {
+    "original_sha256": "7a031127c890a553e1b28e6d06429c5444a381469fb34f4c457ea25a7cfe5f74",
+    "checkpoint_sha256": "7a031127c890a553e1b28e6d06429c5444a381469fb34f4c457ea25a7cfe5f74"
+  },
+  "bios-session-ram-sim/bios_source_overlay.py": {
+    "original_sha256": "8edb2d46a6ab04546c0f9d9ff5c770fdebe6cdccdd0581c0505f55f8115773d2",
+    "checkpoint_sha256": "8edb2d46a6ab04546c0f9d9ff5c770fdebe6cdccdd0581c0505f55f8115773d2"
+  },
+  "bios-session-ram-sim/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-session-ram-sim/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-session-ram-sim/firmware/identity_record.c": {
+    "original_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709",
+    "checkpoint_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709"
+  },
+  "bios-session-ram-sim/firmware/identity_record.h": {
+    "original_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f",
+    "checkpoint_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f"
+  },
+  "bios-session-ram-sim/firmware/image_core.c": {
+    "original_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8",
+    "checkpoint_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8"
+  },
+  "bios-session-ram-sim/firmware/image_core.h": {
+    "original_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71",
+    "checkpoint_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71"
+  },
+  "bios-session-ram-sim/firmware/managed_stream.h": {
+    "original_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f",
+    "checkpoint_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f"
+  },
+  "bios-session-ram-sim/firmware/managed_wire_adapter.c": {
+    "original_sha256": "4f06651856380802ac33092a1ac9765d1255cb3a32ba163281278c0040fc517f",
+    "checkpoint_sha256": "4f06651856380802ac33092a1ac9765d1255cb3a32ba163281278c0040fc517f"
+  },
+  "bios-session-ram-sim/firmware/managed_wire_adapter.h": {
+    "original_sha256": "4d59129c6e52fb038d5e1275ed2af733f1cda4c7fb01eea378091947e926dc81",
+    "checkpoint_sha256": "4d59129c6e52fb038d5e1275ed2af733f1cda4c7fb01eea378091947e926dc81"
+  },
+  "bios-session-ram-sim/firmware/management_wire.c": {
+    "original_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f",
+    "checkpoint_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f"
+  },
+  "bios-session-ram-sim/firmware/management_wire.h": {
+    "original_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08",
+    "checkpoint_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08"
+  },
+  "bios-session-ram-sim/firmware/manifest_core.c": {
+    "original_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10",
+    "checkpoint_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10"
+  },
+  "bios-session-ram-sim/firmware/manifest_core.h": {
+    "original_sha256": "434bdbdf3df25f35ba2317ce6498597539160a4748f3dec9e019c5deddbd4c33",
+    "checkpoint_sha256": "434bdbdf3df25f35ba2317ce6498597539160a4748f3dec9e019c5deddbd4c33"
+  },
+  "bios-session-ram-sim/firmware/manifest_store.c": {
+    "original_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc",
+    "checkpoint_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc"
+  },
+  "bios-session-ram-sim/firmware/manifest_store.h": {
+    "original_sha256": "289abec4314487779877f1e88224e3876e41ae114adc73651df9fb204d91f0a0",
+    "checkpoint_sha256": "289abec4314487779877f1e88224e3876e41ae114adc73651df9fb204d91f0a0"
+  },
+  "bios-session-ram-sim/firmware/network_session.c": {
+    "original_sha256": "23f5fc0cf76ce6f68cbf0fe1612bb4ae367a544f48d51f42f3b6cbdf0b455e93",
+    "checkpoint_sha256": "23f5fc0cf76ce6f68cbf0fe1612bb4ae367a544f48d51f42f3b6cbdf0b455e93"
+  },
+  "bios-session-ram-sim/firmware/network_session.h": {
+    "original_sha256": "09bcbb8c09a555cc1f7c84bee7fd2d2f6fc67a4b5356a935bb4149b6c3f39655",
+    "checkpoint_sha256": "09bcbb8c09a555cc1f7c84bee7fd2d2f6fc67a4b5356a935bb4149b6c3f39655"
+  },
+  "bios-session-ram-sim/firmware/rescue_bios.c": {
+    "original_sha256": "241b5870bf394fe17306e2bd7746085678ef9268fc9e7a535e3c3fef609d3034",
+    "checkpoint_sha256": "241b5870bf394fe17306e2bd7746085678ef9268fc9e7a535e3c3fef609d3034"
+  },
+  "bios-session-ram-sim/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-session-ram-sim/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-session-ram-sim/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-session-ram-sim/firmware/rescue_diag.c": {
+    "original_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c",
+    "checkpoint_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c"
+  },
+  "bios-session-ram-sim/firmware/rescue_diag.h": {
+    "original_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b",
+    "checkpoint_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b"
+  },
+  "bios-session-ram-sim/firmware/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "bios-session-ram-sim/firmware/rescue_flash_probe.h": {
+    "original_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3",
+    "checkpoint_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3"
+  },
+  "bios-session-ram-sim/firmware/rescue_flash_probe_litex.c": {
+    "original_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069",
+    "checkpoint_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069"
+  },
+  "bios-session-ram-sim/firmware/rescue_flash_transaction.c": {
+    "original_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1",
+    "checkpoint_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1"
+  },
+  "bios-session-ram-sim/firmware/rescue_flash_transaction.h": {
+    "original_sha256": "61e9415cc9c056d6278a5bf33c312b6b11d7570954c8865d3e3009da0bc4636b",
+    "checkpoint_sha256": "61e9415cc9c056d6278a5bf33c312b6b11d7570954c8865d3e3009da0bc4636b"
+  },
+  "bios-session-ram-sim/firmware/rescue_journal.c": {
+    "original_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd",
+    "checkpoint_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd"
+  },
+  "bios-session-ram-sim/firmware/rescue_journal.h": {
+    "original_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314",
+    "checkpoint_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314"
+  },
+  "bios-session-ram-sim/firmware/rescue_protected_read.c": {
+    "original_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7",
+    "checkpoint_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7"
+  },
+  "bios-session-ram-sim/firmware/rescue_protected_read.h": {
+    "original_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56",
+    "checkpoint_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56"
+  },
+  "bios-session-ram-sim/firmware/rescue_spi_nor.c": {
+    "original_sha256": "22eda7af7c0341cdb88630a7ac05696c24cafbf21b2ed944fdd4abfc39b8b2c2",
+    "checkpoint_sha256": "ee232769311ff3913b1dc66eaaf65b04b76d96207e6ff84e722d9ea432909a45"
+  },
+  "bios-session-ram-sim/firmware/rescue_spi_nor.h": {
+    "original_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700",
+    "checkpoint_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700"
+  },
+  "bios-session-ram-sim/firmware/rescue_storage.c": {
+    "original_sha256": "c8352c0c4f9054934fe334627bc15ec2f56df56ad0066b0a2c30b59edb7c6dcd",
+    "checkpoint_sha256": "c8352c0c4f9054934fe334627bc15ec2f56df56ad0066b0a2c30b59edb7c6dcd"
+  },
+  "bios-session-ram-sim/firmware/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "bios-session-ram-sim/firmware/rescue_trial.c": {
+    "original_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46",
+    "checkpoint_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46"
+  },
+  "bios-session-ram-sim/firmware/rescue_trial.h": {
+    "original_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07",
+    "checkpoint_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07"
+  },
+  "bios-session-ram-sim/firmware/rescue_update.c": {
+    "original_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e",
+    "checkpoint_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e"
+  },
+  "bios-session-ram-sim/firmware/rescue_update.h": {
+    "original_sha256": "5deb81306b331d97b0969154d523fdae070a57c13bff78b26e53185b84cbc5c9",
+    "checkpoint_sha256": "5deb81306b331d97b0969154d523fdae070a57c13bff78b26e53185b84cbc5c9"
+  },
+  "bios-session-ram-sim/firmware/run_tests.sh": {
+    "original_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f",
+    "checkpoint_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f"
+  },
+  "bios-session-ram-sim/firmware/sim_upload.c": {
+    "original_sha256": "88d14375fea40a6a7e815051899b439cb59af39ea62758c5104ac4d621ef3744",
+    "checkpoint_sha256": "88d14375fea40a6a7e815051899b439cb59af39ea62758c5104ac4d621ef3744"
+  },
+  "bios-session-ram-sim/firmware/sim_upload.h": {
+    "original_sha256": "7ce52ea8c7f86fd1475be069ddc9df74514a1bbb2f732fb9be28b9cb20c4101e",
+    "checkpoint_sha256": "7ce52ea8c7f86fd1475be069ddc9df74514a1bbb2f732fb9be28b9cb20c4101e"
+  },
+  "bios-session-ram-sim/firmware/stream_slot.h": {
+    "original_sha256": "74522aa8c140865c25b3301a20017ff0ce7e3765796746d5ff76f878c71283f0",
+    "checkpoint_sha256": "74522aa8c140865c25b3301a20017ff0ce7e3765796746d5ff76f878c71283f0"
+  },
+  "bios-session-ram-sim/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-session-ram-sim/firmware/test_rescue_diag.c": {
+    "original_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7",
+    "checkpoint_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7"
+  },
+  "bios-session-ram-sim/firmware/upload_session.c": {
+    "original_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430",
+    "checkpoint_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430"
+  },
+  "bios-session-ram-sim/firmware/upload_session.h": {
+    "original_sha256": "32c5ef64c0affcf9705e43ff283fd1df68d4258e7f3fae1dd2d5473a00cc7203",
+    "checkpoint_sha256": "32c5ef64c0affcf9705e43ff283fd1df68d4258e7f3fae1dd2d5473a00cc7203"
+  },
+  "bios-session-ram-sim/rescue_soc.py": {
+    "original_sha256": "8891524cfc5e294d87fa6bb676946897b81fd09cd8e9bc327c16a43b7977276a",
+    "checkpoint_sha256": "8891524cfc5e294d87fa6bb676946897b81fd09cd8e9bc327c16a43b7977276a"
+  },
+  "bios-session-ram-sim/verify_build.py": {
+    "original_sha256": "c7a6a57d69eb336188bce108f9e746eed4765d44a17d897193212e94ee756f70",
+    "checkpoint_sha256": "c7a6a57d69eb336188bce108f9e746eed4765d44a17d897193212e94ee756f70"
+  },
+  "bios-storage-probe/bios_source_overlay.py": {
+    "original_sha256": "76cc06da48911e74fa61f48152b8a9b722bde94f0830a702be3158b8d837b248",
+    "checkpoint_sha256": "76cc06da48911e74fa61f48152b8a9b722bde94f0830a702be3158b8d837b248"
+  },
+  "bios-storage-probe/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-storage-probe/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-storage-probe/firmware/rescue_bios.c": {
+    "original_sha256": "568fc71ce7c2b2a0ca20b45dda511357e36c98ed3ff86cd619f87558ec36590e",
+    "checkpoint_sha256": "568fc71ce7c2b2a0ca20b45dda511357e36c98ed3ff86cd619f87558ec36590e"
+  },
+  "bios-storage-probe/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-storage-probe/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-storage-probe/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-storage-probe/firmware/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "bios-storage-probe/firmware/rescue_flash_probe.h": {
+    "original_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3",
+    "checkpoint_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3"
+  },
+  "bios-storage-probe/firmware/rescue_flash_probe_litex.c": {
+    "original_sha256": "c7efa7151be3aa60535ad5f314c453db923bae83fcb9638484e2bc067f81e671",
+    "checkpoint_sha256": "c7efa7151be3aa60535ad5f314c453db923bae83fcb9638484e2bc067f81e671"
+  },
+  "bios-storage-probe/firmware/rescue_storage.c": {
+    "original_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5",
+    "checkpoint_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5"
+  },
+  "bios-storage-probe/firmware/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "bios-storage-probe/firmware/run_tests.sh": {
+    "original_sha256": "94ffdfb856e7ac96d6d65e48a0724346b17d4ea684a5dfcdad2b9a22c460e81e",
+    "checkpoint_sha256": "94ffdfb856e7ac96d6d65e48a0724346b17d4ea684a5dfcdad2b9a22c460e81e"
+  },
+  "bios-storage-probe/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-storage-probe/rescue_soc.py": {
+    "original_sha256": "0e7064203ac06a2b395bcba488dd846be734b9552905e82fce1bdb0b8454e420",
+    "checkpoint_sha256": "0e7064203ac06a2b395bcba488dd846be734b9552905e82fce1bdb0b8454e420"
+  },
+  "bios-storage-probe/verify_build.py": {
+    "original_sha256": "9380823d5b8984fdc80fe90ee67092f50c49e5c75eb9bf808fd16a6c6341bcdc",
+    "checkpoint_sha256": "9380823d5b8984fdc80fe90ee67092f50c49e5c75eb9bf808fd16a6c6341bcdc"
+  },
+  "bios-synthetic-state-only/bios_source_overlay.py": {
+    "original_sha256": "b4e29a9f583b9c706f03e0226225755cdc38aea746fcce93bb88281022876b5c",
+    "checkpoint_sha256": "b4e29a9f583b9c706f03e0226225755cdc38aea746fcce93bb88281022876b5c"
+  },
+  "bios-synthetic-state-only/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-synthetic-state-only/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-synthetic-state-only/firmware/identity_record.c": {
+    "original_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709",
+    "checkpoint_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709"
+  },
+  "bios-synthetic-state-only/firmware/identity_record.h": {
+    "original_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f",
+    "checkpoint_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f"
+  },
+  "bios-synthetic-state-only/firmware/rescue_bios.c": {
+    "original_sha256": "1b626616264d8936e4b8444d7e276dc207433721a13059cb935df96cab8ce916",
+    "checkpoint_sha256": "1b626616264d8936e4b8444d7e276dc207433721a13059cb935df96cab8ce916"
+  },
+  "bios-synthetic-state-only/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-synthetic-state-only/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-synthetic-state-only/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-synthetic-state-only/firmware/rescue_diag.c": {
+    "original_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c",
+    "checkpoint_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c"
+  },
+  "bios-synthetic-state-only/firmware/rescue_diag.h": {
+    "original_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b",
+    "checkpoint_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b"
+  },
+  "bios-synthetic-state-only/firmware/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "bios-synthetic-state-only/firmware/rescue_flash_probe.h": {
+    "original_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3",
+    "checkpoint_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3"
+  },
+  "bios-synthetic-state-only/firmware/rescue_flash_probe_litex.c": {
+    "original_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069",
+    "checkpoint_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069"
+  },
+  "bios-synthetic-state-only/firmware/rescue_journal.c": {
+    "original_sha256": "4d8a7c288719b1371989d7078d7fb45921a642f8b2ba048a91ab2b8cbe39735a",
+    "checkpoint_sha256": "a8f511c3454d93eabf4a0022329285e24568ed8eaf07927b3939ede30a8cdc2e"
+  },
+  "bios-synthetic-state-only/firmware/rescue_journal.h": {
+    "original_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314",
+    "checkpoint_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314"
+  },
+  "bios-synthetic-state-only/firmware/rescue_protected_read.c": {
+    "original_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7",
+    "checkpoint_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7"
+  },
+  "bios-synthetic-state-only/firmware/rescue_protected_read.h": {
+    "original_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56",
+    "checkpoint_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56"
+  },
+  "bios-synthetic-state-only/firmware/rescue_spi_nor.c": {
+    "original_sha256": "22eda7af7c0341cdb88630a7ac05696c24cafbf21b2ed944fdd4abfc39b8b2c2",
+    "checkpoint_sha256": "ee232769311ff3913b1dc66eaaf65b04b76d96207e6ff84e722d9ea432909a45"
+  },
+  "bios-synthetic-state-only/firmware/rescue_spi_nor.h": {
+    "original_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700",
+    "checkpoint_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700"
+  },
+  "bios-synthetic-state-only/firmware/rescue_storage.c": {
+    "original_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5",
+    "checkpoint_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5"
+  },
+  "bios-synthetic-state-only/firmware/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "bios-synthetic-state-only/firmware/run_tests.sh": {
+    "original_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f",
+    "checkpoint_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f"
+  },
+  "bios-synthetic-state-only/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-synthetic-state-only/firmware/test_rescue_diag.c": {
+    "original_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7",
+    "checkpoint_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7"
+  },
+  "bios-synthetic-state-only/rescue_soc.py": {
+    "original_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f",
+    "checkpoint_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f"
+  },
+  "bios-synthetic-state-only/verify_build.py": {
+    "original_sha256": "7a031127c890a553e1b28e6d06429c5444a381469fb34f4c457ea25a7cfe5f74",
+    "checkpoint_sha256": "7a031127c890a553e1b28e6d06429c5444a381469fb34f4c457ea25a7cfe5f74"
+  },
+  "bios-upload-ram-sim/bios_source_overlay.py": {
+    "original_sha256": "8a5174fee05f9004567d02ef971777fd82556c14802876b285243d3fbdf5eea9",
+    "checkpoint_sha256": "8a5174fee05f9004567d02ef971777fd82556c14802876b285243d3fbdf5eea9"
+  },
+  "bios-upload-ram-sim/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "bios-upload-ram-sim/build.sh": {
+    "original_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4",
+    "checkpoint_sha256": "dc1c11c7dbcd615b7e72dd7575a50096f9741ff90e2b09238e58ee8871dd9ad4"
+  },
+  "bios-upload-ram-sim/firmware/identity_record.c": {
+    "original_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709",
+    "checkpoint_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709"
+  },
+  "bios-upload-ram-sim/firmware/identity_record.h": {
+    "original_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f",
+    "checkpoint_sha256": "9487d3a98a1390babaf21008a92d45ae95719e5df55665140193f3e541a4b63f"
+  },
+  "bios-upload-ram-sim/firmware/image_core.c": {
+    "original_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8",
+    "checkpoint_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8"
+  },
+  "bios-upload-ram-sim/firmware/image_core.h": {
+    "original_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71",
+    "checkpoint_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71"
+  },
+  "bios-upload-ram-sim/firmware/managed_stream.h": {
+    "original_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f",
+    "checkpoint_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f"
+  },
+  "bios-upload-ram-sim/firmware/managed_wire_adapter.c": {
+    "original_sha256": "4f06651856380802ac33092a1ac9765d1255cb3a32ba163281278c0040fc517f",
+    "checkpoint_sha256": "4f06651856380802ac33092a1ac9765d1255cb3a32ba163281278c0040fc517f"
+  },
+  "bios-upload-ram-sim/firmware/managed_wire_adapter.h": {
+    "original_sha256": "4d59129c6e52fb038d5e1275ed2af733f1cda4c7fb01eea378091947e926dc81",
+    "checkpoint_sha256": "4d59129c6e52fb038d5e1275ed2af733f1cda4c7fb01eea378091947e926dc81"
+  },
+  "bios-upload-ram-sim/firmware/management_wire.c": {
+    "original_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f",
+    "checkpoint_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f"
+  },
+  "bios-upload-ram-sim/firmware/management_wire.h": {
+    "original_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08",
+    "checkpoint_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08"
+  },
+  "bios-upload-ram-sim/firmware/manifest_core.c": {
+    "original_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10",
+    "checkpoint_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10"
+  },
+  "bios-upload-ram-sim/firmware/manifest_core.h": {
+    "original_sha256": "434bdbdf3df25f35ba2317ce6498597539160a4748f3dec9e019c5deddbd4c33",
+    "checkpoint_sha256": "434bdbdf3df25f35ba2317ce6498597539160a4748f3dec9e019c5deddbd4c33"
+  },
+  "bios-upload-ram-sim/firmware/manifest_store.c": {
+    "original_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc",
+    "checkpoint_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc"
+  },
+  "bios-upload-ram-sim/firmware/manifest_store.h": {
+    "original_sha256": "289abec4314487779877f1e88224e3876e41ae114adc73651df9fb204d91f0a0",
+    "checkpoint_sha256": "289abec4314487779877f1e88224e3876e41ae114adc73651df9fb204d91f0a0"
+  },
+  "bios-upload-ram-sim/firmware/rescue_bios.c": {
+    "original_sha256": "c6c1c455c4a57e3035ed134eb06239524d6c9cea5a3027b12dcf418684a7de85",
+    "checkpoint_sha256": "c6c1c455c4a57e3035ed134eb06239524d6c9cea5a3027b12dcf418684a7de85"
+  },
+  "bios-upload-ram-sim/firmware/rescue_bios.h": {
+    "original_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662",
+    "checkpoint_sha256": "4683a2cdfdce308ef3b01c012af643130173050fd6e1501bb59106cfd2b91662"
+  },
+  "bios-upload-ram-sim/firmware/rescue_boot_policy.c": {
+    "original_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453",
+    "checkpoint_sha256": "3e08ab806dfc8f75d493dd04aa3b20452210b5e56d23fce897e991b4ef147453"
+  },
+  "bios-upload-ram-sim/firmware/rescue_boot_policy.h": {
+    "original_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035",
+    "checkpoint_sha256": "94e155a0cbcce547d9a2f9a8a259200431b34f4c20521f883c076e63a1679035"
+  },
+  "bios-upload-ram-sim/firmware/rescue_diag.c": {
+    "original_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c",
+    "checkpoint_sha256": "e4ebc404256978388afcada52db180f84ab093bb3f4e330f31964c87fb91379c"
+  },
+  "bios-upload-ram-sim/firmware/rescue_diag.h": {
+    "original_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b",
+    "checkpoint_sha256": "db2e0a0f75b16df9adaff85f9ab9b948173460e3c020709427f1f33101c0309b"
+  },
+  "bios-upload-ram-sim/firmware/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "bios-upload-ram-sim/firmware/rescue_flash_probe.h": {
+    "original_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3",
+    "checkpoint_sha256": "f83183a6b24fd6599e996388a06fe7dc881a6fdd48ab8a67c95c832654524be3"
+  },
+  "bios-upload-ram-sim/firmware/rescue_flash_probe_litex.c": {
+    "original_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069",
+    "checkpoint_sha256": "231ae1a93eb4bc17f9e7fbb2e03b0d380c7489e7b093407f393f2eb91c396069"
+  },
+  "bios-upload-ram-sim/firmware/rescue_flash_transaction.c": {
+    "original_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1",
+    "checkpoint_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1"
+  },
+  "bios-upload-ram-sim/firmware/rescue_flash_transaction.h": {
+    "original_sha256": "61e9415cc9c056d6278a5bf33c312b6b11d7570954c8865d3e3009da0bc4636b",
+    "checkpoint_sha256": "61e9415cc9c056d6278a5bf33c312b6b11d7570954c8865d3e3009da0bc4636b"
+  },
+  "bios-upload-ram-sim/firmware/rescue_journal.c": {
+    "original_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd",
+    "checkpoint_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd"
+  },
+  "bios-upload-ram-sim/firmware/rescue_journal.h": {
+    "original_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314",
+    "checkpoint_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314"
+  },
+  "bios-upload-ram-sim/firmware/rescue_protected_read.c": {
+    "original_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7",
+    "checkpoint_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7"
+  },
+  "bios-upload-ram-sim/firmware/rescue_protected_read.h": {
+    "original_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56",
+    "checkpoint_sha256": "3e12c16d5638f1b33c27eed333c0b2d29fc2150a646b8402bdaa5ef643cd5e56"
+  },
+  "bios-upload-ram-sim/firmware/rescue_spi_nor.c": {
+    "original_sha256": "22eda7af7c0341cdb88630a7ac05696c24cafbf21b2ed944fdd4abfc39b8b2c2",
+    "checkpoint_sha256": "ee232769311ff3913b1dc66eaaf65b04b76d96207e6ff84e722d9ea432909a45"
+  },
+  "bios-upload-ram-sim/firmware/rescue_spi_nor.h": {
+    "original_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700",
+    "checkpoint_sha256": "4a8d13d4867589d2615c8137db1cb1f4edd6ce21ff2f25de89bb5d9d9cfea700"
+  },
+  "bios-upload-ram-sim/firmware/rescue_storage.c": {
+    "original_sha256": "c8352c0c4f9054934fe334627bc15ec2f56df56ad0066b0a2c30b59edb7c6dcd",
+    "checkpoint_sha256": "c8352c0c4f9054934fe334627bc15ec2f56df56ad0066b0a2c30b59edb7c6dcd"
+  },
+  "bios-upload-ram-sim/firmware/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "bios-upload-ram-sim/firmware/rescue_trial.c": {
+    "original_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46",
+    "checkpoint_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46"
+  },
+  "bios-upload-ram-sim/firmware/rescue_trial.h": {
+    "original_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07",
+    "checkpoint_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07"
+  },
+  "bios-upload-ram-sim/firmware/rescue_update.c": {
+    "original_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e",
+    "checkpoint_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e"
+  },
+  "bios-upload-ram-sim/firmware/rescue_update.h": {
+    "original_sha256": "5deb81306b331d97b0969154d523fdae070a57c13bff78b26e53185b84cbc5c9",
+    "checkpoint_sha256": "5deb81306b331d97b0969154d523fdae070a57c13bff78b26e53185b84cbc5c9"
+  },
+  "bios-upload-ram-sim/firmware/run_tests.sh": {
+    "original_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f",
+    "checkpoint_sha256": "f7512886513a32dcf27c6c641ce54ad8e6dd9b7290ed776ab4df622f234e964f"
+  },
+  "bios-upload-ram-sim/firmware/sim_upload.c": {
+    "original_sha256": "50627d7907b45fd38ae92df9a36c2aa98da6ebd1f69654060e08046b18d2c6c3",
+    "checkpoint_sha256": "50627d7907b45fd38ae92df9a36c2aa98da6ebd1f69654060e08046b18d2c6c3"
+  },
+  "bios-upload-ram-sim/firmware/sim_upload.h": {
+    "original_sha256": "1075e3f593ba6a64f6999b2f108d1c20b293a7633067577544297374ceebf822",
+    "checkpoint_sha256": "1075e3f593ba6a64f6999b2f108d1c20b293a7633067577544297374ceebf822"
+  },
+  "bios-upload-ram-sim/firmware/stream_slot.h": {
+    "original_sha256": "74522aa8c140865c25b3301a20017ff0ce7e3765796746d5ff76f878c71283f0",
+    "checkpoint_sha256": "74522aa8c140865c25b3301a20017ff0ce7e3765796746d5ff76f878c71283f0"
+  },
+  "bios-upload-ram-sim/firmware/test_rescue_boot_policy.c": {
+    "original_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196",
+    "checkpoint_sha256": "85e569df10cfd7f53c57ae04dfe5538f296f11fb6162b81b9cfe0225672b2196"
+  },
+  "bios-upload-ram-sim/firmware/test_rescue_diag.c": {
+    "original_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7",
+    "checkpoint_sha256": "5ae1ab90b280b973560d179fde72850fdcc03934ae212a4a697805b13a7814e7"
+  },
+  "bios-upload-ram-sim/firmware/upload_session.c": {
+    "original_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430",
+    "checkpoint_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430"
+  },
+  "bios-upload-ram-sim/firmware/upload_session.h": {
+    "original_sha256": "32c5ef64c0affcf9705e43ff283fd1df68d4258e7f3fae1dd2d5473a00cc7203",
+    "checkpoint_sha256": "32c5ef64c0affcf9705e43ff283fd1df68d4258e7f3fae1dd2d5473a00cc7203"
+  },
+  "bios-upload-ram-sim/rescue_soc.py": {
+    "original_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f",
+    "checkpoint_sha256": "90cf86a0c3cc6c5336c63a219e1944712850f4c1dbbb2db37d367e878e24ee1f"
+  },
+  "bios-upload-ram-sim/verify_build.py": {
+    "original_sha256": "6c75fe09d6ea956171d93f01232eacbe5b839cd82bf724c784c92366d552ea3a",
+    "checkpoint_sha256": "6c75fe09d6ea956171d93f01232eacbe5b839cd82bf724c784c92366d552ea3a"
+  },
+  "boot-model/rescue_boot_model.py": {
+    "original_sha256": "2d2f74289f9da7b5583da7d4a234e28e322680dcda2fc52b9c299247a66d751b",
+    "checkpoint_sha256": "2d2f74289f9da7b5583da7d4a234e28e322680dcda2fc52b9c299247a66d751b"
+  },
+  "boot-model/test_rescue_boot_model.py": {
+    "original_sha256": "d8d7410f7616b61e433cbe60bc5f5055392b574ff5dd19ae0197ec1d99ec8d51",
+    "checkpoint_sha256": "d8d7410f7616b61e433cbe60bc5f5055392b574ff5dd19ae0197ec1d99ec8d51"
+  },
+  "expiry-ram-system-sim/packet_fixture.py": {
+    "original_sha256": "6fef46acf49259054591a157dcebd7ee5ca5b991dde3998205b821c553d15d9a",
+    "checkpoint_sha256": "6fef46acf49259054591a157dcebd7ee5ca5b991dde3998205b821c553d15d9a"
+  },
+  "expiry-ram-system-sim/primitives.sv": {
+    "original_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e",
+    "checkpoint_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e"
+  },
+  "expiry-ram-system-sim/tb.sv": {
+    "original_sha256": "55af70289300e7763f469de06afe7c434dd5b71f2673a879bab0df1d85fdaa3c",
+    "checkpoint_sha256": "2eebc4e04e0b4a439b79436f74d8bd5cce6370a3e5a611cc9fcfdbd2aceee592"
+  },
+  "expiry-ram-system-sim/verify_upload.py": {
+    "original_sha256": "4cd707bd68e12e663a0f90fcd695cb5a6f53a7019b660363d3c431d2d1612d8e",
+    "checkpoint_sha256": "4cd707bd68e12e663a0f90fcd695cb5a6f53a7019b660363d3c431d2d1612d8e"
+  },
+  "firmware-policy/rescue_boot_policy.c": {
+    "original_sha256": "90a2ff5eda23053322e42ab6c13109608e571dfd033cce820ad0a8e458e68c20",
+    "checkpoint_sha256": "90a2ff5eda23053322e42ab6c13109608e571dfd033cce820ad0a8e458e68c20"
+  },
+  "firmware-policy/rescue_boot_policy.h": {
+    "original_sha256": "9268cc072ee0c777f659d83b8bf5598d9e841674eb1618bee03dd0ceff16aee5",
+    "checkpoint_sha256": "9268cc072ee0c777f659d83b8bf5598d9e841674eb1618bee03dd0ceff16aee5"
+  },
+  "firmware-policy/run_tests.sh": {
+    "original_sha256": "94ffdfb856e7ac96d6d65e48a0724346b17d4ea684a5dfcdad2b9a22c460e81e",
+    "checkpoint_sha256": "94ffdfb856e7ac96d6d65e48a0724346b17d4ea684a5dfcdad2b9a22c460e81e"
+  },
+  "firmware-policy/test_rescue_boot_policy.c": {
+    "original_sha256": "c91a2d79d8e393b6186cc3ce5aae9d158226db48d30de15da75590c30d618484",
+    "checkpoint_sha256": "c91a2d79d8e393b6186cc3ce5aae9d158226db48d30de15da75590c30d618484"
+  },
+  "flash-probe/Makefile": {
+    "original_sha256": "75c198540489a6dc17bf7d61beb38fd8e72866c6b26a0edefeb92fcb38d8526b",
+    "checkpoint_sha256": "75c198540489a6dc17bf7d61beb38fd8e72866c6b26a0edefeb92fcb38d8526b"
+  },
+  "flash-probe/rescue_flash_probe.c": {
+    "original_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e",
+    "checkpoint_sha256": "43493bdb3de55bffc5030d22eb3dbe2565e3c0d118012a6060f9570351b71c7e"
+  },
+  "flash-probe/rescue_flash_probe.h": {
+    "original_sha256": "cf1c70ffad706183bb98bbc04e862d8e70041c8eb807f8e2d69a2435963f06a3",
+    "checkpoint_sha256": "cf1c70ffad706183bb98bbc04e862d8e70041c8eb807f8e2d69a2435963f06a3"
+  },
+  "flash-probe/rescue_flash_probe_litex.c": {
+    "original_sha256": "c7efa7151be3aa60535ad5f314c453db923bae83fcb9638484e2bc067f81e671",
+    "checkpoint_sha256": "c7efa7151be3aa60535ad5f314c453db923bae83fcb9638484e2bc067f81e671"
+  },
+  "flash-probe/test_rescue_flash_probe.c": {
+    "original_sha256": "682ccedaa0ed7a43d03dd53c843e8153fda96e023c12a3fd4683e74ea3ff37d7",
+    "checkpoint_sha256": "682ccedaa0ed7a43d03dd53c843e8153fda96e023c12a3fd4683e74ea3ff37d7"
+  },
+  "flash-transaction/Makefile": {
+    "original_sha256": "4cbdd81e9980405a7934307f692782f9c4f8dfd9959c8ce6b32884e6af67b5e2",
+    "checkpoint_sha256": "4cbdd81e9980405a7934307f692782f9c4f8dfd9959c8ce6b32884e6af67b5e2"
+  },
+  "flash-transaction/README.md": {
+    "original_sha256": "5e64d137cd735928854203b2b0d2832d72ba235e9decdfa2d66ac088a60776f7",
+    "checkpoint_sha256": "5e64d137cd735928854203b2b0d2832d72ba235e9decdfa2d66ac088a60776f7"
+  },
+  "flash-transaction/rescue_flash_transaction.c": {
+    "original_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1",
+    "checkpoint_sha256": "11c65744e247cd5b458fe3555df3547ed810878c1893e0fd8cded62712b874b1"
+  },
+  "flash-transaction/rescue_flash_transaction.h": {
+    "original_sha256": "f2f9bf4aaf9d2cf32bd253b13d52f38aee198a88a09fc777fe058e277bdebf96",
+    "checkpoint_sha256": "f2f9bf4aaf9d2cf32bd253b13d52f38aee198a88a09fc777fe058e277bdebf96"
+  },
+  "flash-transaction/test_rescue_flash_transaction.c": {
+    "original_sha256": "a602dccd9efe602925cd700c0daeb879a59e11a540daeed4ff94d27a798f90ca",
+    "checkpoint_sha256": "a602dccd9efe602925cd700c0daeb879a59e11a540daeed4ff94d27a798f90ca"
+  },
+  "full-system-sim/README.md": {
+    "original_sha256": "5446f777e760bd3c7aa9229f0a1c00c55f8bfccb7827565be1d4e49f12d7f1ad",
+    "checkpoint_sha256": "5446f777e760bd3c7aa9229f0a1c00c55f8bfccb7827565be1d4e49f12d7f1ad"
+  },
+  "full-system-sim/packet_fixture.py": {
+    "original_sha256": "42b075880d4c7195052534379c66632fb595b0e680dfb921fe89e40f65a3069b",
+    "checkpoint_sha256": "42b075880d4c7195052534379c66632fb595b0e680dfb921fe89e40f65a3069b"
+  },
+  "full-system-sim/primitives.sv": {
+    "original_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e",
+    "checkpoint_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e"
+  },
+  "full-system-sim/run.sh": {
+    "original_sha256": "a7c8cf896db6a316768e0a472a235792510d34723b1f4df41704c889c4e11b7c",
+    "checkpoint_sha256": "a7c8cf896db6a316768e0a472a235792510d34723b1f4df41704c889c4e11b7c"
+  },
+  "full-system-sim/tb-before-network.sv": {
+    "original_sha256": "2ff0d71bfb58f06bcf77da11963261e1bc665241ed210177298a6837baa44482",
+    "checkpoint_sha256": "72c3a2c79591f6794701b57ed2c7758c15f1d3f8cc9e05853442ec55bf1c7c08"
+  },
+  "full-system-sim/tb-original.sv": {
+    "original_sha256": "0143445fed8c72ea7603f8a7cb5a5e10ff9f60ef1d3324d39688c4c35534bee8",
+    "checkpoint_sha256": "0143445fed8c72ea7603f8a7cb5a5e10ff9f60ef1d3324d39688c4c35534bee8"
+  },
+  "full-system-sim/tb.sv": {
+    "original_sha256": "488bd85b536706be3fbd6b4aa0fc3e55004c2c1e2951577024cc52b3e42842ad",
+    "checkpoint_sha256": "9efc38326ab113ab71d6ca7a9946453a2f0b7c1e65daf220cd6ac0438559e392"
+  },
+  "full-system-sim/verify_packet.py": {
+    "original_sha256": "e8d432baad4263596694f82533e7a8a4e492876eae708f9256c58492b0c6aaee",
+    "checkpoint_sha256": "e8d432baad4263596694f82533e7a8a4e492876eae708f9256c58492b0c6aaee"
+  },
+  "host-diag/Makefile": {
+    "original_sha256": "14403131e85a7dea1dba76753795f23a8d15f926c153329992be91bc5950a91f",
+    "checkpoint_sha256": "14403131e85a7dea1dba76753795f23a8d15f926c153329992be91bc5950a91f"
+  },
+  "host-diag/rescue_diag_client.py": {
+    "original_sha256": "ed95e378dcf770541cac5b590657772f4f01aa33a3c7ef557f9cbd37d963b4d4",
+    "checkpoint_sha256": "ed95e378dcf770541cac5b590657772f4f01aa33a3c7ef557f9cbd37d963b4d4"
+  },
+  "host-diag/test_client.py": {
+    "original_sha256": "c3adc6614a1ff007b823c1fcf0f78d9bb5e7742095111f86082b02e89051c643",
+    "checkpoint_sha256": "c3adc6614a1ff007b823c1fcf0f78d9bb5e7742095111f86082b02e89051c643"
+  },
+  "host-management-sim/Makefile": {
+    "original_sha256": "c8aedf266ba38c9b9b8a64eabf0bf8d69874cbd2a3f4b111154c4ea371ecb445",
+    "checkpoint_sha256": "c8aedf266ba38c9b9b8a64eabf0bf8d69874cbd2a3f4b111154c4ea371ecb445"
+  },
+  "host-management-sim/bridge.c": {
+    "original_sha256": "a36ff2afc56709b49711fffea42508c9934f8d0f2080d68cfd35d1f1f0232358",
+    "checkpoint_sha256": "a36ff2afc56709b49711fffea42508c9934f8d0f2080d68cfd35d1f1f0232358"
+  },
+  "host-management-sim/host_management.py": {
+    "original_sha256": "1af6a711ecfccc7ec430495dffbf58040b7afca0e7b2cd3be2c95c63031f6aff",
+    "checkpoint_sha256": "1af6a711ecfccc7ec430495dffbf58040b7afca0e7b2cd3be2c95c63031f6aff"
+  },
+  "host-management-sim/test_bridge.py": {
+    "original_sha256": "e4271afcea44507444cecb86b3a405ffd279cdfdeb1ab8656c2c6ccd034de523",
+    "checkpoint_sha256": "e4271afcea44507444cecb86b3a405ffd279cdfdeb1ab8656c2c6ccd034de523"
+  },
+  "host-management-sim/test_host_management.py": {
+    "original_sha256": "8e401c6f6540c0cc627006949b5b3fa7245f2fed6678c2b0fbcedd9b8daa3056",
+    "checkpoint_sha256": "8e401c6f6540c0cc627006949b5b3fa7245f2fed6678c2b0fbcedd9b8daa3056"
+  },
+  "host-reconcile-sim/reconcile.py": {
+    "original_sha256": "d467cf237079318061725ed639dabc5f6d297fd1399ff839397fae338679ffc7",
+    "checkpoint_sha256": "d467cf237079318061725ed639dabc5f6d297fd1399ff839397fae338679ffc7"
+  },
+  "host-reconcile-sim/test_reconcile.py": {
+    "original_sha256": "fbfb9282834ff9be6501d95741ddd1a47d61e7f305bce6353d02f1630a6f696d",
+    "checkpoint_sha256": "fbfb9282834ff9be6501d95741ddd1a47d61e7f305bce6353d02f1630a6f696d"
+  },
+  "icap/icap_spartan6_stub.v": {
+    "original_sha256": "a44eb030674f250f4e003924f82761a708b4e5659af36699e806b73d017ab412",
+    "checkpoint_sha256": "a44eb030674f250f4e003924f82761a708b4e5659af36699e806b73d017ab412"
+  },
+  "icap/run_tests.sh": {
+    "original_sha256": "cf7714698be5dcec930d1b3270138c2d5a778b78b000480231f5dc55c63c3257",
+    "checkpoint_sha256": "cf7714698be5dcec930d1b3270138c2d5a778b78b000480231f5dc55c63c3257"
+  },
+  "icap/spartan6_icap.v": {
+    "original_sha256": "d729c3beeaf4272731d36334bcec8c1cd44f969faeab95d705b183643ea0d277",
+    "checkpoint_sha256": "d729c3beeaf4272731d36334bcec8c1cd44f969faeab95d705b183643ea0d277"
+  },
+  "icap/tb_spartan6_icap.v": {
+    "original_sha256": "6e260631bee177a0fdb8c4a4da377b6764f0dada2fb48eb6a92f3a9bab6104cc",
+    "checkpoint_sha256": "6e260631bee177a0fdb8c4a4da377b6764f0dada2fb48eb6a92f3a9bab6104cc"
+  },
+  "icap-integration/README.md": {
+    "original_sha256": "70d75254055fa640c548a7f21113ea83dd78346a3e3ecb42ab8aab914459c113",
+    "checkpoint_sha256": "70d75254055fa640c548a7f21113ea83dd78346a3e3ecb42ab8aab914459c113"
+  },
+  "icap-integration/icap_launch_interlock.v": {
+    "original_sha256": "3e1896f7ab532d5f97ca17fa006edf4fadb91bbb8a0b8f4c5c3768af46b34e36",
+    "checkpoint_sha256": "3e1896f7ab532d5f97ca17fa006edf4fadb91bbb8a0b8f4c5c3768af46b34e36"
+  },
+  "icap-integration/run_tests.sh": {
+    "original_sha256": "083878aba79815247ee43199d059a593dbe7dd7daf8cee5dad90921c6257a268",
+    "checkpoint_sha256": "083878aba79815247ee43199d059a593dbe7dd7daf8cee5dad90921c6257a268"
+  },
+  "icap-integration/spartan6_icap.v": {
+    "original_sha256": "bf9fd03faa2141889a667bb227aa9d23f19d5b001a8f5c5acb38b08314b2883e",
+    "checkpoint_sha256": "bf9fd03faa2141889a667bb227aa9d23f19d5b001a8f5c5acb38b08314b2883e"
+  },
+  "icap-integration/tb_icap_launch_interlock.v": {
+    "original_sha256": "631a7e7b7a8fa91fa3b68b5c547af246059c9510c75f557a556b89c5ad463b56",
+    "checkpoint_sha256": "631a7e7b7a8fa91fa3b68b5c547af246059c9510c75f557a556b89c5ad463b56"
+  },
+  "identity-record/Makefile": {
+    "original_sha256": "f3c08ab1136b9124ceb3083b2440e5c444e44b8e1c87fae352b122b8a6acd952",
+    "checkpoint_sha256": "f3c08ab1136b9124ceb3083b2440e5c444e44b8e1c87fae352b122b8a6acd952"
+  },
+  "identity-record/identity_record.c": {
+    "original_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709",
+    "checkpoint_sha256": "4f05ae33ab6e78213747a572a21fb268391e5d7c965f905546216fe9d4e2c709"
+  },
+  "identity-record/identity_record.h": {
+    "original_sha256": "184b65174b77f2288e07ea510a827bb26abb16fc374e20d0df1b921271905d5c",
+    "checkpoint_sha256": "184b65174b77f2288e07ea510a827bb26abb16fc374e20d0df1b921271905d5c"
+  },
+  "identity-record/test_identity.c": {
+    "original_sha256": "621cb244ec79af23a4de1a29472e6943b9b19f442bf5a784aa24ea200ed1c335",
+    "checkpoint_sha256": "621cb244ec79af23a4de1a29472e6943b9b19f442bf5a784aa24ea200ed1c335"
+  },
+  "image-core/Makefile": {
+    "original_sha256": "76cc012646135f04b09b9bbdeb14e821a97b25aa9783f7991d6f58bd4a3d83d8",
+    "checkpoint_sha256": "76cc012646135f04b09b9bbdeb14e821a97b25aa9783f7991d6f58bd4a3d83d8"
+  },
+  "image-core/image_core.c": {
+    "original_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8",
+    "checkpoint_sha256": "0e06addc73713d96cf400170ad23575e9d763efbab16545904c47aa2f852cfe8"
+  },
+  "image-core/image_core.h": {
+    "original_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71",
+    "checkpoint_sha256": "60f303e34c82f13f54c44f5265006f5d2aa059c56d5a18b4a4f95ad15c42ec71"
+  },
+  "image-core/test_image_core.c": {
+    "original_sha256": "0a86c2c372fb096916cdcee2fcf9edee677f08561cb51583cc26acd86ed3425e",
+    "checkpoint_sha256": "0a86c2c372fb096916cdcee2fcf9edee677f08561cb51583cc26acd86ed3425e"
+  },
+  "iteration-02.txt": {
+    "original_sha256": "8b1c6b7aa6d15836f5c08ab355624e7a7e4cd23899a2362bd0fa44fefc8c453a",
+    "checkpoint_sha256": "8b1c6b7aa6d15836f5c08ab355624e7a7e4cd23899a2362bd0fa44fefc8c453a"
+  },
+  "iteration-03.txt": {
+    "original_sha256": "ad6d21bf6b7661ee44e91afc370bffe8082a6c3ef238a283e3712e333613fc95",
+    "checkpoint_sha256": "ad6d21bf6b7661ee44e91afc370bffe8082a6c3ef238a283e3712e333613fc95"
+  },
+  "iteration-04.txt": {
+    "original_sha256": "677fc5835b0926848eeb7a4bf1ce088e4529ae740a71a93d311a82def730cd6c",
+    "checkpoint_sha256": "677fc5835b0926848eeb7a4bf1ce088e4529ae740a71a93d311a82def730cd6c"
+  },
+  "iteration-05.txt": {
+    "original_sha256": "d128404b86d25cfcdcb21cb254987184d79378bf4ae4559d85ff1f80a1bd30fc",
+    "checkpoint_sha256": "d128404b86d25cfcdcb21cb254987184d79378bf4ae4559d85ff1f80a1bd30fc"
+  },
+  "iteration-06.txt": {
+    "original_sha256": "182f80fc92c793aa5e84a595865f588b1af8bb4a5c47cab8678bf6430d372ea5",
+    "checkpoint_sha256": "182f80fc92c793aa5e84a595865f588b1af8bb4a5c47cab8678bf6430d372ea5"
+  },
+  "iteration-07.txt": {
+    "original_sha256": "6b05effed0202e900c17b56c4aa208ba26e589c8718481631f1a86b1b6f3aa01",
+    "checkpoint_sha256": "6b05effed0202e900c17b56c4aa208ba26e589c8718481631f1a86b1b6f3aa01"
+  },
+  "iteration-08.txt": {
+    "original_sha256": "3378d036c55e2cfa21e5634e2fad7a1d390b3bd4b966f49e361e98394aca919b",
+    "checkpoint_sha256": "3378d036c55e2cfa21e5634e2fad7a1d390b3bd4b966f49e361e98394aca919b"
+  },
+  "iteration-09.txt": {
+    "original_sha256": "c4812d964b6c2d1029731df647584dae2764525162c9e9a31ac590a1f742a0df",
+    "checkpoint_sha256": "f71db611c7389520cb71ca5bd94a9e60cc7857e8df7b5b6854cd1b3babc9ac40"
+  },
+  "iteration-10.txt": {
+    "original_sha256": "a31efd3c38517997233de959c1040bc27dcb1e051c4e566f3dceb86c55b2e606",
+    "checkpoint_sha256": "a31efd3c38517997233de959c1040bc27dcb1e051c4e566f3dceb86c55b2e606"
+  },
+  "iteration-11.txt": {
+    "original_sha256": "a11eae7158e8ec8483d281c335ce0d4222dfad3799be465b898862ba059e6df4",
+    "checkpoint_sha256": "a11eae7158e8ec8483d281c335ce0d4222dfad3799be465b898862ba059e6df4"
+  },
+  "iteration-12.txt": {
+    "original_sha256": "769eee841738be87634b1671d8863f6a947c2bcd82b78c07c697d370d3056bf8",
+    "checkpoint_sha256": "34791fc46041073d48f99312ef1cbf596a21dd73b7155da84ae93d8a31e30851"
+  },
+  "iteration-13.txt": {
+    "original_sha256": "ec15baf4c6b13516eed64f337b8296ffc0e2a0e38e704eea5ecd5efa7c769d14",
+    "checkpoint_sha256": "eaaaad036b9c0b1ec2ce06e4947f3c1d4f2cb79b8a8daf019f003a6e3e07759d"
+  },
+  "iteration-14.txt": {
+    "original_sha256": "835194cdd619c240431dccc48b364d51192de84438ef632fa5bf861b872b6934",
+    "checkpoint_sha256": "835194cdd619c240431dccc48b364d51192de84438ef632fa5bf861b872b6934"
+  },
+  "iteration-15.txt": {
+    "original_sha256": "75265fedd6ca25a354f8f9361d251f2f653c9bccb0e5293701fb2e6b644535d8",
+    "checkpoint_sha256": "75265fedd6ca25a354f8f9361d251f2f653c9bccb0e5293701fb2e6b644535d8"
+  },
+  "journal-core/Makefile": {
+    "original_sha256": "e0106c7f70c7765e14c751b677876c8bb862f34a46bca4b2a97d6ec24b4e645f",
+    "checkpoint_sha256": "e0106c7f70c7765e14c751b677876c8bb862f34a46bca4b2a97d6ec24b4e645f"
+  },
+  "journal-core/rescue_journal.c": {
+    "original_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd",
+    "checkpoint_sha256": "0b735c912fb68bb38eb75230715fe0804dcfd9911629c6661b22d690239a71fd"
+  },
+  "journal-core/rescue_journal.h": {
+    "original_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314",
+    "checkpoint_sha256": "1a696c45b9afc0347250b1d9af0b85707c90e0d1a2cdff4e0b07f59590948314"
+  },
+  "journal-core/test_rescue_journal.c": {
+    "original_sha256": "d17a04cd43afe9c16c58aa2f0c699cf8896ec00b9cf06818e69d67b5f60d49b7",
+    "checkpoint_sha256": "d17a04cd43afe9c16c58aa2f0c699cf8896ec00b9cf06818e69d67b5f60d49b7"
+  },
+  "ledger-reset-integration/Makefile": {
+    "original_sha256": "59666eee66fa94f70f42f60055a76058b7d959864a15f628626b5b455b7a32a5",
+    "checkpoint_sha256": "59666eee66fa94f70f42f60055a76058b7d959864a15f628626b5b455b7a32a5"
+  },
+  "ledger-reset-integration/fixtures.py": {
+    "original_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a",
+    "checkpoint_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a"
+  },
+  "ledger-reset-integration/test_stream_slot.c": {
+    "original_sha256": "faf23edabd709dc4402333c61d51391d6644c1b6d65a570d6ea046b50d63dc4f",
+    "checkpoint_sha256": "faf23edabd709dc4402333c61d51391d6644c1b6d65a570d6ea046b50d63dc4f"
+  },
+  "managed-spi-integration/Makefile": {
+    "original_sha256": "91b3a36a5009ba669beeaf2ceb35a0eb595008a831952c94616c608425769606",
+    "checkpoint_sha256": "91b3a36a5009ba669beeaf2ceb35a0eb595008a831952c94616c608425769606"
+  },
+  "managed-spi-integration/test_managed_spi.c": {
+    "original_sha256": "56989170cc77337f5e8b9f7218076c88a0c81b58b76757f66044f7613b6228a6",
+    "checkpoint_sha256": "56989170cc77337f5e8b9f7218076c88a0c81b58b76757f66044f7613b6228a6"
+  },
+  "managed-stream/Makefile": {
+    "original_sha256": "435b0d136b9f2267832698adae8e88a17d2b9c21d9527be11bcc963671b1bded",
+    "checkpoint_sha256": "435b0d136b9f2267832698adae8e88a17d2b9c21d9527be11bcc963671b1bded"
+  },
+  "managed-stream/fixtures.py": {
+    "original_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a",
+    "checkpoint_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a"
+  },
+  "managed-stream/managed_stream.h": {
+    "original_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f",
+    "checkpoint_sha256": "587172c97c4e621ef5eead320a1893a99b08783f09ef23a0d472a8e3cb52ad4f"
+  },
+  "managed-stream/rescue_update.c": {
+    "original_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e",
+    "checkpoint_sha256": "5a3b7fb737b2afb94ef835e591d7d8c2ab3f2b5799d9c9cafd62043c5904187e"
+  },
+  "managed-stream/rescue_update.h": {
+    "original_sha256": "67141068a4c39b61e8eebdf66212784e6fff7a1f5b9d5875565f447763b6cbb0",
+    "checkpoint_sha256": "67141068a4c39b61e8eebdf66212784e6fff7a1f5b9d5875565f447763b6cbb0"
+  },
+  "managed-stream/stream_slot.h": {
+    "original_sha256": "11faa93601e2014a5bd5d70de898266a5d899f658befd02ba97860b034c76049",
+    "checkpoint_sha256": "11faa93601e2014a5bd5d70de898266a5d899f658befd02ba97860b034c76049"
+  },
+  "managed-stream/test_stream_slot.c": {
+    "original_sha256": "c1a965f471cbde45e0d402bac3fc3016adaa14f4a9ceeb613941a6e3faf5c8f0",
+    "checkpoint_sha256": "c1a965f471cbde45e0d402bac3fc3016adaa14f4a9ceeb613941a6e3faf5c8f0"
+  },
+  "management-wire/Makefile": {
+    "original_sha256": "d2bdabf2d4f6de4d66d117e66d91dabec9a0f37ef143286b299c3b7493b681cd",
+    "checkpoint_sha256": "d2bdabf2d4f6de4d66d117e66d91dabec9a0f37ef143286b299c3b7493b681cd"
+  },
+  "management-wire/PROTOCOL.md": {
+    "original_sha256": "d4d725b22fc51956fbb5b074565e5398889b4e1114917bc6c8cdfcd1ef545dba",
+    "checkpoint_sha256": "d4d725b22fc51956fbb5b074565e5398889b4e1114917bc6c8cdfcd1ef545dba"
+  },
+  "management-wire/management_wire.c": {
+    "original_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f",
+    "checkpoint_sha256": "5635be11075cf2409a047e4cf42f9fcdb265492747431e283e10b24bdbd49b6f"
+  },
+  "management-wire/management_wire.h": {
+    "original_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08",
+    "checkpoint_sha256": "0d913dee61a8fbc0a2cc74492647822efbf0f79b1a7cc0a10f4e3d56eeed3f08"
+  },
+  "management-wire/management_wire_test.c": {
+    "original_sha256": "b2e5f1b96d3e5befe3f52088d0272bf7afc45c3ecc0f88ec1cc3a486dac3b521",
+    "checkpoint_sha256": "b2e5f1b96d3e5befe3f52088d0272bf7afc45c3ecc0f88ec1cc3a486dac3b521"
+  },
+  "manifest-core/Makefile": {
+    "original_sha256": "ebf77789522e9da8f78345bb9aeb579e6fc5b6b448340b69bce115505ad1bf48",
+    "checkpoint_sha256": "ebf77789522e9da8f78345bb9aeb579e6fc5b6b448340b69bce115505ad1bf48"
+  },
+  "manifest-core/README.md": {
+    "original_sha256": "3e33b843ccb852cf02c5eb3c099b7060403e3dc798eeab3e58fdad9354f818a2",
+    "checkpoint_sha256": "3e33b843ccb852cf02c5eb3c099b7060403e3dc798eeab3e58fdad9354f818a2"
+  },
+  "manifest-core/fixtures.py": {
+    "original_sha256": "6d53d40315c6b71c18957002786fcafba8001d68a58cc0f7ca7f6e1c52cad050",
+    "checkpoint_sha256": "6d53d40315c6b71c18957002786fcafba8001d68a58cc0f7ca7f6e1c52cad050"
+  },
+  "manifest-core/manifest_core.c": {
+    "original_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10",
+    "checkpoint_sha256": "03f96b21b25b48c91d262a8bce0d8a3b41679a23e8db7e65a5bc9c2118410d10"
+  },
+  "manifest-core/manifest_core.h": {
+    "original_sha256": "fa3bc9f7ae8ccab212a0ae382a8553dba174c3ca8a988a109e347740e162e684",
+    "checkpoint_sha256": "fa3bc9f7ae8ccab212a0ae382a8553dba174c3ca8a988a109e347740e162e684"
+  },
+  "manifest-core/test_manifest.c": {
+    "original_sha256": "24046b106e639db2ae8ee97227a887997d39cb3c17fcfe36e810e9e10d300d28",
+    "checkpoint_sha256": "24046b106e639db2ae8ee97227a887997d39cb3c17fcfe36e810e9e10d300d28"
+  },
+  "manifest-store/Makefile": {
+    "original_sha256": "09245f2d109f4dcd371ec0054b12a7f254473f9740ee469625f26cf4a7eea025",
+    "checkpoint_sha256": "09245f2d109f4dcd371ec0054b12a7f254473f9740ee469625f26cf4a7eea025"
+  },
+  "manifest-store/README.md": {
+    "original_sha256": "cd0a874448fa4264150b1822f695328a139034c4c8fc6b1df52134d6848f814b",
+    "checkpoint_sha256": "cd0a874448fa4264150b1822f695328a139034c4c8fc6b1df52134d6848f814b"
+  },
+  "manifest-store/fixtures.py": {
+    "original_sha256": "22286147d8d1d897137f6a57d3f14596d3f3216ee60381eea9d7e37b014a4f40",
+    "checkpoint_sha256": "22286147d8d1d897137f6a57d3f14596d3f3216ee60381eea9d7e37b014a4f40"
+  },
+  "manifest-store/manifest_store.c": {
+    "original_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc",
+    "checkpoint_sha256": "6350214919da9f10eb949303f1c0bc74f8c6701267a6ec09f1b4629e700951dc"
+  },
+  "manifest-store/manifest_store.h": {
+    "original_sha256": "9648f7c3331622d13984972ad0f08f0c5f16c31f71191b67607e3e74f188f25a",
+    "checkpoint_sha256": "9648f7c3331622d13984972ad0f08f0c5f16c31f71191b67607e3e74f188f25a"
+  },
+  "manifest-store/test_store.c": {
+    "original_sha256": "7afdf61113359a86e0e757d11006660fa660e95c9e6713817efe890f0c4c1e54",
+    "checkpoint_sha256": "7afdf61113359a86e0e757d11006660fa660e95c9e6713817efe890f0c4c1e54"
+  },
+  "network-session/Makefile": {
+    "original_sha256": "99476d7992a847b581292acd067f79c749efb020ae8c8b04fa6c1116e95bcbe8",
+    "checkpoint_sha256": "99476d7992a847b581292acd067f79c749efb020ae8c8b04fa6c1116e95bcbe8"
+  },
+  "network-session/network_session.c": {
+    "original_sha256": "23f5fc0cf76ce6f68cbf0fe1612bb4ae367a544f48d51f42f3b6cbdf0b455e93",
+    "checkpoint_sha256": "23f5fc0cf76ce6f68cbf0fe1612bb4ae367a544f48d51f42f3b6cbdf0b455e93"
+  },
+  "network-session/network_session.h": {
+    "original_sha256": "deae5a8b91c971001ebaa947a432383cc8701049d61f946b410380ad4f4a734d",
+    "checkpoint_sha256": "deae5a8b91c971001ebaa947a432383cc8701049d61f946b410380ad4f4a734d"
+  },
+  "network-session/network_session_test.c": {
+    "original_sha256": "df0a50d71e6e7e6818465a23ccda572175462a7ed8cd832be96b06a4ffe22082",
+    "checkpoint_sha256": "df0a50d71e6e7e6818465a23ccda572175462a7ed8cd832be96b06a4ffe22082"
+  },
+  "operation-ledger/Makefile": {
+    "original_sha256": "14facf2dc9876d1426e71a0472dba36eabdde6aaf708612f35b2ca4b5a15a539",
+    "checkpoint_sha256": "14facf2dc9876d1426e71a0472dba36eabdde6aaf708612f35b2ca4b5a15a539"
+  },
+  "operation-ledger/op_ledger.c": {
+    "original_sha256": "98b83b510c49a4e31feffffaf491243ba8ac283102b34ffb611f515c634ce66f",
+    "checkpoint_sha256": "98b83b510c49a4e31feffffaf491243ba8ac283102b34ffb611f515c634ce66f"
+  },
+  "operation-ledger/op_ledger.h": {
+    "original_sha256": "58576c1280d16eebbfe6b3e2f6c53d9453f507ead33707f1dde172b2cc333a9a",
+    "checkpoint_sha256": "58576c1280d16eebbfe6b3e2f6c53d9453f507ead33707f1dde172b2cc333a9a"
+  },
+  "operation-ledger/test_ledger.c": {
+    "original_sha256": "5bb74a195facd0d20f605fb3e2792eae60dddbc2310674931b3b3d9f78f88401",
+    "checkpoint_sha256": "5bb74a195facd0d20f605fb3e2792eae60dddbc2310674931b3b3d9f78f88401"
+  },
+  "persistent-system-sim/packet_fixture.py": {
+    "original_sha256": "42b075880d4c7195052534379c66632fb595b0e680dfb921fe89e40f65a3069b",
+    "checkpoint_sha256": "42b075880d4c7195052534379c66632fb595b0e680dfb921fe89e40f65a3069b"
+  },
+  "persistent-system-sim/primitives.sv": {
+    "original_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e",
+    "checkpoint_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e"
+  },
+  "persistent-system-sim/tb.sv": {
+    "original_sha256": "bee324dac8e570d333f4bfcf0e428af473968aa23711a72a39119a304e49156c",
+    "checkpoint_sha256": "0eabcc4f1e4d7f85f5bec19fc7a02c2e06d04d8c6e0fb4a068416e577156098d"
+  },
+  "persistent-system-sim/verify_packet.py": {
+    "original_sha256": "e8d432baad4263596694f82533e7a8a4e492876eae708f9256c58492b0c6aaee",
+    "checkpoint_sha256": "e8d432baad4263596694f82533e7a8a4e492876eae708f9256c58492b0c6aaee"
+  },
+  "protected-read/Makefile": {
+    "original_sha256": "036b7e463dfac8f9ed013e4ed91bd8eb16b6759babd50efee4dc1581bfa1864e",
+    "checkpoint_sha256": "036b7e463dfac8f9ed013e4ed91bd8eb16b6759babd50efee4dc1581bfa1864e"
+  },
+  "protected-read/rescue_protected_read.c": {
+    "original_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7",
+    "checkpoint_sha256": "d6148d2a47b887e8e3fbcb3f6001cd82e7a0d1aa6141eff844b043eb1f0259b7"
+  },
+  "protected-read/rescue_protected_read.h": {
+    "original_sha256": "9d27f1ca840d8a4401d4cf992d115afebffb1bc33c8fd73af69cbe0f12e793f6",
+    "checkpoint_sha256": "9d27f1ca840d8a4401d4cf992d115afebffb1bc33c8fd73af69cbe0f12e793f6"
+  },
+  "protected-read/test_rescue_protected_read.c": {
+    "original_sha256": "6ba44ab76c3bd1b1de91fff840188b0ce75d8975637d2f4b83201ee4c5258514",
+    "checkpoint_sha256": "6ba44ab76c3bd1b1de91fff840188b0ce75d8975637d2f4b83201ee4c5258514"
+  },
+  "reset-recovery-sim/Makefile": {
+    "original_sha256": "ec3827db96a84e25ff41dd20b4f70a2d2effd001336aea468cc80e541e0c9c82",
+    "checkpoint_sha256": "ec3827db96a84e25ff41dd20b4f70a2d2effd001336aea468cc80e541e0c9c82"
+  },
+  "reset-recovery-sim/fixtures.py": {
+    "original_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a",
+    "checkpoint_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a"
+  },
+  "reset-recovery-sim/test_stream_slot.c": {
+    "original_sha256": "25fc4119d81a0bab2cf693288eb567d17957dd3f1f56853c1a93cafa0083e0b5",
+    "checkpoint_sha256": "25fc4119d81a0bab2cf693288eb567d17957dd3f1f56853c1a93cafa0083e0b5"
+  },
+  "session-ram-system-sim/packet_fixture.py": {
+    "original_sha256": "3b135794ed83c8f413eb65ab8989c0f4eaf8d95c972e8ade67a4dfba1c223af7",
+    "checkpoint_sha256": "3b135794ed83c8f413eb65ab8989c0f4eaf8d95c972e8ade67a4dfba1c223af7"
+  },
+  "session-ram-system-sim/primitives.sv": {
+    "original_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e",
+    "checkpoint_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e"
+  },
+  "session-ram-system-sim/tb.sv": {
+    "original_sha256": "fe6e89d2dfbabc256ce3711e6005baa341511da6fad0980d55240163aae59a34",
+    "checkpoint_sha256": "a1984cdcc8f258042c751df8c977e2eff6ca4de51bc25ab6746d67474b9e11c5"
+  },
+  "session-ram-system-sim/verify_upload.py": {
+    "original_sha256": "1e86fb3060187ba3420629cff7559b4760062fa2cfebf86bd871534629710ce1",
+    "checkpoint_sha256": "1e86fb3060187ba3420629cff7559b4760062fa2cfebf86bd871534629710ce1"
+  },
+  "spi-nor/Makefile": {
+    "original_sha256": "1ef9df73f7186eeffb3b28293c4a1e2df20804d744119845e9266d7ec1e69099",
+    "checkpoint_sha256": "1ef9df73f7186eeffb3b28293c4a1e2df20804d744119845e9266d7ec1e69099"
+  },
+  "spi-nor/README.md": {
+    "original_sha256": "3280585995adea1b53964554172a1356af08d07c1d6224ad2a456945d450261e",
+    "checkpoint_sha256": "3280585995adea1b53964554172a1356af08d07c1d6224ad2a456945d450261e"
+  },
+  "spi-nor/rescue_spi_nor.c": {
+    "original_sha256": "2a96b5f5639e83d9f207d702d84f0f5f9ab12948ab49033d463d45833e19e425",
+    "checkpoint_sha256": "2a96b5f5639e83d9f207d702d84f0f5f9ab12948ab49033d463d45833e19e425"
+  },
+  "spi-nor/rescue_spi_nor.h": {
+    "original_sha256": "5d9b9c93ca20bff9be51da898257557e9e81c0efcd79463debfede627e8dc910",
+    "checkpoint_sha256": "5d9b9c93ca20bff9be51da898257557e9e81c0efcd79463debfede627e8dc910"
+  },
+  "spi-nor/test_spi_nor.c": {
+    "original_sha256": "6f203ce62cb81291e488616f71302fefaf5dc46cad714db1197c7ada1789d45a",
+    "checkpoint_sha256": "6f203ce62cb81291e488616f71302fefaf5dc46cad714db1197c7ada1789d45a"
+  },
+  "spi-update-integration/Makefile": {
+    "original_sha256": "bec0734733e3d30f1e8d6c17cdf13bcfdc3f4036a0d6d9b5d6c2d74d783cb363",
+    "checkpoint_sha256": "bec0734733e3d30f1e8d6c17cdf13bcfdc3f4036a0d6d9b5d6c2d74d783cb363"
+  },
+  "spi-update-integration/test_spi_update.c": {
+    "original_sha256": "0adcec212e6f2b03b4ada05fa7ac3228ea927db735145d2a2e179569f15e1ac1",
+    "checkpoint_sha256": "0adcec212e6f2b03b4ada05fa7ac3228ea927db735145d2a2e179569f15e1ac1"
+  },
+  "stage_rescue.py": {
+    "original_sha256": "db8baaec836e01e500acb7ccfcba1aa61003f0a99272f878f38aec0247e0f944",
+    "checkpoint_sha256": "db8baaec836e01e500acb7ccfcba1aa61003f0a99272f878f38aec0247e0f944"
+  },
+  "storage-core/Makefile": {
+    "original_sha256": "acf8777ef97cd3c5b2ac512c771dd2ee8cdf578fa3f6c18414f9cf511fab3e9f",
+    "checkpoint_sha256": "acf8777ef97cd3c5b2ac512c771dd2ee8cdf578fa3f6c18414f9cf511fab3e9f"
+  },
+  "storage-core/rescue_storage.c": {
+    "original_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5",
+    "checkpoint_sha256": "26198bad4972ac07313dd7ff88ee9f8b54225f46cd53e42c8f21cdcc251f71e5"
+  },
+  "storage-core/rescue_storage.h": {
+    "original_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e",
+    "checkpoint_sha256": "f3a0da52ac388ce7dcf42e49538834583e35289289150418fa7695aaa42fc63e"
+  },
+  "storage-core/test_rescue_storage.c": {
+    "original_sha256": "202526640935189db2b8053faf124e84f8da2126939cf9421a07281d501dd59a",
+    "checkpoint_sha256": "202526640935189db2b8053faf124e84f8da2126939cf9421a07281d501dd59a"
+  },
+  "stream-slot/Makefile": {
+    "original_sha256": "435b0d136b9f2267832698adae8e88a17d2b9c21d9527be11bcc963671b1bded",
+    "checkpoint_sha256": "435b0d136b9f2267832698adae8e88a17d2b9c21d9527be11bcc963671b1bded"
+  },
+  "stream-slot/fixtures.py": {
+    "original_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a",
+    "checkpoint_sha256": "4bdaaaaa71067cd9ea751f7334bf00ad7f7977cca347118d28646e5f5c18df5a"
+  },
+  "stream-slot/rescue_update.c": {
+    "original_sha256": "919eb30713a4e599d7369909532a0270afbeea961b9d589638bc94e68d707a49",
+    "checkpoint_sha256": "919eb30713a4e599d7369909532a0270afbeea961b9d589638bc94e68d707a49"
+  },
+  "stream-slot/rescue_update.h": {
+    "original_sha256": "67141068a4c39b61e8eebdf66212784e6fff7a1f5b9d5875565f447763b6cbb0",
+    "checkpoint_sha256": "67141068a4c39b61e8eebdf66212784e6fff7a1f5b9d5875565f447763b6cbb0"
+  },
+  "stream-slot/stream_slot.h": {
+    "original_sha256": "11faa93601e2014a5bd5d70de898266a5d899f658befd02ba97860b034c76049",
+    "checkpoint_sha256": "11faa93601e2014a5bd5d70de898266a5d899f658befd02ba97860b034c76049"
+  },
+  "stream-slot/test_stream_slot.c": {
+    "original_sha256": "cfbaaf70a969a71f839aa7db5f09fbac856424b06843631185b0481e202425d9",
+    "checkpoint_sha256": "cfbaaf70a969a71f839aa7db5f09fbac856424b06843631185b0481e202425d9"
+  },
+  "synthetic-state-system-sim/make_fixture.py": {
+    "original_sha256": "5c4d6fb4a33fd3831907b4fbf5c8e04d149b911ce51d465d026b9b84dbbed030",
+    "checkpoint_sha256": "5c4d6fb4a33fd3831907b4fbf5c8e04d149b911ce51d465d026b9b84dbbed030"
+  },
+  "synthetic-state-system-sim/primitives.sv": {
+    "original_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e",
+    "checkpoint_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e"
+  },
+  "synthetic-state-system-sim/tb.sv": {
+    "original_sha256": "98f403dcf03ea1c79d0b932d4052d9ba6957840f1eb304ce05b6b3f55d6a4c56",
+    "checkpoint_sha256": "039e041103fe5fc2cf75038a55e9ed09f12bd8a8cb57fd0b719c2af29eaefb1b"
+  },
+  "timing-fix/boards/pano_g2_rev_b/bsp.py": {
+    "original_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df",
+    "checkpoint_sha256": "b9a8b9b4d58319d41b60b21ef83dcac1ea4ccf58c1b967324972a41f9429a5df"
+  },
+  "timing-fix/rescue_soc.py": {
+    "original_sha256": "adc2c05a9f8f86bf4c71f0bccf758fb65bc048571ec2a7b855da234573e30fb3",
+    "checkpoint_sha256": "adc2c05a9f8f86bf4c71f0bccf758fb65bc048571ec2a7b855da234573e30fb3"
+  },
+  "timing-fix/run_timing_fix_tests.sh": {
+    "original_sha256": "d20142b62a42d5f0c7dde8a1bc9c181f26f624c7c174d3a9c54d92a6c15066da",
+    "checkpoint_sha256": "d20142b62a42d5f0c7dde8a1bc9c181f26f624c7c174d3a9c54d92a6c15066da"
+  },
+  "timing-fix/test_timing_fix.py": {
+    "original_sha256": "12506cdf309dde974d6fa3f694e2b5b1f9f13368220881deb6966e96106d79cb",
+    "checkpoint_sha256": "12506cdf309dde974d6fa3f694e2b5b1f9f13368220881deb6966e96106d79cb"
+  },
+  "timing-review/bsp-timing.patch": {
+    "original_sha256": "339e01e1b03191c60e52712fd226f152d8408b579b0fe1d8e8dc1ccef3c24b3b",
+    "checkpoint_sha256": "52f5cc6910ae620b20b9784ed76d611d92f4cae4e71024a76cb295c31810244f",
+    "normalization": "Trailing unchanged blank context omitted; adjusted hunk counts; edit semantics unchanged. Verified equivalent with git apply --unidiff-zero against the original patch output."
+  },
+  "trial-core/Makefile": {
+    "original_sha256": "910abc9f2f103adba3cbf8bbb14c6ea5ea60ffba1f549235336af0fec13934cc",
+    "checkpoint_sha256": "910abc9f2f103adba3cbf8bbb14c6ea5ea60ffba1f549235336af0fec13934cc"
+  },
+  "trial-core/rescue_trial.c": {
+    "original_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46",
+    "checkpoint_sha256": "7e8d0c5d9e666c4e6100b73ffd36bb493ee390b20f43d74b69eb46e369b23d46"
+  },
+  "trial-core/rescue_trial.h": {
+    "original_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07",
+    "checkpoint_sha256": "a07fae2e1a954c165ccc5453e566228d68fcab56c8605a236620167a9643bb07"
+  },
+  "trial-core/test_rescue_trial.c": {
+    "original_sha256": "ddada8ebf21d668a0d6ff6e5403aa3c759748a598a2048b1ddc50b014fbc0f39",
+    "checkpoint_sha256": "ddada8ebf21d668a0d6ff6e5403aa3c759748a598a2048b1ddc50b014fbc0f39"
+  },
+  "update-controller/Makefile": {
+    "original_sha256": "835d9b8b90aeab2e84b675fe50a888d58a894deda454c1f82b6054fbe8df9681",
+    "checkpoint_sha256": "835d9b8b90aeab2e84b675fe50a888d58a894deda454c1f82b6054fbe8df9681"
+  },
+  "update-controller/fixtures.py": {
+    "original_sha256": "89190dc18f98a7c62b7316b348aa16a20bcb03e0bac8f320c7679f48bf5da676",
+    "checkpoint_sha256": "89190dc18f98a7c62b7316b348aa16a20bcb03e0bac8f320c7679f48bf5da676"
+  },
+  "update-controller/rescue_update.c": {
+    "original_sha256": "f9f41f143daa056e03a0475696337d39ea297a10498344b12ff1cb78f0e68ece",
+    "checkpoint_sha256": "f9f41f143daa056e03a0475696337d39ea297a10498344b12ff1cb78f0e68ece"
+  },
+  "update-controller/rescue_update.h": {
+    "original_sha256": "67141068a4c39b61e8eebdf66212784e6fff7a1f5b9d5875565f447763b6cbb0",
+    "checkpoint_sha256": "67141068a4c39b61e8eebdf66212784e6fff7a1f5b9d5875565f447763b6cbb0"
+  },
+  "update-controller/test_update.c": {
+    "original_sha256": "297891bcc32497e97c5b5ba77f92b3da839796e8ab18936109c491f8dba74191",
+    "checkpoint_sha256": "297891bcc32497e97c5b5ba77f92b3da839796e8ab18936109c491f8dba74191"
+  },
+  "upload-ram-system-sim/packet_fixture.py": {
+    "original_sha256": "b0661a537328dc3f0fc900597cd25fc3095b0321b4bed75cfbd98573a626ce58",
+    "checkpoint_sha256": "b0661a537328dc3f0fc900597cd25fc3095b0321b4bed75cfbd98573a626ce58"
+  },
+  "upload-ram-system-sim/primitives.sv": {
+    "original_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e",
+    "checkpoint_sha256": "7c4ffce3400a11ccb9e2eac0e898d41674e17e7489dd27e6a3e46e75a039dc1e"
+  },
+  "upload-ram-system-sim/tb.sv": {
+    "original_sha256": "e1ac9aef4789f95b4b94b9d9d7f5174edb0fcf7f34b8be16f428f795fb20ffc4",
+    "checkpoint_sha256": "dbe3b7bcacf166b4c8a571613be312896d7745b4302651c51a2f30f5b45edd7a"
+  },
+  "upload-ram-system-sim/verify_upload.py": {
+    "original_sha256": "488174ca15e7a612d342f683ddfc13019d2341ed9ba23c84030271ba7bbc9d0a",
+    "checkpoint_sha256": "488174ca15e7a612d342f683ddfc13019d2341ed9ba23c84030271ba7bbc9d0a"
+  },
+  "upload-session/Makefile": {
+    "original_sha256": "3634094f96b70c62eeea293ceabf3100bc90720bf62b8d6556764ab8fda30d9e",
+    "checkpoint_sha256": "3634094f96b70c62eeea293ceabf3100bc90720bf62b8d6556764ab8fda30d9e"
+  },
+  "upload-session/test_upload_session.c": {
+    "original_sha256": "a23bb3746982e1bb5c46717901b52573054a6b286346a551fd982d27229408df",
+    "checkpoint_sha256": "a23bb3746982e1bb5c46717901b52573054a6b286346a551fd982d27229408df"
+  },
+  "upload-session/upload_session.c": {
+    "original_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430",
+    "checkpoint_sha256": "be868180846d942dbcc4c6c303b71696a627285f46a5a5692d6059f95e290430"
+  },
+  "upload-session/upload_session.h": {
+    "original_sha256": "8346497a20c2537235cf478f518b7101eded2786b5e806265ef6a39e91ad877c",
+    "checkpoint_sha256": "8346497a20c2537235cf478f518b7101eded2786b5e806265ef6a39e91ad877c"
+  },
+  "wire-spi-integration/Makefile": {
+    "original_sha256": "62d4d1ce21bfebb0e1b66f814901295aa240c2d9a64a30b1d411bc7cd1313f7b",
+    "checkpoint_sha256": "62d4d1ce21bfebb0e1b66f814901295aa240c2d9a64a30b1d411bc7cd1313f7b"
+  },
+  "wire-spi-integration/fixtures.py": {
+    "original_sha256": "474795fde2b65b9c41425c27e10406cd4441b347ee91c75a075aa8764d084457",
+    "checkpoint_sha256": "474795fde2b65b9c41425c27e10406cd4441b347ee91c75a075aa8764d084457"
+  },
+  "wire-spi-integration/managed_wire_adapter.c": {
+    "original_sha256": "e9a9aeaf5232dafe01e9b3bb0659f4f9645fa6669e3a6821c967bac2f6677ee2",
+    "checkpoint_sha256": "e9a9aeaf5232dafe01e9b3bb0659f4f9645fa6669e3a6821c967bac2f6677ee2"
+  },
+  "wire-spi-integration/managed_wire_adapter.h": {
+    "original_sha256": "526d28a46ddaf7af7c39dd6a3d4f5edf34f79e34f41a39276dec73ced3f7307c",
+    "checkpoint_sha256": "526d28a46ddaf7af7c39dd6a3d4f5edf34f79e34f41a39276dec73ced3f7307c"
+  },
+  "wire-spi-integration/test_managed_spi.c": {
+    "original_sha256": "941c1c081fe00591a08c77a01ab889ee49dc2fa9fa077fe019b8bcb20f95e66d",
+    "checkpoint_sha256": "941c1c081fe00591a08c77a01ab889ee49dc2fa9fa077fe019b8bcb20f95e66d"
+  },
+  "evidence/iteration-05-regressions.txt": {
+    "original_sha256": "598c6b81b224dfea8f637e2bd11fbd1cb8663295209b1d332703a693cdc1dfbc",
+    "checkpoint_sha256": "598c6b81b224dfea8f637e2bd11fbd1cb8663295209b1d332703a693cdc1dfbc"
+  },
+  "evidence/iteration-06-regressions.txt": {
+    "original_sha256": "6bcf90291aeacdb9b19b38bc72b6da0748041cd030b648c4461b6a3f9c9b3739",
+    "checkpoint_sha256": "6bcf90291aeacdb9b19b38bc72b6da0748041cd030b648c4461b6a3f9c9b3739"
+  },
+  "evidence/iteration-07-regressions.txt": {
+    "original_sha256": "fde996d6842f282bd6099fddff2629b3b9a5d88e098fa6ec9525f932597ae10a",
+    "checkpoint_sha256": "fde996d6842f282bd6099fddff2629b3b9a5d88e098fa6ec9525f932597ae10a"
+  },
+  "evidence/iteration-08-regressions.txt": {
+    "original_sha256": "28f5887ebc3a54b36100b2dc380b26a543586f7daff30720b09e578d5c0de34f",
+    "checkpoint_sha256": "28f5887ebc3a54b36100b2dc380b26a543586f7daff30720b09e578d5c0de34f"
+  },
+  "evidence/iteration-09-regressions.txt": {
+    "original_sha256": "e47e9fa5d948266e1a4e4f6578c34fc6c3bd2da75aa02fccf4aa7b486ee6c51d",
+    "checkpoint_sha256": "e47e9fa5d948266e1a4e4f6578c34fc6c3bd2da75aa02fccf4aa7b486ee6c51d"
+  },
+  "evidence/iteration-10-regressions.txt": {
+    "original_sha256": "4a0b897982c5c6ac7fccd21d71c26df1744cd9597a4172a605e7d67e5e59f95f",
+    "checkpoint_sha256": "4a0b897982c5c6ac7fccd21d71c26df1744cd9597a4172a605e7d67e5e59f95f"
+  },
+  "evidence/iteration-11-regressions.txt": {
+    "original_sha256": "1f8ae0cddb0343e9598c6b73475df4cd01595e2099591c2d2dcbd5352d3a701f",
+    "checkpoint_sha256": "1f8ae0cddb0343e9598c6b73475df4cd01595e2099591c2d2dcbd5352d3a701f"
+  },
+  "evidence/iteration-12-regressions.txt": {
+    "original_sha256": "dd3535dbdca5c4c37b9ad363125aa8a9698385e8ab7f6ba75400f7073b1481b3",
+    "checkpoint_sha256": "dd3535dbdca5c4c37b9ad363125aa8a9698385e8ab7f6ba75400f7073b1481b3"
+  },
+  "evidence/iteration-13-regressions.txt": {
+    "original_sha256": "e2e3ecbc679cf06d32b1e1277ce21fa42ecc5f54c92e8a01210e02f16b34b5fe",
+    "checkpoint_sha256": "e2e3ecbc679cf06d32b1e1277ce21fa42ecc5f54c92e8a01210e02f16b34b5fe"
+  },
+  "evidence/iteration-14-regressions.txt": {
+    "original_sha256": "58b5a9e9d64d58970f561128ed3b6b267f7e5c125c47120017efcd6b0ab3ebbf",
+    "checkpoint_sha256": "58b5a9e9d64d58970f561128ed3b6b267f7e5c125c47120017efcd6b0ab3ebbf"
+  },
+  "evidence/iteration-15-regressions.txt": {
+    "original_sha256": "3fdec45a0e5c9bffaf1f87055ab85f7a1c69f1df357a104b0a290ff58ccfde0e",
+    "checkpoint_sha256": "3fdec45a0e5c9bffaf1f87055ab85f7a1c69f1df357a104b0a290ff58ccfde0e"
+  }
+}

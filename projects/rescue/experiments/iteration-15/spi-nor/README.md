@@ -1,0 +1,3 @@
+# Bounded SPI NOR driver candidate
+
+Run make check for native fake-byte-bus tests and strict RV32 compilation. No physical backend is connected. Caller supplies exclusive idle bus ownership, verified geometry, stable trusted layout and authorization at the higher update-controller layer. Failed operations latch a fault; explicit fresh init requires the caller to quiesce the controller. Poll budgets are iteration counts, not calibrated wall-time limits. WIP/WEL completion is not proof of erase/program success; contents must be verified by higher layers. Physical protection/status behavior, controller recovery, timing budgets, wear and repeated page programming remain unqualified.

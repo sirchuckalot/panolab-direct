@@ -1,0 +1,185 @@
+
+=== storage-core ===
+./build/test_rescue_storage
+storage-core tests passed
+
+=== journal-core ===
+./build/test_rescue_journal
+PASS: 794 interruption and read-error cases, 16 readback mismatches, 216 single-byte corruption cases, state mapping and selection checks
+
+=== flash-probe ===
+./build/test_rescue_flash_probe
+SPI JEDEC probe tests passed
+
+=== image-core ===
+./build/test_image_core
+image core tests passed
+
+=== flash-transaction ===
+./build/test_rescue_flash_transaction
+flash transaction tests passed
+
+=== trial-core ===
+./build/test_rescue_trial
+rescue trial tests passed
+
+=== manifest-core ===
+riscv64-unknown-elf-nm -u build/manifest.rv32.o > build/rv32-undefined.txt
+test ! -s build/rv32-undefined.txt
+./build/test_manifest
+manifest tests passed
+
+=== manifest-store ===
+riscv64-unknown-elf-nm -u build/core.rv32.o > build/rv32-undefined.txt
+test ! -s build/rv32-undefined.txt
+./build/test_store
+manifest store checks passed (430 body bytes, all cut points)
+
+=== update-controller ===
+mkdir -p build
+python3 fixtures.py > build/fixtures.h
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../journal-core -O2 rescue_update.c ../storage-core/rescue_storage.c ../journal-core/rescue_journal.c ../image-core/image_core.c ../manifest-core/manifest_core.c ../manifest-store/manifest_store.c ../flash-transaction/rescue_flash_transaction.c ../trial-core/rescue_trial.c test_update.c -o build/test_update
+./build/test_update
+PASS: integrated staging, protected bytes, 9 interrupted callback positions, reverify, trial, mocked confirmation, rollback and failed-reset recovery
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -I../journal-core -ffreestanding -march=rv32im -mabi=ilp32 -c rescue_update.c -o build/rescue_update.rv32.o
+
+=== identity-record ===
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror identity_record.c ../storage-core/rescue_storage.c test_identity.c -o build/test_identity
+./build/test_identity
+PASS: normalized identity decode, 1528 single-bit corruptions, all truncated prefixes, duplicate MAC rejection
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -march=rv32im -mabi=ilp32 -ffreestanding -c identity_record.c -o build/identity_record.rv32.o
+
+=== host-diag ===
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Werror -shared -fPIC ../bios-network-probe/firmware/rescue_diag.c -o build/diag.so
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v test_client
+test_mock_transport (test_client.Tests.test_mock_transport) ... ok
+test_real_c_handler (test_client.Tests.test_real_c_handler) ... ok
+test_wrong_id_and_truncations (test_client.Tests.test_wrong_id_and_truncations) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+
+=== spi-nor ===
+./build/test_spi_nor
+SPI NOR tests passed
+
+=== spi-update-integration ===
+./build/test_spi_update
+PASS: SPI NOR staging/readback, invalid manifest, protected bytes, full journal scans, trial confirmation and rollback
+
+=== protected-read ===
+./build/test_rescue_protected_read
+PASS: protected persistent state inspection
+
+=== upload-session ===
+mkdir -p build
+python3 -B ../update-controller/fixtures.py > build/fixtures.h
+cc   -std=c11 -Wall -Wextra -Wpedantic -Werror -UNDEBUG -O2 upload_session.c ../manifest-core/manifest_core.c ../image-core/image_core.c test_upload_session.c -o build/test_upload_session
+./build/test_upload_session
+upload session tests passed
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -ffreestanding -march=rv32im -mabi=ilp32 -c upload_session.c -o build/upload_session.rv32.o
+
+=== stream-slot ===
+./build/test_stream_slot
+PASS: 262161-byte cross-sector streaming upload, final-page padding and readback
+PASS: streaming NOR, 9 upload mutation boundaries plus abort, journal safety and readback
+
+=== managed-stream ===
+./build/test_stream_slot
+PASS: 262161-byte cross-sector streaming upload, final-page padding and readback
+PASS: managed NOR journal bytes per chunk 262295 -> 302, ownership and lockout
+PASS: streaming NOR, 9 upload mutation boundaries plus abort, journal safety and readback
+
+=== managed-spi-integration ===
+./build/test_managed_spi
+PASS: managed streaming through SPI NOR, 302 journal bytes/chunk, protected bytes, full journal scans, trial confirmation and rollback
+
+=== management-wire ===
+./management_wire_test
+management wire tests passed
+
+=== wire-spi-integration ===
+./build/test_managed_spi
+PASS: encoded management requests -> managed streaming -> SPI NOR, replay/offset rejection, 302 journal bytes/chunk, protected bytes, full journal scans, trial confirmation and rollback
+./build/test_managed_spi product-scale
+PASS: 4221965-byte synthetic image, 4124 encoded chunks, full SPI transport and independent readback; protected bytes intact
+
+=== network-session ===
+./network_session_test
+
+=== host-management-sim ===
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v
+test_real_firmware_transport (test_bridge.TestFirmwareBridge.test_real_firmware_transport) ... ok
+test_each_mutation_retries_exact_wire_bytes_after_lost_reply (test_host_management.HostManagementTests.test_each_mutation_retries_exact_wire_bytes_after_lost_reply) ... ok
+test_local_limits (test_host_management.HostManagementTests.test_local_limits) ... ok
+test_missing_seal_offset_is_uncertain (test_host_management.HostManagementTests.test_missing_seal_offset_is_uncertain) ... ok
+test_reset_signal_stops_retries (test_host_management.HostManagementTests.test_reset_signal_stops_retries) ... ok
+test_short_empty_and_long_streams (test_host_management.HostManagementTests.test_short_empty_and_long_streams) ... ok
+test_status_can_follow_definite_rejection (test_host_management.HostManagementTests.test_status_can_follow_definite_rejection) ... ok
+test_stream_stops_on_wrong_acknowledged_offset (test_host_management.HostManagementTests.test_stream_stops_on_wrong_acknowledged_offset) ... ok
+test_timeout_retry_exhaustion (test_host_management.HostManagementTests.test_timeout_retry_exhaustion) ... ok
+test_wrong_response_fields_lock_client_without_retry (test_host_management.HostManagementTests.test_wrong_response_fields_lock_client_without_retry) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.004s
+
+OK
+SIM: verified sealed image; journal unchanged
+PASS: real C session + RAM updater, lost replies, exactly acknowledged offsets, lease cancellation and host lockout
+
+=== reset-recovery-sim ===
+./build/test_stream_slot
+PASS: 18 abrupt process exits at nine NOR mutations, preserved persistent bytes, fresh-process revalidation and restart with supplied high-water ID
+
+=== operation-ledger ===
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 op_ledger.c test_ledger.c -o build/test_ledger
+./build/test_ledger
+PASS: 459 interrupted ledger mutations, boot epoch, high-water reservation, terminal binding, corrupt/ambiguous records and read failures
+riscv64-unknown-elf-gcc -std=c11 -Wall -Wextra -Wpedantic -Werror -ffreestanding -march=rv32im -mabi=ilp32 -c op_ledger.c -o build/op_ledger.rv32.o
+
+=== ledger-reset-integration ===
+./build/test_stream_slot
+PASS: fresh-process terminal ledger and image reconciliation, corrupted sealed image rejected
+PASS: 18 abrupt process exits at nine NOR mutations, ledger-backed ID recovery without supplied high-water mark
+test_cancelled (test_reconcile.ReconciliationTests.test_cancelled) ... ok
+test_interrupted_even_if_image_valid (test_reconcile.ReconciliationTests.test_interrupted_even_if_image_valid) ... ok
+test_reject_mismatch (test_reconcile.ReconciliationTests.test_reject_mismatch) ... ok
+test_verified_not_activated (test_reconcile.ReconciliationTests.test_verified_not_activated) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK
+PASS: APP A/B ICAP packets and launch interlock
+tb_icap_launch_interlock.v:179: $finish called at 37600000 (1ps)
+PASS: boot policy scenarios including 1 s and 60 s boundaries
+Rescue diagnostic request tests passed
+RV32 freestanding object compiled with riscv64-unknown-elf-gcc
+PASS request 1: operation=1 code=0 state=2 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 2: operation=2 code=0 state=2 offset=197; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 3: operation=2 code=0 state=2 offset=197; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 4: operation=2 code=7 state=0 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 5: operation=5 code=7 state=0 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 6: operation=1 code=0 state=2 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 7: operation=4 code=0 state=4 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS: actual GMII lease expiration, replay does not renew lease, new peer acquires and cancels
+PASS request 1: operation=5 code=7 state=0 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 2: operation=1 code=7 state=0 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 3: operation=1 code=0 state=2 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 4: operation=2 code=0 state=2 offset=197; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 5: operation=2 code=7 state=0 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 6: operation=2 code=0 state=2 offset=197; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 7: operation=2 code=5 state=0 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 8: operation=2 code=5 state=2 offset=197; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 9: operation=2 code=0 state=2 offset=513; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 10: operation=3 code=0 state=3 offset=513; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 11: operation=5 code=0 state=3 offset=513; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 12: operation=3 code=0 state=3 offset=513; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS request 13: operation=5 code=7 state=0 offset=0; Ethernet FCS, IP/UDP checksum, correlation and endpoints
+PASS: actual GMII -> VexRiscv BIOS -> RAM NOR updater -> GMII, sealed image independently reverified by embedded code
+ALL REGRESSION GROUPS PASS

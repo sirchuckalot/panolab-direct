@@ -1,5 +1,7 @@
 # PanoLab Rescue G2 Rev B — Source-first build and simulation evidence
 
+**Historical first-build record.** The [iteration-15 checkpoint](../projects/rescue/experiments/iteration-15/README.md) supersedes the first-build status for later diagnostic ISE timing and simulated integration evidence. The physical Rescue qualification gates remain open.
+
 **Historical evidence notice:** This record captures the first G2 builds before the repository
 source migration. Linked source paths point at their migrated locations,
 but previously observed outputs remain historical results. See
@@ -91,4 +93,4 @@ The original first-build warning messages remain preserved as historical evidenc
 4. **Power-fail-safe flash and trial state:** implement inactive-slot update, readback verification, protected identity, journal and revert; failure-injection tests.
 5. **Hardware acceptance:** after separate exact owner authorization, perform read-only real G2 BIOS/PHY/SPI/identity observation, independent button+power cycle recovery, then carefully staged write/provisioning. No remote agent or software success is permission to overwrite factory flash.
 
-**Conclusion:** First source-first SoC and real LiteX BIOS build exist; the standardized Ethernet-recoverable FPGA appliance and physical `.bit` image **do not exist yet**. Claim hardware success only after vendor bitstream and G2 bench tests.
+**Historical conclusion:** First source-first SoC and BIOS build existed at this milestone. Subsequent diagnostic ISE bitstreams and simulation results are documented in the [checkpoint](../projects/rescue/experiments/iteration-15/BUILD_RECORD.md); a standardized physically qualified Ethernet-recoverable FPGA appliance still does not exist.

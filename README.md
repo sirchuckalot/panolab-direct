@@ -31,6 +31,8 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [PanoLab Rescue v1 standard](specs/PANOLAB_RESCUE_V1.md) | Cross-platform boot, A/B update, identity, BSP, trust profiles and qualification contract |
 | [LiteX BIOS Rescue implementation](docs/RESCUE_IMPLEMENTATION.md) | Startup timeout/button behavior, Ethernet management, unpaired Trusted-LAN profile and validation gates |
 | [G2 Rev B first Rescue SoC](projects/rescue/README.md) | Pinned LiteX BIOS/VexRiscv/LiteEth/LiteSPI implementation and build helper |
+| [Rescue iteration-15 engineering checkpoint](projects/rescue/experiments/iteration-15/README.md) | Preserved 15 iterations, read-only diagnostic timing proof, simulated components and pending physical qualification |
+| [Stock Pano research](research/pano-stock/README.md) | Physically measured stock discovery, flash acquisition and agentic workflow |
 | [G2 Rescue test evidence](docs/RESCUE_BUILD_EVIDENCE.md) | Actual generated BIOS/Verilog, nine tests, live LiteX simulation and unproven hardware gates |
 | [Rootless LiteX environment recipe](docs/RESCUE_ENVIRONMENT_RECIPE.md) | Container packages, immutable source locks, clean bootstrap evidence and safe image refresh |
 | [Unified development image upgrade](docs/UNIFIED_DEV_IMAGE_UPGRADE.md) | One modern FPGA development image, explicit laptop rebuild, source reconciliation and rollback plan |
@@ -113,9 +115,8 @@ VM/laptop has **not yet been provisioned or tested**. See
 [clean-host acceptance evidence](docs/FRESH_HOST_ACCEPTANCE.md).
 
 **Still unverified:** a completely unprovisioned host installation,
-reboot recovery of the revised on-demand system, a Pano G2 Rev B
-**board-constrained** bitstream, actual G2 boot, physical Etherbone traffic,
-and programming/flash. No physical FPGA programming was performed.
+reboot recovery of the revised on-demand system, actual Rescue G2 boot, physical Etherbone traffic,
+and Rescue programming/flash. A G2 Rev B read-only diagnostic candidate did pass ISE timing; see the [iteration-15 checkpoint](projects/rescue/experiments/iteration-15/README.md). Separate stock-device Ethernet discovery and full SPI address-space acquisition passed; no FPGA programming was performed.
 The historical [LM1 milestone](specs/LAB_MILESTONE_1.md) remains the accepted
 six-service baseline, not evidence of the new eight-container reboot test.
 
@@ -173,6 +174,7 @@ PanoLab's [Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PR
 | --- | --- |
 | `projects/rescue/` | Complete Rescue project: `project.toml`, SoC, BIOS integration, build and tests |
 | `boards/pano_g2_rev_b/` | Reusable physical G2 Rev B BSP and board-specific constraints |
+| `research/` | Owner-approved independent research, including stock Pano protocol and flash evidence (no private images) |
 | `shared/` | Common PanoLab project source resolver and future reusable RTL/components |
 | `third_party/` | Selected, versioned LiteX, Migen, LiteEth, LiteSPI, Picolibc and VexRiscv source snapshots with licenses and checksums |
 | `docker/` | Container images, modern toolchain, broker, Git gateway, manager and isolated vendor ISE sources |

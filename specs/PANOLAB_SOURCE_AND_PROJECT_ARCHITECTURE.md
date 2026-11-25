@@ -59,6 +59,7 @@ panolab-direct/
       firmware/              # Rescue-owned firmware
       rtl/                   # Rescue-owned handwritten HDL when needed
       tests/                 # Rescue behavior and project tests
+      experiments/           # Frozen, named experimental source checkpoints; not selected by active build
   boards/
     pano_g2_rev_b/           # Board-specific data, BSP hooks, constraints, validation
   shared/                    # Reusable PanoLab-authored RTL, generators and libraries
@@ -69,6 +70,7 @@ panolab-direct/
         upstream.toml        # Exact origin/revision, selection, local changes, license map
         src/                 # Only required imported paths, retaining upstream layout
         ...                  # Required copyright/license/notice files
+  research/                  # Approved independent research; sanitized sources/evidence only
   tests/                     # Platform and cross-project test infrastructure
   specs/                     # Cross-project standards (including this file)
   docs/                      # Operational architecture, procedures, evidence
@@ -76,7 +78,7 @@ panolab-direct/
   LICENSES/                  # Existing license/attribution index; upstream full texts retained in snapshots
 ```
 
-This tree is the approved source-ownership model. The migration
+This tree is the approved source-ownership model. The owner approved the research source root and preservation of the iteration-15 Rescue experiment checkpoint. Frozen experiments may retain relative source variants for evidence/reproduction; they are not independent active project/dependency roots. Consolidate reviewed changes into the owning BSP/project/shared source rather than maintaining parallel production implementations. Generated outputs remain private workspace artifacts until separately reviewed for release. The migration
 candidate now contains the implementation paths, but live host mount and
 Docker-service acceptance remains a separate gate. Names selected for the target architecture: **`projects/` rather than `products/`**, since each item is an engineering implementation and may or may not become a commercial product. `products/` is not a second source root. A release or manufactured product is built *from* a project.
 
