@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 540" role="img" aria-labelledby="title desc">
+<title id="title">PanoLab evidence-driven agentic engineering cycle</title>
+<desc id="desc">Research, hypothesize, implement, experiment, validate and learn form a clockwise cycle around human direction, ChatGPT coordination, Codex implementation and physical evidence.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526b84"/></marker></defs>
+<rect width="760" height="540" rx="24" fill="#f5f8fc"/>
+<g fill="none" stroke="#526b84" stroke-width="3" marker-end="url(#arrow)">
+<path d="M470 65 Q610 65 610 139"/><path d="M610 196V344"/><path d="M610 401 Q610 475 474 475"/>
+<path d="M290 475Q150 475 150 405"/><path d="M150 344V196"/><path d="M150 139Q150 65 286 65"/>
+</g>
+<g fill="#e2edf8" stroke="#517ba3" stroke-width="2">
+<rect x="290" y="35" width="180" height="60" rx="13"/><rect x="520" y="139" width="180" height="57" rx="13"/><rect x="520" y="344" width="180" height="57" rx="13"/><rect x="290" y="445" width="180" height="60" rx="13"/><rect x="60" y="344" width="180" height="57" rx="13"/><rect x="60" y="139" width="180" height="57" rx="13"/>
+</g>
+<g font-family="system-ui,sans-serif" font-size="20" font-weight="600" text-anchor="middle" fill="#19364e">
+<text x="380" y="72">Research</text><text x="610" y="175">Hypothesize</text><text x="610" y="380">Implement</text><text x="380" y="482">Experiment</text><text x="150" y="380">Validate</text><text x="150" y="175">Learn</text>
+</g>
+<g font-family="system-ui,sans-serif" text-anchor="middle" fill="#253b50">
+<text x="380" y="221" font-size="23" font-weight="700">Human direction</text>
+<text x="380" y="257" font-size="19">ChatGPT coordination</text>
+<text x="380" y="287" font-size="19">Codex implementation</text>
+<text x="380" y="325" font-size="18" font-weight="600">Physical evidence</text>
+</g></svg>
