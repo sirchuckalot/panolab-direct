@@ -65,8 +65,8 @@ performs the genuine six-stage pipeline, and then removes only its
 labeled test resources. Successful artifacts are recorded by SHA-256
 in the normal broker's private state volume. The existing persistent
 worker is not modified or reinstalled. See
-[the full acceptance contract](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md).
+[the full acceptance contract](GETTING_STARTED.md#disposable-unattended-ise-147-acceptance).
 This framework must remain independent of the temporary
 `trusted-maintenance` route.
 
-[Architecture and acceptance gates](ARCHITECTURE.md) · [Security](SECURITY.md)
+[Architecture and acceptance gates](ARCHITECTURE.md) · [Security](ARCHITECTURE.md#security-and-trust-boundaries)

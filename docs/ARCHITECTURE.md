@@ -37,7 +37,7 @@ modern dev and ISE worker) is a target, not a reboot-accepted deployment.
 Provisioning the persistent setup service from complete absence, and
 fresh-machine installation, are not yet proven. The independent **disposable**
 ISE installation/build/cleanup path has passed twice through normal MCP
-([evidence](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md)); it does not establish
+([evidence](EVIDENCE.md#disposable-ise-installation)); it does not establish
 full host provisioning. The development container continues to use
 approved source mounts and a private Codex bind with
 **2 CPUs, 4 GiB memory, 256 PIDs**. The normal manager and developer
@@ -46,7 +46,7 @@ owner-approved trusted-maintenance sidecar do. That temporary sidecar
 has broad user-rootless Docker authority and must be retired before
 production hardening claims. Rootless container UID 0 is mapped to the laptop owner's
 ordinary UID, **not host root**; it can still affect files owned by
-that user. See [security](SECURITY.md).
+that user.
 
 **Image boundary (accepted):** compatible general FPGA tools share
 [one modern development image](../docker/modern/Dockerfile), organized
@@ -85,8 +85,7 @@ and correctly excludes these later achievements.
 The laptop uses separate protected configuration and data roots. The canonical
 checkout is mounted read-only at `/repo`, with a read-only tmpfs masking
 `/repo/.git`. Workspace and Codex authentication have separate writable binds.
-See [operations](GETTING_STARTED.md) for paths and [security](SECURITY.md)
-for access boundaries.
+See [operations](GETTING_STARTED.md) for paths.
 
 At development commit `31534ed99072af490360a7882103031de8609594`,
 independent verification recorded matching clean laptop and GitHub revisions,
@@ -125,10 +124,10 @@ artifact redistribution require separate review.
 | Frozen Rescue source | `projects/rescue/` (project manifest, SoC, firmware/BIOS overlay, tests and build entrypoints) |
 | Active product ownership | `projects/anchor/` under the source and project standard |
 | Shared and third-party source | `shared/`, `third_party/registry.toml`, individual `upstream.toml`, retained license texts and per-file SHA-256 manifests |
-| Security/licensing | [Security boundaries](SECURITY.md), [source architecture](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md), [license summary](../LICENSES/README.md) and original upstream notices |
+| Security/licensing | [source architecture](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md), [license summary](../LICENSES/README.md) and original upstream notices |
 | Git publishing | [Scoped development-branch push](GETTING_STARTED.md#scoped-github-push); `main` remains frozen |
 
-**Owner-private artifacts:** operational state in the [external config and data roots](EXTERNAL_STORAGE_CUTOVER.md), personal
+**Owner-private artifacts:** operational state in the [external config and data roots](GETTING_STARTED.md#owner-local-storage-recovery), personal
 tokens, Codex login state, node-locked license, proprietary Xilinx archive
 and installed binaries, generated HDL/build directories, bitstreams and
 private diagnostic traces. Local Docker image tags and backup containers
@@ -151,6 +150,14 @@ manager and worker require a rebuild. The approved maintenance helper provides
 `status`, `check`, `reload-broker` and `deploy-management`. Its detached
 management deployment records status and logs in the maintenance workspace so
 verification can resume after a transport reconnect.
+
+The manager's `ise_project_stage` adapter (also `@ise14 stage <project>`)
+reads `/workspace/ise-staging/<project>/build.json` and its declared Verilog
+and UCF. A temporary networkless helper stages the approved inputs as
+`<project>-<sha256-prefix>` under the worker's read-only `/projects` mount.
+Recovery coverage still calls for malformed-source rejection, staging
+rollback, active cancellation, restart persistence, invalid request denial,
+race resistance and tunnel preservation.
 
 The target control plane uses versioned releases, preflight, authenticated
 canaries and independently recoverable rollback. Security-critical code and
@@ -180,7 +187,7 @@ installation or licensed compilation**. Running `@ise-e2e` must work
 through ordinary authenticated manager/broker, without maintenance
 executing any install/build/cleanup step.
 
-## Preserve (do not prune) existing local rollback assets
+## Retained rollback assets
 
 At the accepted ISE bring-up checkpoint, the following stopped
 containers were retained on the owner's rootless Engine:
@@ -222,3 +229,95 @@ Until then, retaining this temporary environment is **intentional**.
 It accelerates development and failure diagnosis; its presence does
 not make the actual FPGA hardware or the eventual production appliance
 qualified.
+
+## Security and trust boundaries
+
+Use approved source and private mounts, the owner-user rootless Engine and
+the authenticated, restricted MCP broker. Default prohibitions include sudo,
+host package installation, rootful Docker, privileged containers, broad home
+mounts, host networking, a Docker socket in dev, unchecked outbound services,
+public Etherbone or vendor listeners, and automatic FPGA programming.
+
+### Laptop trust map
+
+- `manager` and `repo-git` communicate using private RPC paths.
+- Under the normal/target model, only `docker-broker` sees the **user
+  rootless Docker socket**, bound as `/var/run/docker.sock` inside the
+  broker. Its typed operation allowlist is a security boundary.
+  **Temporary 2026-11-24 engineering exception:** the explicitly enabled
+  `panolab-direct-trusted-maintenance` sidecar also mounts that
+  ordinary-user rootless Docker socket. The authenticated `@maintenance`
+  compatibility route is intentionally broad and can affect other
+  user-owned containers/files through rootless Docker. It is not
+  production-hardened, even though it has no network namespace access
+  and drops capabilities. See [the retirement plan](#temporary-maintenance-and-retirement).
+- Rootless container UID 0 maps to the ordinary laptop owner's
+  host UID, **not host root**. It can still read/write that owner's
+  accessible files if a mount is granted.
+- `dev` has a 2-CPU, 4-GiB, 256-PID quota and approved source/workspace
+  mounts; its auth mount belongs to the owner's private directory.
+- `tunnel` connects out to the platform and uses private on-disk
+  credentials. The internal MCP endpoint is bearer-protected; a
+  request without a bearer must be rejected.
+- The external config and data roots keep credentials, media and operational
+  state outside the canonical checkout. Source admission rejects legacy
+  private files, unsafe links and unapproved entries before creating new dev
+  mounts. The whole checkout is read-only at `/repo`, with an empty read-only
+  tmpfs masking `/repo/.git`. The agent workspace and Codex credentials have
+  separate writable mounts.
+- The Git gateway retains the checkout and its Git metadata to perform its
+  permitted source operations. Its RPC directory lives in the data root. The optional Git push Compose overlay mounts
+  only `PANOLAB_CONFIG_DIR/github-git-auth` in the gateway, read-only at
+  `/run/panolab-git-auth`. Clean, non-force `development` pushes invoke the
+  existing scoped `GIT_ASKPASS` helper. [GitHub publishing](GETTING_STARTED.md#scoped-github-push)
+
+### Rescue appliance Ethernet trust — separate from MCP
+
+The proposed first-use Rescue `trusted-lan` mode intentionally enables
+**unpaired** network updates of inactive application slots on a single-owner,
+**isolated Ethernet lab**. No account/certificate/pairing is needed; this is
+not cryptographic sender authentication. Every reachable host can issue the
+supported, partition-scoped app update and boot operations. A button held
+at startup selects Rescue mode, **not** the identity of a network caller.
+Never expose this unpaired endpoint to guest/shared networks or the internet.
+Status/discovery and the CLI must prominently identify unpaired operation.
+Paired developer/production profiles require network authentication;
+production also requires encrypted transport and signed artifacts.
+
+All profiles retain protected BOOT/RESCUE/IDENTITY, A/B last-known-good,
+manifest and readback verification, redundant journals and bounds checks.
+The normal network API never exposes arbitrary erase/address or raw bus
+master controls. See the [BIOS implementation plan](RESCUE_IMPLEMENTATION.md)
+and [Rescue v1 standard](../specs/PANOLAB_RESCUE_V1.md).
+
+**The laptop agent remains separately gated:** Factory SPI flash, JTAG,
+volatile FPGA programming and physical network access require separate,
+exact owner authorization, trusted recovery provisions and evidence.
+A remote MCP tool is not blanket consent.
+
+The licensed ISE 14.7 CentOS 6.10 userspace is EOL. The successful
+2026-11-24 licensed build runs in a rootless, read-only worker with
+dropped capabilities and an isolated Docker **internal** network
+carrying the previously licensed virtual Ethernet identity. The
+license and physical NICs were not edited; no vendor service port is
+published. This preserves node-locked vendor behavior, but does not
+make the legacy environment or temporary maintenance control
+production-safe. [Real build evidence](EVIDENCE.md#licensed-ise-bring-up).
+
+**Owner-authorized unattended vendor installation is narrowly scoped.**
+The disposable ISE acceptance route uses the normal authenticated
+manager/rootless broker, **not** `@maintenance`. It requires the exact
+approved System Edition 14.7 archive SHA-256 and size from the reviewed
+[acceptance policy](../docker/ise14/acceptance-policy.json) before sending
+the existing vendor-install confirmation. It creates uniquely labeled,
+Docker-internal / network-none disposable setup and worker containers
+with fresh private Docker volumes, dropped capabilities, and read-only
+vendor media/license mounts. It deletes **only** test-tagged resources
+after verifying real six-stage bitstream artifacts. Results preserve
+hashes, not license keys or host MAC identities. This does not authorize
+other EULAs, new license entitlements, host changes or FPGA programming.
+A temporary maintenance sidecar can still inspect/correct the framework,
+but **its participation as a test executor invalidates acceptance**.
+See [independent installation evidence](EVIDENCE.md#disposable-ise-installation).
+The regular broker's Docker-socket authority still requires long-term
+hardening independently of the temporary maintenance retirement.

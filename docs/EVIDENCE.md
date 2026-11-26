@@ -2,25 +2,23 @@
 
 Use [architecture](ARCHITECTURE.md) for the current operating state and
 [operations](GETTING_STARTED.md) for supported procedures. The records below
-identify the scope and limitations of earlier checkpoints. Original reports
-are pinned to the verified development revision
-`31534ed99072af490360a7882103031de8609594`.
+identify the scope and limitations of earlier checkpoints. Original reports link to the Git revisions that preserve them.
 
 | Record | Scope and later evidence |
 | --- | --- |
 | [G2 engineering handoff](#g2-engineering-handoff) | Earlier deployment decisions and the G2 development stopping point. |
 | [LM1](../specs/LAB_MILESTONE_1.md) | Reinstall and six-service reboot on the already provisioned laptop before ISE. Preserves legacy paths and the separate LM2 simulation fixture. |
 | [First Rescue build](RESCUE_BUILD_EVIDENCE.md) and [upstream review](../specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Source selection, initial generated BIOS/RTL and generic simulation. Later diagnostic evidence is recorded at iteration 15. |
-| [LiteX environment recipe](RESCUE_ENVIRONMENT_RECIPE.md) | Initial bootstrap evidence, package and source pin rationale. Use the current installer and Docker recipe for provisioning. |
+| [LiteX environment recipe](#litex-bootstrap) | Initial bootstrap evidence, package and source pin rationale. Use the current installer and Docker recipe for provisioning. |
 | [Unified development image](#unified-development-image) | Laptop image rebuild, 23 tests and generic BIOS simulation. Later warning cleanup removed the named stopped rollback container. |
-| [Toolchain warning cleanup](DEV_TOOLCHAIN_WARNING_CLEANUP.md) | Warning-free BIOS, RX/RW segments, owner-local Buildx setup and exact stopped-container cleanup. |
+| [Toolchain warning cleanup](#toolchain-warning-cleanup) | Warning-free BIOS, RX/RW segments, owner-local Buildx setup and exact stopped-container cleanup. |
 | [Source migration](#source-layout-migration) | Isolated source-layout and build-equivalence evidence. The later external storage migration has a separate accepted operational result. |
 | [ISE bring-up](#licensed-ise-bring-up) and [milestone review](#remote-ise-milestone) | Generic licensed jobs, network-license correction, eight-container checkpoint and preserved image identities. |
-| [Remote iteration](REMOTE_ITERATION_ARCHITECTURE.md) | Historical staging and temporary maintenance design, with the restricted updater still pending. |
+| [Remote iteration](https://github.com/sirchuckalot/panolab-direct/blob/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6/docs/REMOTE_ITERATION_ARCHITECTURE.md) | Historical staging and temporary maintenance design, with the restricted updater still pending. |
 | [On-demand setup](#on-demand-ise-setup) | Existing stopped setup lifecycle and worker build. Setup creation from absence remains separate. |
-| [Disposable ISE installation](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md) | Two fresh vendor installs, builds and verified resource disposal through the normal MCP route on the provisioned laptop. |
-| [Fresh-host admission](FRESH_HOST_ACCEPTANCE.md) | Read-only empty-home fixture. Full fresh-host install and reboot remain open. |
-| [External storage runbook](EXTERNAL_STORAGE_CUTOVER.md) | Historical owner-local migration procedure and rollback details. See architecture for the accepted cutover evidence. |
+| [Disposable ISE installation](#disposable-ise-installation) | Two fresh vendor installs, builds and verified resource disposal through the normal MCP route on the provisioned laptop. |
+| [Fresh-host admission](#fresh-host-admission) | Read-only empty-home fixture. Full fresh-host install and reboot remain open. |
+| [External storage runbook](#external-storage-cutover) | Historical owner-local migration procedure and rollback details. See architecture for the accepted cutover evidence. |
 | [Rescue BIOS plan](RESCUE_IMPLEMENTATION.md) and [iteration 15](../projects/rescue/experiments/iteration-15/README.md) | Historical implementation design and later G2 diagnostic timing and simulation. Physical recovery and product qualification are open. |
 | [Stock research](../research/pano-stock/README.md) | Physical stock discovery and readback, with private evidence and restore limits. |
 
@@ -60,7 +58,7 @@ The 39,156-byte BIOS hash was
 The 492,579-byte HDL hash was
 `1461a0e5c9e6a33ef83ae6976b4ed7034e84bfabc080fb0fc9ee8e06f767cf09`.
 The stopped rollback was retained at this checkpoint. The
-[later cleanup](DEV_TOOLCHAIN_WARNING_CLEANUP.md) records its removal.
+[later cleanup](#toolchain-warning-cleanup) records its removal.
 Rollback execution, Ethernet TAP, vendor implementation and physical
 qualification were outside this image acceptance.
 [Original laptop acceptance and test matrix](https://github.com/sirchuckalot/panolab-direct/blob/31534ed99072af490360a7882103031de8609594/docs/UNIFIED_DEV_IMAGE_ACCEPTANCE.md)
@@ -134,3 +132,80 @@ On 2026-11-23 Pacific, the owner-local setup reported
 no-op push. Use the [current owner procedure](GETTING_STARTED.md#scoped-github-push)
 for provisioning or renewal.
 [Original authentication record and procedure](https://github.com/sirchuckalot/panolab-direct/blob/31534ed99072af490360a7882103031de8609594/docs/GITHUB_PUBLISHING.md)
+
+## LiteX bootstrap
+
+PLR-ENV-001 verified seven pinned source revisions, the pinned Python virtual
+environment and a fresh workspace BIOS/HDL build. The pinned Git Picolibc
+data and wrapper replaced the incompatible PyPI layout. An absolute data
+symlink within the container survives LiteX's source copy. Native simulation
+dependencies built successfully. Ethernet TAP execution remains open under
+the rootless policy. [Original bootstrap record](https://github.com/sirchuckalot/panolab-direct/blob/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6/docs/RESCUE_ENVIRONMENT_RECIPE.md)
+
+## Toolchain warning cleanup
+
+PLR-ENV-004 verified the six SHA-256-guarded build-output overlays on the
+laptop. The BIOS rebuilt with zero warnings/errors and separate RX/RW ELF
+segments. Nine G2 tests and 13 overlay and host maintenance tests passed.
+The owner installed pinned Buildx, confirmed the default rootless driver and
+removed only the named rollback ending in `020818Z`. Independent status
+confirmed six services. A fresh Buildx image rebuild and live generic
+simulation using the patched G2 BIOS remained pending at that checkpoint.
+[Original cleanup record](https://github.com/sirchuckalot/panolab-direct/blob/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6/docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md)
+
+## Disposable ISE installation
+
+On 2026-11-24 both runs used the normal authenticated manager/broker path.
+Independent inspection confirmed disposal and matching private license,
+installation-state and settings hashes. The run venue was the provisioned
+laptop. Full timing-report retrieval and separate board acceptance remain open.
+
+| Evidence | First completely disposable run | Repeat run |
+| --- | --- | --- |
+| Run ID | `f0080a606722` | `e65e511a8633` |
+| Vendor job ID | `1795543475178815872` | `1795543672971384328` |
+| Archive SHA-256 approved and checked | PASS | PASS |
+| Fresh installation from initially empty volume | PASS | PASS |
+| Unattended native installer status | `succeeded` | `succeeded` |
+| Actual licensed implementation | 6/6 stages passed | 6/6 stages passed |
+| `design.bit` | 4,220,305 bytes | 4,220,305 bytes |
+| Bitstream SHA-256 | `09d4ada91e617928c79ee3b050a6f5bc641727da23eae73d303ca0fc7d8727f6` | `200a1df5fc44afe5c9811682fdd4ad9b5666d535cb9bb3cf361f480890fbef50` |
+| Timing report and six stage logs | Present and hashed | Present and hashed |
+| Controller terminal state | `passed`, `finished` | `passed`, `finished` |
+| Verified test resource disposal | `disposed:true`, eight absent | `disposed:true`, eight absent |
+
+Both runs used identical source inputs:
+`acceptance_build.json` SHA-256
+`46ba12cf2ed227b6eb49722612fcfd743520b40eaafb611ba7a5f549201141a7`
+and `acceptance_design.v` SHA-256
+`a9375958f743a8518ce7c4b99c10bf72765f7d04e58a065fa6970624f35fcfe2`.
+Different bitstream hashes between runs are not interpreted as a
+deterministic/reproducible binary-output claim; both outputs were independently
+verified as real, nonempty vendor artifacts.
+
+One attempted overlapping `@ise-e2e start` request was rejected safely
+while the first run was active. Thirteen non-Docker unit tests covered
+safe resource names, exact media/terms policy, source/mount separation,
+caller output filtering, simulated success/failure and cleanup failure.
+A build-time broker candidate with the initial test suite also passed;
+no candidate image was promoted solely to run the acceptance tests.
+
+[Original acceptance record](https://github.com/sirchuckalot/panolab-direct/blob/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6/docs/ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md) ·
+[Current procedure and criteria](GETTING_STARTED.md#disposable-unattended-ise-147-acceptance)
+
+## Fresh-host admission
+
+The read-only 2026-11-24 empty-home fixture returned
+`FRESH_HOST_PREREQUISITES=BLOCKED` (exit 10) for 20 missing fixture conditions.
+Eight source and behavioral tests passed. An independent installation and
+reboot remain pending, including rootless and private-input provisioning,
+persistent worker commissioning from scratch, and entitlement on the test host.
+[Original fixture and blocker evidence](https://github.com/sirchuckalot/panolab-direct/blob/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6/docs/FRESH_HOST_ACCEPTANCE.md) ·
+[Independent acceptance sequence](GETTING_STARTED.md#independent-fresh-host-qualification)
+
+## External storage cutover
+
+The [accepted migration baseline](ARCHITECTURE.md#accepted-external-storage-and-source-mounts)
+records the live cutover. The original owner-local procedure preserves all
+transaction-specific paths, commands, inventory and rollback sequencing.
+[Original cutover and rollback runbook](https://github.com/sirchuckalot/panolab-direct/blob/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6/docs/EXTERNAL_STORAGE_CUTOVER.md)

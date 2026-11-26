@@ -19,14 +19,14 @@ If a different host lacks this helper or delegated resources,
 host `apt` or a nested/rootful Docker daemon.
 
 Containerized tooling includes Python, Git, Yosys, Icarus, Verilator,
-Codex and the [pinned LiteX/VexRiscv Rescue stack](RESCUE_ENVIRONMENT_RECIPE.md):
+Codex and the [pinned LiteX/VexRiscv Rescue stack](#verify-the-pinned-litex-environment):
 LiteX BIOS, LiteX-Boards, LiteEth, LiteSPI, Migen, SPI/PHY support,
 RISC-V GCC/binutils, Meson/Ninja and simulation C libraries.
 Licensed ISE remains separately approved. **Host Docker Buildx** is a
 Docker CLI extension (not another Docker image or development service).
 For the owner-laptop version-pinned, no-sudo bootstrap and exact
 old-development-rollback cleanup, see the
-[toolchain cleanup procedure](DEV_TOOLCHAIN_WARNING_CLEANUP.md).
+[toolchain cleanup procedure](#buildx-and-the-guarded-rollback-cleanup).
 The installer now builds images with BuildKit and fails rather than
 falling back to Docker's deprecated legacy builder.
 
@@ -42,7 +42,36 @@ A missing-prerequisite report returns exit code `10`; even a `READY`
 report establishes **prerequisite readiness only**, not a working
 installation. A genuinely new host may require a reviewed OS
 administrator provisioning step and owner-provided private media.
-Read [the actual test and remaining gates](FRESH_HOST_ACCEPTANCE.md).
+Read [the actual test and remaining gates](EVIDENCE.md#fresh-host-admission).
+
+### Independent fresh-host qualification
+
+1. Launch an **independent disposable Linux x86_64 VM/host** with a
+   known OS image and confirmed owner approval for first-time OS setup;
+   it must not share the working laptop's Docker images, volumes,
+   Git checkout or secret directories.
+2. Record the clean baseline, rootless prerequisites, image/cache
+   state and absence of PanoLab services. Run
+   `bash panolab-install.sh --fresh-host-check` and record all blockers.
+3. Establish the host runtime explicitly and safely. If system packages,
+   uidmap or kernel changes are required, handle them through a reviewed
+   OS provisioning step, never through the temporary PanoLab sidecar.
+4. Provide private owner-approved credentials and media through
+   a separate encrypted input channel or already-authorized local
+   facility. Validate exact vendor SHA-256 and licensing scope; do not
+   send credentials/media to a public CI runner.
+5. Run the **normal one-command launcher** and make it build the manager,
+   broker, repo gateway, modern tools, optional setup and licensed
+   worker from reviewed source. Validate typed lifecycle, authenticated
+   remote MCP, resource limits and setup-off-by-default behavior.
+6. Run `@ise-e2e start` from the **normal MCP route**, wait for
+   `passed` + `disposed:true`, verify all six vendor stages, artifact
+   hashes and strict cleanup.
+7. Exercise a persistent installed worker, reboot the independent host
+   and confirm automatic return of the intended six services. Keep
+   temporary maintenance absent for the entire acceptance execution.
+8. Preserve the evidence/known-good versions and destroy **only the
+   independent clean-host test environment** after qualification.
 
 ## 2. Owner-private inputs
 
@@ -64,7 +93,7 @@ symlinks.
 The installer requires these inputs to exist and preserves the existing
 vendor installation. Keep credential contents, license details and archives
 private. The owner laptop completed the external-storage migration. The
-[cutover runbook](EXTERNAL_STORAGE_CUTOVER.md) preserves the original rollback
+[cutover runbook](#owner-local-storage-recovery) preserves the original rollback
 procedure and checkpoint-specific inputs.
 
 ## 3. Commands
@@ -132,7 +161,7 @@ The installer reuses existing services with `--no-recreate`. When the modern
 image recipe changes, it rebuilds and smoke-tests the image tag and reports
 that the running dev container still needs an explicit
 [dev-only upgrade](#controlled-development-image-upgrade).
-See the [LiteX environment recipe](RESCUE_ENVIRONMENT_RECIPE.md). Before any service replacement,
+Before any service replacement,
 review effects on the remote tunnel, host resources, private mounts,
 licenses and persistent results. Do not globally prune Docker.
 Reboot recovery was accepted for the **earlier six-service LM1 configuration**
@@ -141,6 +170,19 @@ standalone developer container. Clean reboot acceptance remains open for the cur
 deployment and the proposed six-service topology. The earlier
 test does not prove unattended headless startup before login or a
 fresh-host installation.
+
+### Temporary management recovery
+
+The already authorized maintenance helper offers `status` and `check` for
+health, `reload-broker` for a Python-only restart, and `deploy-management`
+for candidate image builds, tests, saved-image tags and rollback on a failed
+authenticated canary. Run a broker or manager replacement detached through
+the approved maintenance interface so loss of the remote session cannot
+interrupt it. After reconnecting, inspect
+`/workspace/maintenance/status.json` and `/workspace/maintenance/latest.log`
+and verify authenticated normal service behavior. Keep the owner-local
+recovery path available. See the
+[retirement gate](ARCHITECTURE.md#approved-future-retirement-gate).
 
 ### On-demand ISE setup controls
 
@@ -154,7 +196,7 @@ and checksum validation.
 ### Controlled development image upgrade
 
 1. Verify the clean canonical development checkout and reviewed revision.
-   Use the guarded synchronization procedure in [development](DEVELOPMENT.md).
+   Use the guarded synchronization procedure in [development](#working-milestone-and-commit-discipline).
 2. Run `bash ./panolab-install.sh --check`, then the explicitly authorized
    `bash ./panolab-install.sh --upgrade-dev`. The helper checks rootless
    preconditions, exact mounts and the recipe label, then smoke-tests the
@@ -205,8 +247,20 @@ and requires no laptop-side manual terminal steps after the approved
 inputs are provisioned. The existing installation, license, normal
 setup and persistent worker are never writable test inputs.
 
+Acceptance requires the normal manager/broker path, the exact approved
+archive and terms, an initially empty install volume, an unattended
+successful native install, all six licensed stages, nonempty hashed
+bitstream and timing report, and all eight run-scoped resources absent.
+Verify `passed` and `disposed: true` and preservation of the persistent worker,
+private inputs and stopped setup service. Maintenance may inspect the
+framework. Execution or mid-run modification by maintenance invalidates
+the run. Preflight currently requires the healthy persistent worker,
+existing stopped setup for mount discovery, and known-good setup and
+worker checkpoint images. Bounded results are private under
+`/rpc/ise-e2e/` in the management RPC volume.
+
 The successful end-to-end evidence and limitations are recorded in
-[disposable ISE acceptance](ISE14_DISPOSABLE_INSTALL_ACCEPTANCE.md).
+[disposable ISE acceptance](EVIDENCE.md#disposable-ise-installation).
 This capability proves a **fresh ISE vendor installation on the
 already-provisioned laptop**, not an untouched-host installation of
 Docker, a new entitlement, the tunnel, or Pano G2 hardware programming.
@@ -221,7 +275,7 @@ preserved as the accepted baseline. All engineering goes through
 `development`, and promotion to `main` requires explicit owner
 acceptance. Use guarded fast-forward sync only while the checkout
 is clean and source history permits it; never reset or force-push
-to hide divergence. Follow [development and publishing](DEVELOPMENT.md)
+to hide divergence. Follow [development and publishing](#working-milestone-and-commit-discipline)
 and [LM1 evidence](../specs/LAB_MILESTONE_1.md).
 
 ### Scoped GitHub push
@@ -257,4 +311,176 @@ changes, use reviewed local staging or the connected integration. Verify the
 expected remote SHA after publication. Historical authentication results are
 in [the evidence index](EVIDENCE.md#scoped-github-authentication).
 
-[Architecture](ARCHITECTURE.md) · [Security](SECURITY.md)
+## Development and verification
+
+Follow [engineering session policy](../AGENTS.md) and the
+[source and project standard](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
+
+### Choose the test venue
+
+| Goal | Default execution |
+| --- | --- |
+| Bash/Python/Go lint and unit tests, HDL simulation and synthesis checks | Laptop development container or a dedicated local toolchain container |
+| Dependencies, incompatible fixtures and repeatability experiments | Isolated, resource-limited local rootless container through approved broker controls |
+| Rootless Docker, systemd/cgroups, mounts, authenticated MCP, network and Codex behavior | The **actual laptop** and running PanoLab services; never hosted CI as proxy |
+| Licensed ISE, bitstream implementation and reproducibility | Separately approved persistent laptop-local ISE worker |
+| JTAG/Etherbone, FPGA identity, configuration or flash | Owner-authorized physical laptop/board environment with recovery |
+| Repository hygiene, deterministic clean-environment unit/lint/security checks | Local first; optional small, explicitly justified CI gate |
+
+GitHub Actions is legitimate CI for fast reproducible checks,
+review gates and platform portability tests. It is **not** a substitute
+for the laptop's Docker/rootless setup, private credential environment,
+licensed ISE or hardware. Before adding a workflow, state the concrete
+question, clean-runner assumptions, trigger, timeout, cost budget and
+what PASS can establish. No Actions workflows are required or shipped
+in this baseline. Avoid hosted KVM and push/CI debugging loops.
+
+### Working milestone and commit discipline
+
+1. Check source status and GitHub refs, identify the active checkout
+   and define the smallest complete engineering objective and tests.
+2. Experiment in `/workspace`, a disposable local checkout or a
+   reviewed isolated container. **Do not commit and push each trial.**
+3. Rerun appropriate laptop-local checks until the actual feature
+   works. Check implementation and credentials/mount boundaries.
+4. Review the final diff and record exactly what passed: command,
+   execution site, test result and any separate PENDING gate. Source
+   tests are not proof of a licensed or physical FPGA build.
+5. Publish **one coherent, reviewed commit** for the verified change
+   using the connected GitHub integration and an expected-parent,
+   non-force update. Alternatively, after the owner completes the
+   [private Git push setup](#scoped-github-push), the existing
+   `repo-git` gateway can push a clean, reviewed local `development`
+   commit without force. Draft/unverified work requires explicit approval.
+6. Verify the new GitHub SHA. Only use PanoLab `repo_sync` when the
+   checkout is clean, the gateway supports the branch, and the
+   histories share ancestry. Never wipe local work or silently
+   reconcile unrelated histories.
+
+### Local source checks
+
+For a separately scoped audit of the frozen Rescue checkpoint, verify source bytes before compiling:
+
+```sh
+python3 shared/source_registry.py verify --project projects/rescue/project.toml
+PANOLAB_LAB_MAC=02:00:00:00:00:01 bash projects/rescue/build.sh
+bash projects/rescue/test.sh
+```
+
+Use the provisioned modern development toolchain; output is isolated
+under `/workspace/panolab-projects/rescue-g2b/` unless explicitly redirected.
+The historical G2 source checks and the platform suite are
+separate test gates.
+
+Use an approved laptop container with the project available:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py'
+python3 -m unittest discover -s tests -p 'test_litex_recipe.py' -v
+python3 -m unittest discover -s tests -p 'test_upgrade_reconcile.py' -v
+python3 -m unittest discover -s tests -p 'test_bios_overlay.py' -v
+bash -n panolab-install.sh host/rootless-install.sh
+python3 -m py_compile docker/control/broker.py docker/control/repo_gateway.py
+```
+
+The Go MCP manager and vendor MCP worker have in-tree Go tests,
+normally executed inside locally built Go toolchain stages or
+an approved local Go container. Keep the external
+`tests/fixtures/ise_counter/` RTL/manifest and
+`tests/ise_mcp_smoke_client.py` separate from the vendor worker.
+The fixture is not a bitstream ready to program.
+
+The [BIOS warning cleanup](EVIDENCE.md#toolchain-warning-cleanup) uses
+six SHA-256-guarded, build-output-only overlays for the exact pinned
+LiteX/Compiler-RT sources: no blanket warning suppression or rewrites
+of the pristine upstream checkouts. A full G2 source build with zero
+compiler/link warnings and RX/RW (not RWX) BIOS ELF LOAD segments
+passed in the laptop development container. Docker image construction
+uses owner-local Buildx on the existing rootless Engine, never a
+second BuildKit service.
+
+**Unified modern development image:** All open-source FPGA development tools share [one Dockerfile](../docker/modern/Dockerfile). Dedicated legacy vendor ISE remains separate. The [controlled dev-only upgrade](#controlled-development-image-upgrade) verifies source history and mounts and preserves a stopped rollback container before accepting a rebuilt image. Do not delete or recreate the running lab merely to add another HDL package.
+
+See the [early LiteX BIOS bootstrap and source-build evidence](EVIDENCE.md#litex-bootstrap). The image
+pins seven upstream checkouts and Python build versions; standard LiteX
+BIOS builds do not require copying old Pano FPGA frameworks. A clean
+workspace-install PASS and static recipe tests do **not** demonstrate
+a new Docker image build, ISE bitstream, real FPGA boot, or TAP Ethernet
+simulation (upstream TAP setup still needs a nonprivileged solution).
+
+After the [external storage cutover](EVIDENCE.md#external-storage-cutover), the
+standalone development container sees the entire canonical source checkout
+at read-only `/repo`. Git administration is masked. Run source integrity and
+simulation tests against `/repo`, and put build output and writable engineering
+checkouts under `/workspace`.
+
+```sh
+python3 -B -m unittest discover -s /repo/tests -p 'test_panolab_csr_demo.py' -v
+```
+
+On the owner-host checkout, rerun the full source suite; tests
+requiring Icarus/Yosys report `SKIP` if those tools are not installed
+there, so a passing **container** simulation is still required.
+For runtime changes, syntax and source tests are insufficient:
+validate actual service and authentication behavior on the laptop.
+Vendor/physical acceptance requires separate authorization and tests
+per [architecture](ARCHITECTURE.md) and [security](ARCHITECTURE.md#security-and-trust-boundaries).
+
+
+### Verify the pinned LiteX environment
+
+In the modern dev container, load and verify the installed environment offline.
+
+```sh
+. /opt/panolab/litex/env.sh
+python3 /opt/panolab/recipes/litex-bootstrap.py \
+  --prefix /opt/panolab/litex \
+  --lock /opt/panolab/recipes/litex-upstream.lock.json \
+  --requirements /opt/panolab/recipes/litex-requirements.txt --verify-only
+```
+
+The image build fetches pinned public dependencies. Runtime verification uses
+the installed pins. Advance corresponding source locks, the image marker and
+verification evidence together when changing versions.
+
+### Buildx and the guarded rollback cleanup
+
+The [owner-local installer](../host/install-rootless-buildx.sh) pins Buildx
+v0.36.1 and checks the release binary against its recorded SHA-256. It installs
+under `~/.docker/cli-plugins` when needed and preserves a working plugin.
+A missing binary requires network access. Image builds use
+`docker buildx build --builder default --load` with the existing rootless
+Engine's default Docker driver.
+
+The historical, separately approved `bash ./panolab-install.sh --finalize-maintenance`
+checks the rootless Engine, reviewed image and running dev identity, mounts,
+tools and Buildx driver. Its only removal target is the exact stopped
+`panolab-direct-dev-1-rollback-20261124T020818Z` with matching image and
+workspace. The operation fails closed on mismatch and is idempotent if absent.
+See the [original acceptance and scope](EVIDENCE.md#toolchain-warning-cleanup).
+
+## Owner-local storage recovery
+
+The [original cutover and rollback runbook](EVIDENCE.md#external-storage-cutover)
+is revision-locked. Use an owner-local terminal because stopping ingress
+disconnects the tunnel. Block submissions, drain all jobs, quiesce writers
+and preserve the previous source, exact image and container IDs, restart and
+mount metadata, private inputs and the metadata-only migration journal outside
+the checkout. Recheck image IDs and ownership before any replacement action.
+
+Use the original helper's read-only preflight and repeat its dry-run before
+moves. Disable recorded restart policies before stopping the old containers,
+tunnel first and maintenance last. Keep the old containers and tags available.
+The storage helper checks overlapping live binds and journals same-filesystem
+renames. Verify the read-only source and Git mask, writable mount scope,
+authenticated and anonymous MCP behavior, Codex and resource limits, and
+normal setup and ISE operations after replacement.
+
+For rollback, stop and remove only identified replacements, preserve the
+original RPC volume and network, and reverse the journal with the candidate
+source while affected writers are stopped. Verify legacy paths, entry
+identities and modes before starting any original container. Restore the
+previous source, names, tags and restart policies by recorded ID, start only
+the original running set with the tunnel last, and verify the original
+authenticated interface. Keep services quiescent and retain the journal if
+a rename cannot be reconciled.

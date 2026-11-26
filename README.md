@@ -7,12 +7,10 @@ worker. The reference target is the Pano Logic G2 Rev B (XC6SLX150-2-FGG484).
 
 | Start here | Purpose |
 | --- | --- |
-| [Architecture](docs/ARCHITECTURE.md) | Current laptop state, component ownership and pending qualifications |
-| [Installation and operations](docs/GETTING_STARTED.md) | Prerequisites, private inputs, normal commands and maintenance |
-| [Development](docs/DEVELOPMENT.md) | Test venues, commands and source publication |
+| [Architecture](docs/ARCHITECTURE.md) | Operating baseline, ownership, trust boundaries and open qualifications |
+| [Installation and operations](docs/GETTING_STARTED.md) | Installation, development, verification, maintenance and recovery |
 | [Engineering sessions](AGENTS.md) | Binding instructions for owner, ChatGPT and Codex |
 | [Managed launcher](agent/README.md) | Job admission, result records and activation |
-| [Security](docs/SECURITY.md) | Credentials, trust boundaries and physical approval |
 | [Vendor API](docs/TOOLCHAIN_MCP_CONTRACT.md) | Five persistent worker operations and control-plane adapters |
 | [Evidence index](docs/EVIDENCE.md) | Dated tests, migration records and qualification limits |
 | [Source and project standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md) | Ownership, dependencies, source closure, provenance and licensing |

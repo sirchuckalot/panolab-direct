@@ -93,7 +93,7 @@ ELF load segment. If the active implementation adopts new upstream inputs, updat
 and rerun the BIOS, HDL and source regression tests before publishing. The six original guards remain part of the frozen Rescue checkpoint.
 Docker CLI Buildx belongs in the owner-local CLI plugin directory,
 not the general development image and not another BuildKit container.
-The [exact owner-approved rollback cleanup](docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md)
+The [exact owner-approved rollback cleanup](docs/GETTING_STARTED.md#buildx-and-the-guarded-rollback-cleanup)
 is a separate, guarded host operation; never globally prune.
 
 ## Unified container policy
@@ -145,7 +145,7 @@ Report source, licensed implementation and physical acceptance individually.
 Give commands, venue and limitations. A read-only fresh-host audit and
 disposable vendor installations cannot establish unprovisioned-host acceptance.
 Maintain deployment state in [architecture](docs/ARCHITECTURE.md), procedures
-in [operations](docs/GETTING_STARTED.md) and [development](docs/DEVELOPMENT.md),
-and access boundaries in [security](docs/SECURITY.md). Update README navigation
+in [operations](docs/GETTING_STARTED.md), including [development and verification](docs/GETTING_STARTED.md#development-and-verification),
+and access boundaries in [architecture](docs/ARCHITECTURE.md#security-and-trust-boundaries). Update README navigation
 when paths change. Preserve unique evidence and future requirements and avoid
 duplicate decisions, transient logs, dead links and per-iteration commits.

@@ -13,8 +13,6 @@ DOCS = (
     "AGENTS.md",
     "docs/ARCHITECTURE.md",
     "docs/GETTING_STARTED.md",
-    "docs/DEVELOPMENT.md",
-    "docs/SECURITY.md",
     "docs/TOOLCHAIN_MCP_CONTRACT.md",
     "specs/PANOLAB_DIRECT_v1_0.txt",
     "agent/README.md",
@@ -138,8 +136,8 @@ class SnapshotIntegrity(unittest.TestCase):
         self.assertTrue({p for p in expected if p.endswith(".md")} <= actual,
                         "Required markdown and project entry points must exist")
         readme = (ROOT / "README.md").read_text()
-        for page in ("ARCHITECTURE", "GETTING_STARTED", "DEVELOPMENT",
-                     "SECURITY", "TOOLCHAIN_MCP_CONTRACT"):
+        for page in ("ARCHITECTURE", "GETTING_STARTED", "EVIDENCE",
+                     "TOOLCHAIN_MCP_CONTRACT"):
             self.assertIn("docs/" + page + ".md", readme)
 
     def test_all_local_markdown_links_exist(self):
@@ -159,14 +157,14 @@ class SnapshotIntegrity(unittest.TestCase):
 
     def test_baseline_and_workflow_are_explicit(self):
         agents = (ROOT / "AGENTS.md").read_text()
-        development = (ROOT / "docs/DEVELOPMENT.md").read_text()
+        operations = (ROOT / "docs/GETTING_STARTED.md").read_text()
         architecture = (ROOT / "docs/ARCHITECTURE.md").read_text()
         self.assertIn("one coherent reviewed commit", " ".join(agents.split()))
-        self.assertIn("GitHub Actions is legitimate CI", development)
-        self.assertIn("do not commit and push each trial", development.lower())
+        self.assertIn("GitHub Actions is legitimate CI", operations)
+        self.assertIn("do not commit and push each trial", operations.lower())
         self.assertIn("current decision baseline", architecture.lower())
         self.assertIn("not yet proven", architecture)
-        self.assertIn("histories share ancestry", development)
+        self.assertIn("histories share ancestry", operations)
 
 
 
