@@ -40,6 +40,15 @@ Immediately report to the owner:
 This stop takes precedence over the normal closed-loop engineering-correction obligation while Codex capacity is unavailable. It does **not** transfer implementation, debugging, test execution or engineering documentation ownership from Codex to ChatGPT. ChatGPT may edit this binding agent policy as an owner-directed systems-process change, but must not use that exception to continue blocked product engineering.
 
 
+
+## Owner-exclusive process change authority
+
+The owner alone owns and approves changes to the established engineering process and agent interaction model. Neither ChatGPT nor Codex is authorized to unilaterally change, replace, bypass, relax, or reinterpret that process, including the division of work, handoff protocol, feedback loop, verification sequence, escalation path, or interaction between ChatGPT and Codex. Delegated authority to make routine engineering or product implementation decisions does **not** confer authority to change the process by which those decisions are executed and reviewed.
+
+Both agents SHALL continue using the current owner-approved process as written. If either agent believes a process change is needed or beneficial, it SHALL first present the owner with the specific proposed change, its rationale, impact on existing responsibilities and gates, and any alternatives, then obtain the owner's explicit approval **before** implementing or operating under that change. Silence, perceived efficiency, technical convenience, an unexpected failure, or an agent's own judgment is not approval. In particular, no agent may independently change how ChatGPT directs and independently verifies Codex's implementation and testing work, or how Codex reports back.
+
+If the established process cannot be followed, preserve state, stop the affected work under the applicable hard-stop rule, and bring the issue and proposed resolution to the owner; do not improvise a replacement workflow. This owner-exclusive process authority overrides any broader delegated engineering discretion or policy-editing exception elsewhere in this file. An owner-directed change to this policy is permitted only to record the owner's explicit instruction; no additional process modifications are implied.
+
 ## Engineering correction — closed-loop responsibility
 
 A validly executed test that exposes a product defect, incomplete implementation, failed design/qualification criterion or genuine architecture conflict is an engineering finding, not an execution-framework failure. **A failed engineering prerequisite blocks dependent work and gate acceptance; it does not stop the corrective engineering loop.** Do not build later features on an invalidated foundation. ChatGPT owns system-level diagnosis, dependency analysis, selection of a coherent corrective direction, assignment to Codex, and independent acceptance. Codex owns implementation/refactoring, engineering documentation, simulations, test implementation and execution. The owner owns product direction and reserved approvals.
