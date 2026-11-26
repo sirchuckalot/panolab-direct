@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 MASK = "ro,nosuid,nodev,noexec,size=64k"
-ROOT_FILES = ("AGENTS.md", "README.md", "LICENSE", "docs/AGENT_EXECUTION_POLICY.md")
+ROOT_FILES = ("AGENTS.md", "README.md", "LICENSE")
 ROOT_DIRS = ("agent", "boards", "docker/control", "docker/ise14", "docker/modern",
              "docs", "host", "projects", "research", "shared", "specs", "tests", "third_party")
 PROBE = " && ".join(

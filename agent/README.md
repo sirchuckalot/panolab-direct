@@ -89,15 +89,11 @@ ChatGPT independently reviews and activates through the existing approved
 deployment interface. Confirm the job store, launcher and installed Codex CLI
 are accessible, including support for `--output-last-message`. Pause submissions
 and drain all jobs. Record the current source revision, launcher and startup
-pointer hashes, modes and owners. Preserve exact previous runtime copies in
-approved owner storage, including the launcher and startup shim. Preserve
-the matching full legacy policy at the reviewed previous source revision
-and prepare the reviewed source rollback before cutover.
+pointer hashes, modes and owners. Preserve the current launcher and startup
+shim in approved owner storage.
 
 Publish and fast-forward the clean laptop checkout to the reviewed revision.
-Verify the exact bytes of `/repo/AGENTS.md` and the retained
-`/repo/docs/AGENT_EXECUTION_POLICY.md` pointer. The broker source admission
-allowlist still requires the latter path. Atomically replace the deployed launcher
+Verify the exact bytes of `/repo/AGENTS.md`. Atomically replace the deployed launcher
 and `/codex-auth/AGENTS.md` with the verified launcher and staged
 `startup-AGENTS.md`, preserving ownership and modes. Keep `jobs/` in place.
 Block new submissions throughout this sequence.
@@ -107,10 +103,7 @@ Check its reported SHA-256 against the actual root file, job `policy_sha256`
 and exact injected bytes. Verify the explicit canary verdict and record the
 evidence before resuming submissions.
 
-If activation fails, keep submissions paused. Restore the exact previous launcher
-and startup shim together with the reviewed previous source deployment
-that supplies its full legacy policy at `/repo/docs/AGENT_EXECUTION_POLICY.md`.
-The old launcher requires the full legacy file for correct injection. Verify
-the restored hashes, owners and modes while submissions remain paused. Use an approved rollback path that preserves
-Git history and owner work. Verify the previous normal-path canary before
-resuming. Leave the job store and failure evidence available for review.
+If activation fails, keep submissions paused and preserve the job store, owner
+work and failure evidence. Diagnose the failure and plan recovery from the
+current system state through the approved maintenance process. Verify the
+normal-path canary before resuming submissions.

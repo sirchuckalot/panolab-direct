@@ -56,9 +56,6 @@ class LauncherTest(unittest.TestCase):
         repo.mkdir()
         self.policy = repo / "AGENTS.md"
         self.policy.write_bytes(b"# Fixture policy\r\nExact canonical bytes.\n")
-        self.legacy_policy = repo / "docs" / "AGENT_EXECUTION_POLICY.md"
-        self.legacy_policy.parent.mkdir()
-        self.legacy_policy.write_bytes(b"Legacy policy must never be injected.\n")
         source = (HERE / "launcher.py").read_text().replace(
             'REPO = Path("/repo")',
             f"REPO = Path({str(repo)!r})",
@@ -151,7 +148,6 @@ class LauncherTest(unittest.TestCase):
         self.prompt.write_text("edited prompt")
         received = (self.workdir / "received").read_bytes()
         self.assertTrue(received.startswith(self.policy.read_bytes() + b"\n\n"))
-        self.assertNotIn(self.legacy_policy.read_bytes(), received)
         self.assertTrue(received.endswith(b"original prompt\n"))
         self.assertEqual((self.job / "prompt.txt").read_bytes(), received)
         self.assertEqual(running["policy_sha256"], hashlib.sha256(self.policy.read_bytes()).hexdigest())
@@ -260,7 +256,7 @@ class LauncherTest(unittest.TestCase):
         self.prompt.unlink()
         self.assert_admission_block(self.prompt)
 
-    def test_absent_root_policy_blocks_even_with_legacy_policy(self):
+    def test_absent_root_policy_blocks(self):
         self.policy.unlink()
         self.assert_admission_block(self.policy)
 
