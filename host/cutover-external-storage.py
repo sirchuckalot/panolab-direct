@@ -160,8 +160,11 @@ def preflight(args, sock, run=query):
     records = inventory(args.inventory, args.inventory_sha256, (repo, SOURCE, config, data))
     verify_engine(run, repo, sock, records,
                   {"broker": args.broker_image, "repo-git": args.repo_git_image})
-    run("python3", "-B", str(SOURCE / "host/migrate-external-storage.py"),
-        "dry-run", "--checkout", str(repo))
+    try:
+        run("python3", "-B", str(SOURCE / "host/migrate-external-storage.py"),
+            "dry-run", "--checkout", str(repo))
+    except (OSError, subprocess.SubprocessError) as error:
+        raise ValueError(f"phase=storage-migration-dry-run {type(error).__name__}") from None
 
 
 def main():

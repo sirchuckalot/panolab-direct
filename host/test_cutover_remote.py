@@ -113,8 +113,10 @@ class SupervisorTests(unittest.TestCase):
         tx.legacy.mkdir(parents=True, mode=0o700)
         tx.config.mkdir()
         tx.data.mkdir()
+        work = tx.legacy / "ise-work"
+        work.mkdir(mode=0o700)
         with (
-            patch.object(tx, "plan", []),
+            patch.object(tx, "plan", [(work, tx.data / work.name)]),
             patch.object(tx, "git", return_value="development"),
             patch.object(tx, "branch_revision", return_value=None),
             patch.object(tx, "containers", return_value={}),
@@ -123,6 +125,14 @@ class SupervisorTests(unittest.TestCase):
             patch.object(API, "verify_engine"),
         ):
             tx.admit("supervisor")
+            setup = work / "install-state.json"
+            setup.write_text('{"State":"succeeded","Error":""}')
+            tx.admit("supervisor")
+            setup.write_text('{"State":"running","Error":"private-payload"}')
+            with self.assertRaisesRegex(ValueError, "phase=ise-admission ISE setup state") as caught:
+                tx.admit("supervisor")
+            self.assertNotIn("private-payload", str(caught.exception))
+            setup.unlink()
             for root in (tx.config, tx.data):
                 with self.subTest(root=root.name):
                     entry = root / ".existing"

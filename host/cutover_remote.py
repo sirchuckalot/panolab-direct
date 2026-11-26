@@ -174,7 +174,10 @@ class Cutover:
             mode = (0o664 if new.name == self.migration.ARCHIVE else
                     0o600 if new.name in self.migration.FILES else 0o700)
             check_path(old, mode, new.name not in self.migration.FILES)
-        self.migration.require_terminal_ise_jobs(self.legacy / "ise-work")
+        try:
+            self.migration.require_terminal_ise_jobs(self.legacy / "ise-work")
+        except self.migration.ISEAdmissionError as error:
+            raise ValueError(f"phase=ise-admission {error}") from None
         api.require(restart_value(self.records[api.SETUP]["restart"]) == "no",
                     "On-demand setup must have restart disabled")
         api.require(not set(self.containers()).intersection(map(self.renamed, self.names)),

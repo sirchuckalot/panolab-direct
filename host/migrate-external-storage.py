@@ -101,23 +101,73 @@ def rename_without_replacement(source, destination):
         raise OSError(errno, os.strerror(errno))
 
 
-def require_terminal_ise_jobs(work):
-    def state(path):
-        info = path.lstat()
-        if path.resolve() != path or not stat.S_ISREG(info.st_mode) or info.st_size > 16384:
-            raise ValueError("Unexpected operational job record")
-        return json.loads(path.read_text())["state"]
+class ISEAdmissionError(ValueError):
+    """Admission failure with a message safe for operator logs."""
 
-    setup = work / "install-state.json"
-    if os.path.lexists(setup) and state(setup) not in {"succeeded", "failed", "not_started"}:
-        raise ValueError("ISE setup state is nonterminal or unknown")
+
+def require_terminal_ise_jobs(work):
+    def unique_fields(pairs):
+        fields = {}
+        for key, value in pairs:
+            if key in fields:
+                raise ValueError("Duplicate JSON field")
+            fields[key] = value
+        return fields
+
+    def require_terminal(path, phase, terminal, *, setup=False):
+        try:
+            info = path.lstat()
+        except FileNotFoundError:
+            if setup:
+                return  # No setup state has been persisted.
+            raise ISEAdmissionError(f"{phase}: missing record") from None
+        except OSError:
+            raise ISEAdmissionError(f"{phase}: cannot inspect record") from None
+        try:
+            if (not stat.S_ISREG(info.st_mode) or path.resolve() != path
+                    or info.st_size > 16384):
+                raise ISEAdmissionError(f"{phase}: unsafe record path, type, or size")
+            raw = path.read_text(encoding="utf-8")
+        except (OSError, RuntimeError):
+            raise ISEAdmissionError(f"{phase}: cannot read record") from None
+        except UnicodeError:
+            raise ISEAdmissionError(f"{phase}: invalid UTF-8") from None
+        try:
+            record = json.loads(raw, object_pairs_hook=unique_fields)
+        except (ValueError, RecursionError):
+            raise ISEAdmissionError(f"{phase}: invalid JSON or duplicate fields") from None
+        if not isinstance(record, dict):
+            raise ISEAdmissionError(f"{phase}: expected a JSON object")
+        key = "state"
+        if setup and "State" in record:
+            if "state" in record:
+                raise ISEAdmissionError(f"{phase}: ambiguous State and state fields")
+            key = "State"
+        if key not in record:
+            raise ISEAdmissionError(f"{phase}: missing state field")
+        if not isinstance(record[key], str):
+            raise ISEAdmissionError(f"{phase}: state field must be a string")
+        if record[key] not in terminal:
+            raise ISEAdmissionError(f"{phase}: nonterminal or unknown state")
+
+    require_terminal(work / "install-state.json", "ISE setup state (install-state.json)",
+                     {"succeeded", "failed", "not_started"}, setup=True)
     jobs = work / "worker/results/jobs"
-    if os.path.lexists(jobs):
-        if jobs.resolve() != jobs or not jobs.is_dir():
-            raise ValueError("Unexpected worker job directory")
-        for job in jobs.iterdir():
-            if state(job / "job.json") not in {"succeeded", "failed", "cancelled", "interrupted"}:
-                raise ValueError("ISE worker job is nonterminal or unknown")
+    try:
+        info = jobs.lstat()
+    except FileNotFoundError:
+        return  # An unused worker may have no results directory.
+    except OSError:
+        raise ISEAdmissionError("ISE worker job inventory: cannot inspect directory") from None
+    try:
+        if not stat.S_ISDIR(info.st_mode) or jobs.resolve() != jobs:
+            raise ISEAdmissionError("ISE worker job inventory: unsafe directory")
+        job_dirs = list(jobs.iterdir())
+    except (OSError, RuntimeError):
+        raise ISEAdmissionError("ISE worker job inventory: cannot list directory") from None
+    for job in job_dirs:
+        require_terminal(job / "job.json", "ISE worker job (job.json)",
+                         {"succeeded", "failed", "cancelled", "interrupted"})
 
 
 def migrate(repo, config, data, direction, rename=rename_without_replacement):
@@ -235,6 +285,9 @@ def main():
                 require_quiescence(repo, config, data)
                 count = migrate(repo, config, data, args.action)
         print(f"PANOLAB_STORAGE_MIGRATION={args.action} entries={count}")
+    except ISEAdmissionError as error:
+        print(f"PANOLAB_STORAGE_MIGRATION_BLOCKED phase=ise-admission {error}", file=sys.stderr)
+        return 9
     except (KeyError, TypeError, OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         # Exception paths and subprocess diagnostics may contain private names.
         print(f"PANOLAB_STORAGE_MIGRATION_BLOCKED={type(error).__name__}", file=sys.stderr)

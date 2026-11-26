@@ -1,5 +1,6 @@
 """Synthetic tests for the owner-local filesystem transaction."""
 import importlib.util
+import json
 import os
 from pathlib import Path
 import tempfile
@@ -71,16 +72,53 @@ class Migration(unittest.TestCase):
         work = self.legacy / "ise-work"
         job = work / "worker/results/jobs/123/job.json"
         job.parent.mkdir(parents=True)
-        job.write_text('{"state":"running"}')
+        worker_record = dict(exit_code=0, job_id="123", profile="fixture",
+                             project="fixture", state="running")
+        job.write_text(json.dumps(worker_record))
         with self.assertRaisesRegex(ValueError, "worker job"):
             self.migrate("dry-run")
-        job.write_text('{"state":"succeeded"}')
+        job.write_text(json.dumps(dict(worker_record, state="succeeded")))
+        failed = job.parent.with_name("456") / "job.json"
+        failed.parent.mkdir()
+        failed.write_text(json.dumps(dict(worker_record, job_id="456", state="failed", exit_code=1)))
         setup = work / "install-state.json"
-        setup.write_text('{"state":"running"}')
+        setup.write_text('{"State":"running","Error":""}')
         with self.assertRaisesRegex(ValueError, "setup state"):
             self.migrate("dry-run")
-        setup.write_text('{"state":"succeeded"}')
-        self.assertEqual(self.migrate("dry-run"), 12)
+        for record in ('{"State":"succeeded","Error":""}', '{"state":"succeeded","error":""}'):
+            with self.subTest(record=record):
+                setup.write_text(record)
+                self.assertEqual(self.migrate("dry-run"), 12)
+                self.assertEqual(setup.read_text(), record)
+
+    def test_reject_invalid_setup_and_worker_state_records(self):
+        work = self.legacy / "ise-work"
+        setup = work / "install-state.json"
+        job = work / "worker/results/jobs/private-job-id/job.json"
+        for path, phase in ((setup, "ISE setup state"), (job, "ISE worker job")):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            invalid = [
+                (b'{"private-payload"', "invalid JSON"),
+                (b'\xff', "invalid UTF-8"),
+                (b'[]', "expected a JSON object"),
+                (b'{}', "missing state field"),
+                (b'{"state":[]}', "state field must be a string"),
+                (b'{"state":"private-payload"}', "nonterminal or unknown state"),
+                (b'{"state":"running","state":"succeeded"}', "duplicate fields"),
+            ]
+            if path == setup:
+                invalid.append((b'{"State":"succeeded","state":"succeeded"}', "ambiguous"))
+            else:
+                invalid.append((b'{"State":"succeeded"}', "missing state field"))
+            for contents, reason in invalid:
+                with self.subTest(phase=phase, reason=reason):
+                    path.write_bytes(contents)
+                    with self.assertRaisesRegex(migration.ISEAdmissionError, f"{phase}.*{reason}") as caught:
+                        self.migrate("dry-run")
+                    self.assertNotIn("private-", str(caught.exception))
+            path.unlink()
+        with self.assertRaisesRegex(migration.ISEAdmissionError, "ISE worker job.*missing record"):
+            self.migrate("dry-run")
 
     def test_rollback_for_failure_at_every_rename(self):
         for step in range(1, 13):
