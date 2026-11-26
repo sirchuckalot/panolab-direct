@@ -43,12 +43,8 @@ from `9490e0c` through `db8b329`. Each link identifies an original commit.
 | Documentation sweep and canonical agent launcher enforcement shipped together | [2ab466c](https://github.com/sirchuckalot/panolab-direct/commit/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6) |
 | Final platform operations, architecture and research documentation consolidation | [db8b329](https://github.com/sirchuckalot/panolab-direct/commit/db8b329ff53f1b3d9874c91332c90226e48e4213) |
 
-Publish one independently reviewed commit per dependency-coherent milestone.
-Keep code with its directly required documentation and tests, and commit
-unrelated general documentation sweeps separately. Multiple reviewed local
-milestone commits may be published together in a single expected-parent
-fast-forward. Keep trial and error local and preserve published commit
-boundaries. See [working milestone and commit discipline](GETTING_STARTED.md#working-milestone-and-commit-discipline).
+For current commit rules, see the
+[mandatory development process](../AGENTS.md#mandatory-development-process).
 
 - **Storage cutover.** Laptop verification recorded 172 migration tests,
   about 43 GiB transferred and verified, and seven services restored.

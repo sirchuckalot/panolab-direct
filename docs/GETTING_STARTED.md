@@ -337,25 +337,20 @@ in this baseline. Avoid hosted KVM and push/CI debugging loops.
 
 ### Working milestone and commit discipline
 
-1. Check source status and GitHub refs, identify the active checkout
-   and define the smallest complete engineering objective and tests.
-2. Experiment in `/workspace`, a disposable local checkout or a
-   reviewed isolated container. **Do not commit and push each trial.**
-3. Rerun appropriate laptop-local checks until the actual feature
-   works. Check implementation and credentials/mount boundaries.
-4. Review the final diff and record exactly what passed: command,
-   execution site, test result and any separate PENDING gate. Source
-   tests are not proof of a licensed or physical FPGA build.
-5. Publish **one coherent, reviewed commit** for the verified change
-   using the connected GitHub integration and an expected-parent,
-   non-force update. Alternatively, after the owner completes the
-   [private Git push setup](#scoped-github-push), the existing
-   `repo-git` gateway can push a clean, reviewed local `development`
-   commit without force. Draft/unverified work requires explicit approval.
-6. Verify the new GitHub SHA. Only use PanoLab `repo_sync` when the
-   checkout is clean, the gateway supports the branch, and the
-   histories share ancestry. Never wipe local work or silently
-   reconcile unrelated histories.
+Follow the binding [development process](../AGENTS.md#mandatory-development-process)
+and [repository ownership rules](../AGENTS.md#repository-ownership) when
+planning, reviewing and publishing milestones.
+
+Run experiments in the approved `/workspace` candidate.
+Do not commit and push each trial.
+Use `lab_status` and `repo_status` to inspect the laptop baseline and compare
+the reported source revision with GitHub `development`. Use the connected
+GitHub integration for publication, or follow the owner-local
+[scoped GitHub push setup](#scoped-github-push) to enable the gateway route.
+Before calling `repo_sync`, verify the published GitHub SHA and confirm that
+the gateway supports the branch and both histories share ancestry. Apply
+the remaining binding sync conditions and check `repo_status` afterward to
+confirm the expected revision and a clean checkout.
 
 ### Local source checks
 

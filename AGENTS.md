@@ -6,6 +6,10 @@
 
 At every new session/job and before each dependent gate, identify the exact task authority, required canonical source files/directories, revision, tools, permissions, environment and evidence. Read the current policy and the task's actual controlling documents; check required paths and access via their approved interfaces, the expected revision, tool readiness and result retrieval. Check applicable dependencies before consuming substantial compute or editing. Use the canonical source, not chat summaries, stale copies or unverified substitutes. A deliberately limited mount is not authority to ignore a required input. If a required resource is unavailable, STOP before dependent work. Do not access private/unauthorized data to satisfy admission.
 
+Both ChatGPT and Codex must read the complete current `/repo/AGENTS.md` at every
+managed session. Use the ownership and commit rules below to identify the
+existing owners, affected paths and milestone grouping during admission.
+
 ## HARD STOP — execution infrastructure
 
 A missing, inaccessible, unreadable, truncated, stale or unverifiable REQUIRED specification/source/directory/dependency/artifact; wrong revision or unavailable mount; permission or authentication failure; missing required executable/tool; unexpected execution timeout, lost job, transport/RPC failure, malformed result, insufficient tool output or other framework failure that prevents the prescribed engineering action or verification is an **INFRASTRUCTURE_BLOCKED** condition. This includes a required file or operation that an agent cannot reach because of the approved interface. It is not permission to infer, substitute, skip or route around the failure.
@@ -58,7 +62,9 @@ This policy does not change product scope, protected identity, authorization, li
 1. Inspect `lab_status`, `repo_status` and live GitHub branch SHA
    before editing. Work only on `development`; `main` is frozen until
    explicit owner approval for a reviewed promotion.
-2. Define the specific outcome and relevant test gate before editing.
+2. Before editing, define the outcome, test gate, scope, dependencies and
+   planned commit grouping in dependency order. Identify the existing owners
+   and apply [repository ownership](#repository-ownership) before adding any file.
    Work in `/workspace`, a disposable local checkout, or an
    appropriately restricted local rootless container—not in the live
    Git gateway's checkout merely for experiments.
@@ -68,20 +74,56 @@ This policy does not change product scope, protected identity, authorization, li
    narrowly scoped, fast, deterministic clean-runner checks, but
    cannot substitute for the actual laptop, private credentials,
    licensed ISE or hardware.
-4. Iterate locally **without publishing trial-and-error**. Review
-   the final diff, run the appropriate local tests, record actual
-   PASS and unverified PENDING gates. Only then publish **one
-   coherent reviewed commit** for a working engineering milestone.
-   Draft work with incomplete required gates needs explicit approval.
-5. Publish reviewed source using the connected GitHub integration
-   with an expected-parent non-force update. Only call `repo_sync`
-   when the laptop checkout is clean and has shared ancestry with the
-   target branch. Never reset, stash, force-push or discard live work
-   to hide divergence.
+4. Keep trial and error local. Use one coherent reviewed commit per
+   functional milestone. Review each milestone independently and keep code
+   with its directly relevant tests and documentation. Give unrelated general
+   documentation and independent infrastructure changes their own milestones.
+   At completion, review the
+   diff and commit order for unnecessary files, duplicated content, broken
+   references, unrelated scope and accurate chronology. Run the applicable
+   tests and record the exact revision, changes, verified acceptance and
+   pending gates or limitations in the appropriate existing owner. Draft
+   work with incomplete required gates needs explicit approval.
+5. Publish reviewed milestones in dependency order. A single final push may
+   contain multiple sequential, independently reviewed milestone commits.
+   Use the connected GitHub integration or approved scoped gateway with an
+   expected-parent, non-force update. Preserve rollback options and verify the
+   published revision. Only call `repo_sync` when the laptop checkout is clean
+   and has shared ancestry with the target branch. Never rewrite published
+   history, force-push, or reset, stash or discard live work to hide divergence.
 6. Never launch extensive hosted CI/KVM or repeated GitHub commits to
    debug rootless namespaces, cgroups, Docker connectivity, private
    MCP, ISE installation or hardware. If CI is justified, state
    its narrow test purpose, budget and what success establishes.
+
+### Repository ownership
+
+Before creating any code or documentation file, inspect the existing structure
+and identify the component or document that owns the responsibility. Prefer
+editing, reusing or merging into the existing owner. Add a file only when it
+has a concrete, distinct responsibility and there is a specific reason the
+existing owner cannot accommodate it. Review ownership, duplication, incoming
+and outgoing references, and ongoing maintenance cost before adding it. For
+file placement, escalate unresolved ownership or material scope conflicts.
+
+| Existing owner | Responsibility |
+| --- | --- |
+| [Root README](README.md) | Orientation and navigation |
+| [Root AGENTS.md](AGENTS.md) | Sole binding engineering session policy for both agents |
+| [Architecture](docs/ARCHITECTURE.md) | Current structure, design, security and trust boundaries |
+| [Operations](docs/GETTING_STARTED.md) | Installation, deployment, development, maintenance and recovery procedures |
+| [Existing specifications](specs/) | Requirements and interfaces |
+| [Evidence index](docs/EVIDENCE.md) | Concise verified results, limits and references to exact revisions and historical evidence |
+| Existing scoped READMEs | Distinct local usage for their owning component |
+| Existing licensing, upstream and frozen historical files | Original terms, notices, provenance and preserved history |
+
+Retain the evidence index as the consolidated platform evidence owner because
+it makes verified checkpoints and their limits discoverable across revisions.
+Link to architecture and operations for current design and procedures. Use Git
+history for chronology. Do not create per-task worklogs, status files or
+reports in the repository. Keep transient logs and generated artifacts in
+the approved workspace outside the repository. Preserve licensing, notices,
+upstream material and frozen history in their existing locations.
 
 ## Toolchain warning and legacy-builder policy
 
