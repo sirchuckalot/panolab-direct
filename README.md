@@ -17,7 +17,8 @@ worker. The reference target is the Pano Logic G2 Rev B (XC6SLX150-2-FGG484).
 
 The [system specification](specs/PANOLAB_DIRECT_v1_0.txt) covers the CPU-less
 application. The [boot and recovery standard](specs/PANOLAB_RESCUE_V1.md)
-covers the separate recovery personality. Anchor is the active product.
+is the normative specification for [Anchor](projects/anchor/README.md),
+the active boot, recovery and deployment product.
 [Rescue](projects/rescue/README.md) is frozen engineering history, and
 [stock-device research](research/pano-stock/README.md) records a separate
 physical investigation. The [license index](LICENSES/README.md) identifies

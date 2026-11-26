@@ -3,20 +3,19 @@
 | Document control | Value |
 | --- | --- |
 | Identifier | `PLR-ARCH-001` |
-| Version | **1.1.0** — architecture/interoperability contract; adds BIOS-first boot UX and explicit Trusted-LAN profile |
-| Date | 2026-11-23 |
-| Status | **Design baseline for development; not implemented or hardware-qualified** |
+| Version | **1.2.0** — owner-approved A-01 identity preservation and Anchor adoption |
+| Date | 2026-11-26 |
+| Status | **Owner-approved normative Anchor design freeze. Implementation and board qualification pending.** |
 | Scope | Embedded FPGA board boot, update, rescue, identity, and qualification |
 | First reference platform | Pano Logic G2 Rev B, Spartan-6 XC6SLX150-2-FGG484 |
 | Repository policy | Develop on `development`; accepted `main` stays unchanged until expressly authorized |
 | Authority | PanoLab Direct project engineering standard |
 
 **Repository source-ownership authority:** [PanoLab Source and Project Architecture Standard](PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
-Rescue is a project (`projects/rescue/` in the **planned** layout),
-not a board BSP; this specification remains authoritative for Rescue's
-on-device behavior, A/B update, board qualification, and image manifest.
-The planned source project manifest is separate from that image manifest.
-No source move is implied by this cross-reference.
+Anchor adopts PLR-ARCH-001 as its sole normative product specification.
+Rescue remains the name of the recovery configuration and its existing
+protocol and service identifiers. The source project manifest and the
+on-device image manifest serve distinct purposes.
 
 ## 1. Executive decision
 
@@ -26,7 +25,7 @@ A *common recovery implementation* means common sources, protocol, manifest, sta
 
 The recovery firmware SHOULD build on **upstream LiteX BIOS** and existing LiteX boot, console, Ethernet and SPI support rather than a separate custom boot stack. PanoLab adds bounded network management, A/B state and FPGA ICAP reconfiguration. The first-use **trusted-lan** device profile explicitly allows unpaired app management on a fully owner-controlled isolated LAN; it MUST clearly disclose the lack of sender authentication. See [BIOS-based implementation plan](../docs/RESCUE_IMPLEMENTATION.md).
 
-The original Pano factory firmware is a **one-time provisioning entry point**, not a permanent product dependency. The migration MAY extract only relevant identity bytes/records, provided those are validated and kept safe before erasure. A full factory SPI image is useful for archaeology but **not a product prerequisite**. The integrity of the boot path and per-device identity remains mandatory.
+The original Pano factory firmware is a **one-time provisioning entry point**, not a permanent product dependency. Migration MUST preserve the complete device-specific factory identity source as specified in §3.2. A full factory SPI image is useful for archaeology but **not a product prerequisite**. The integrity of the boot path and per-device identity remains mandatory.
 
 **Normative terms.** `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, and `MAY` express requirement levels for a conforming implementation. Requirements described as `PENDING / PROOF REQUIRED` are binding qualification gates, not claims of existing functionality.
 
@@ -113,11 +112,11 @@ The provisioning tool MAY assemble one full-flash binary offline as a reproducib
 ### 3.2 Protected identity
 
 - Required logical fields: `identity_format_version`, stable `device_id`, `board_id`, `board_revision`, `fpga_part`, unique `mac_address` (if Ethernet-capable), optional `serial_number`, `source_provenance`, `integrity_check`.
-- During migration, save the **raw, device-specific source record** to private host storage before editing it; record extraction tool/version, source address, size, board observations and digest. A whole-firmware backup is optional.
-- Validate MAC format and uniqueness against physical label, discovery and repeated reads when available. If values conflict, **stop provisioning**; do not invent a replacement MAC silently.
-- Applications and rescue SHALL read identity through a versioned logical API; avoid embedding per-unit MAC/serial values in common bitstreams.
-- Identity relocation is allowed only after the target representation and boot/PHY behavior have been tested. Identity records MUST NOT contain private signing keys, login tokens or credentials copied from another board.
-- If the original source has unknown factory fields, preserve the raw bytes even when only a subset is decoded.
+- Before modifying the device as part of migration, preserve the complete raw, device-specific factory identity source, including all unknown bytes, in private owner-controlled storage. Record the source address and size, extraction tool/version, board observations and cryptographic digest. A whole-firmware backup is optional.
+- Retain the original factory identity erase unit in place when qualified erase geometry, range, non-aliasing and boot/layout compatibility permit. Protect the entire unit against ordinary erase and program operations. Routine identity writes are forbidden.
+- The BSP MUST validate the factory identity and normalize it in memory. Applications and Rescue SHALL access identity through the versioned logical API. Avoid embedding per-unit MAC or serial values in common bitstreams. Validate MAC format and uniqueness against physical label, discovery and repeated reads when available. Stop provisioning on conflicting values, ambiguous identity or unverified protection. Do not invent a replacement MAC.
+- Relocate identity only when evidence shows in-place preservation cannot meet the requirements. Relocation requires separate owner authorization, a qualified erase-isolated target, verified exact write and independent readback, logical equivalence, and demonstrated boot, PHY and power-loss rollback behavior. Keep the original source and last verified recovery path available until the alternate is verified.
+- Identity records MUST NOT contain private signing keys, login tokens or credentials copied from another board.
 
 ### 3.3 Boot-state journal and power-fail safety
 
@@ -364,7 +363,7 @@ The manufacturer's network updater is an initial entry point for converting a su
 3. **Plan:** generate a board-personalized partition image offline, with exact region map, source artifact hashes, factory boot constraints and failure rollback table.
 4. **Establish a recoverable entry:** use only the stock updater's actually proven supported operation to load the **intended LiteX Rescue** into a compatible, reversible slot. A separate disposable bootstrap design is **not required** unless the stock updater cannot load the Rescue image.
 5. **Prove Rescue:** repeatedly discover its Ethernet management, read identity, inspect SPI geometry, demonstrate ICAP handoff and cold-boot return, verify a physical recovery-button/power-cycle path.
-6. **Finalize layout:** have Rescue relocate/commit required identity data and write the remaining application/metadata regions in a power-loss-safe order, with readback and protected-region assertions.
+6. **Finalize layout:** assert and verify protection of the qualified original factory identity erase unit. If relocation is necessary under §3.2, commit and independently read back the alternate before selecting it, with power-loss-safe rollback to verified identity and recovery. Write the application and state regions in power-loss-safe order with readback, and verify protected regions.
 7. **Activate policy last:** alter permanent boot header/selection **only after** an independently bootable Rescue is proven; never erase the remaining working fallback before that.
 8. **Qualify and record:** capture board revision, image digests, manifest, log, test results and explicit final acceptance.
 
@@ -402,7 +401,7 @@ Every BSP seeking `PanoLab Rescue v1 — A/B qualified` SHALL pass the required 
 | --- | --- | --- |
 | Q01 | Board/flash identification | Correct part/rev, JEDEC chip/geometry, true per-unit MAC; mismatches refused |
 | Q02 | Partition bounds | No overlaps; correct erase/page alignment; protected ranges cannot be erased by standard update |
-| Q03 | Device identity migration | Raw source kept and hashed; relocated identity survives reboot, upgrade and failed trial |
+| Q03 | Device identity migration | Complete raw source including unknown bytes preserved privately and hash-verified. The same unit’s validated logical identity and on-wire MAC survive reboot, application update and failed trial. Ordinary updates cannot mutate the protected erase unit. If relocation is necessary under §3.2, prove alternate readback and equivalence, power-loss rollback and preservation of the verified recovery path. |
 | Q04 | Rescue-first cold boot | Rescue reachable before launching apps after power-on/reset |
 | Q05 | Independent recovery | Physical recovery selection works with app fabric completely dead/unresponsive |
 | Q06 | Discovery | Unique DNS-SD identity across at least two boards; no shared MAC; route across ordinary LAN where supported |
@@ -490,5 +489,7 @@ Qualification status MUST indicate `NOT_STARTED`, `SIMULATED`, `BENCH_VERIFIED`,
 ---
 
 **Revision v1.1.0 (2026-11-23):** Approved LiteX BIOS-first implementation, button-held/timed autoboot, and explicit unpaired Trusted-LAN developer workflow. Added tests Q23–Q25. This is a change to the architectural specification, not a claim that an updated bitstream exists.
+
+**Revision v1.2.0 (2026-11-26):** Owner approved A-01 and adopted this specification for Anchor. The design freeze preserves qualified factory identity in place and makes relocation conditional. The revision leaves the on-device API, BSP and image manifest versions intact. Implementation and board qualification remain pending.
 
 **Final design principle:** *FPGA application images are disposable workloads; device identity, boot selection, and an independently usable rescue environment are protected system services. The developer sees normal embedded firmware update behavior; FPGA-specific configuration mechanisms stay behind the BSP.*
