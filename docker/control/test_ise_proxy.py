@@ -326,6 +326,50 @@ class TimingResultContracts(unittest.TestCase):
         with self.assertRaises(ValueError):
             ise_proxy.parse_timing_report(body.replace(b"0.125ns", b"-0.125ns"))
 
+    def test_trace_conclusion_before_timing_summary(self):
+        details = (
+            b"Release 14.7 Trace (lin64)\n"
+            b'Timing constraint: TS_clk = PERIOD TIMEGRP "test_clk" 20 ns HIGH 50%;\n'
+            b"12 paths analyzed, 4 endpoints analyzed, 0 failing endpoints\n"
+            b"0 timing errors detected.\n"
+            b"Minimum period is 3.125ns.\n\n"
+        )
+        conclusion = b"All constraints were met.\n"
+        summary = (
+            b"\nTiming summary:\n"
+            b"---------------\n"
+            b"Timing errors: 0 Score: 0 (Setup/Max: 0, Hold: 0)\n"
+        )
+        coverage = b"Constraints cover 12 paths, 4 nets, and 8 connections\n"
+        report = details + conclusion + summary + coverage
+        evidence = ise_proxy.parse_timing_report(report)
+        self.assertEqual(evidence["constraint_status"], "constrained")
+        self.assertTrue(evidence["overall"]["all_constraints_met"])
+        self.assertEqual(evidence["constraints"][0]["requested_period_ns"], "20")
+        self.assertEqual(evidence["constraints"][0]["minimum_period_ns"], "3.125")
+
+        for incomplete in (
+            details + summary + coverage,
+            details + b"Source: " + conclusion + summary + coverage,
+            details + conclusion + b"Destination: test_endpoint\n" + summary + coverage,
+            details + conclusion + summary,
+            report.replace(b"PERIOD", b"UNKNOWN"),
+        ):
+            with self.subTest(report=incomplete):
+                evidence = ise_proxy.parse_timing_report(incomplete)
+                self.assertEqual(evidence["constraint_status"], "incomplete")
+                self.assertNotIn("all_constraints_met", evidence["overall"])
+
+        negative = b"Not all constraints were met.\n"
+        for contradictory in (
+            report + negative,
+            details + negative + conclusion + summary + coverage,
+            details + negative + summary + coverage,
+            report.replace(b"Timing errors: 0", b"Timing errors: 1"),
+        ):
+            with self.subTest(report=contradictory), self.assertRaises(ValueError):
+                ise_proxy.parse_timing_report(contradictory)
+
     def test_license_proof_is_bounded_and_coherent(self):
         data = {"vendor": "Xilinx", "toolchain_version": "ISE 14.7",
                 "ise_available": True, "license_available": True, "license_validated": True,

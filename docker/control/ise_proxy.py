@@ -376,6 +376,11 @@ COVERAGE = re.compile(
     rf"Constraints cover\s+{COUNT} paths?,\s+{COUNT} nets?,?\s+and\s+{COUNT} connections?\.?", re.I)
 TIMING_SCORE = re.compile(rf"Timing (?:errors\s*:\s*{COUNT}\s+)?(?:score\s*:\s*){COUNT}"
                           rf"(?:\s*\(\s*Setup/Max\s*:\s*{COUNT}\s*,\s*Hold\s*:\s*{COUNT}\s*\))?", re.I)
+TIMING_CONCLUSIONS = {
+    "all constraints were met.": True,
+    "not all constraints were met.": False,
+    "timing constraints are not met.": False,
+}
 
 
 def ns(value, unit):
@@ -395,14 +400,27 @@ def parse_timing_report(content):
     in_summary = False
     saw_header = False
     saw_no_constraints = False
+    preceding_conclusions = set()
     for line in content.decode("utf-8", errors="replace").splitlines():
         line = line.strip()
+        if not line:
+            continue
+        conclusion = TIMING_CONCLUSIONS.get(line.lower())
         if re.match(r"Release\s+14\.7\s+Trace\b", line, re.I):
             saw_header = True
         if re.fullmatch(r"(?:Timing\s+)?Summary(?:\s+of\s+Timing\s+Analysis)?\s*[:.]*", line, re.I):
+            # TRACE 14.7 can place its conclusion immediately before the timing summary.
+            if re.fullmatch(r"Timing\s+summary:", line, re.I):
+                for preceding_conclusion in preceding_conclusions:
+                    record_fact(overall, "all_constraints_met", preceding_conclusion)
             current = None
             in_summary = True
+            preceding_conclusions.clear()
             continue
+        if conclusion is None:
+            preceding_conclusions.clear()
+        else:
+            preceding_conclusions.add(conclusion)
         if line.lower().startswith("timing constraint:"):
             in_summary = False
             if len(constraints) == 64:
@@ -457,10 +475,8 @@ def parse_timing_report(content):
                 if setup_score is not None:
                     record_fact(overall, "setup_score", int(setup_score))
                     record_fact(overall, "hold_score", int(hold_score))
-            if re.fullmatch(r"All constraints were met\.", line, re.I):
-                record_fact(overall, "all_constraints_met", True)
-            if re.fullmatch(r"(?:Not all constraints were met|Timing constraints are not met)\.", line, re.I):
-                record_fact(overall, "all_constraints_met", False)
+            if conclusion is not None:
+                record_fact(overall, "all_constraints_met", conclusion)
     if not saw_header or "timing_errors" not in overall or not content.endswith(b"\n"):
         raise ValueError("incomplete TRACE report")
     explicit = [c for c in constraints if c["type"] not in ("default_period", "tig")]
