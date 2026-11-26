@@ -1,5 +1,10 @@
 # External storage cutover
 
+This historical runbook records the owner-local migration and its rollback.
+Fixed names, inventories and revision tags below belong to that transaction.
+See [architecture](ARCHITECTURE.md#accepted-external-storage-and-source-mounts)
+for the accepted deployment.
+
 Use an owner-local terminal connected to the laptop's ordinary-user rootless
 Engine. The tunnel will disconnect during cutover. Keep the terminal and the
 previous source revision available until authenticated service checks pass.

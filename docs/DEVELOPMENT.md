@@ -4,26 +4,10 @@
 GitHub is the source/review system; publication happens only at a
 verified logical stopping point, not per experiment.
 
-For the current working state and known outstanding gates, consult the
-[engineering baseline](ENGINEERING_BASELINE.md) and the
-[temporary-component register](TEMPORARY_COMPONENTS.md). The
-temporary maintenance bridge is deliberately retained for rapid
-diagnosis and infrastructure repair; it does not execute the
-normal-path vendor acceptance tests.
-
-For source ownership, project manifests, selective upstream imports,
-version isolation, build provenance, and license/attribution rules,
-follow the [Source and Project Architecture Standard](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
-It governs the migrated source-candidate layout. Historical operational
-commands below still describe the previous deployed toolchain where
-not explicitly superseded; a service/mount cutover must be separately
-verified before claiming the running laptop uses the new paths.
-
-## Mandatory execution admission
-
-Follow the [agent execution and hard-stop policy](AGENT_EXECUTION_POLICY.md) for every engineering session and dependent gate. A required input, mount, permission, tool or RPC failure stops dependent work immediately; correct and verify the original path before restarting. Distinguish infrastructure failures from valid engineering-test findings. Report infrastructure blockers immediately and first. A failed engineering prerequisite blocks downstream work, not the in-scope ChatGPT–Codex diagnosis, implementation, regression and independent-verification loop; resolve it at the earliest applicable gate and report material findings, decisions and evidence without requiring owner approval of routine engineering corrections.
-
-For Anchor, preserve the entire Rescue project as read-only history. The normal Anchor build, test, vendor staging and source package must work with Rescue absent; select and integrate only necessary historical code and fixtures into the correct active ownership locations. Independently verify this closure and the preserved checkpoint. ChatGPT directs and independently accepts; Codex implements and corrects engineering work. See the [source architecture independence rule](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md#61-anchor-product-independence-and-frozen-rescue-history) and [agent execution policy](AGENT_EXECUTION_POLICY.md).
+See [architecture](ARCHITECTURE.md) for the operating baseline. Follow
+[AGENTS.md](../AGENTS.md) for binding session admission and publication rules,
+and the [source and project standard](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md)
+for ownership, source closure and provenance.
 
 ## Choose the test venue
 
@@ -58,7 +42,7 @@ in this baseline. Avoid hosted KVM and push/CI debugging loops.
 5. Publish **one coherent, reviewed commit** for the verified change
    using the connected GitHub integration and an expected-parent,
    non-force update. Alternatively, after the owner completes the
-   [private Git push setup](GITHUB_PUBLISHING.md), the existing
+   [private Git push setup](GETTING_STARTED.md#scoped-github-push), the existing
    `repo-git` gateway can push a clean, reviewed local `development`
    commit without force. Draft/unverified work requires explicit approval.
 6. Verify the new GitHub SHA. Only use PanoLab `repo_sync` when the
@@ -72,7 +56,7 @@ published milestones.
 
 ## Local source checks
 
-For the G2 Rescue project, source bytes are checked **before** compiling:
+For a separately scoped audit of the frozen Rescue checkpoint, verify source bytes before compiling:
 
 ```sh
 python3 shared/source_registry.py verify --project projects/rescue/project.toml
@@ -82,7 +66,7 @@ bash projects/rescue/test.sh
 
 Use the provisioned modern development toolchain; output is isolated
 under `/workspace/panolab-projects/rescue-g2b/` unless explicitly redirected.
-The G2 source acceptance and the legacy Docker/bootstrap suite are
+The historical G2 source checks and the platform suite are
 separate test gates.
 
 
@@ -113,9 +97,9 @@ passed in the laptop development container. Docker image construction
 uses owner-local Buildx on the existing rootless Engine, never a
 second BuildKit service.
 
-**Unified modern development image:** All open-source FPGA development tools share [one Dockerfile](../docker/modern/Dockerfile). Dedicated legacy vendor ISE remains separate. The [controlled dev-only upgrade](UNIFIED_DEV_IMAGE_UPGRADE.md) verifies source history and mounts and preserves a stopped rollback container before accepting a rebuilt image. Do not delete or recreate the running lab merely to add another HDL package.
+**Unified modern development image:** All open-source FPGA development tools share [one Dockerfile](../docker/modern/Dockerfile). Dedicated legacy vendor ISE remains separate. The [controlled dev-only upgrade](GETTING_STARTED.md#controlled-development-image-upgrade) verifies source history and mounts and preserves a stopped rollback container before accepting a rebuilt image. Do not delete or recreate the running lab merely to add another HDL package.
 
-Rootless LiteX BIOS provisioning and source builds are documented in
+Early LiteX BIOS provisioning and source-build evidence are documented in
 [RESCUE_ENVIRONMENT_RECIPE.md](RESCUE_ENVIRONMENT_RECIPE.md). The image
 pins seven upstream checkouts and Python build versions; standard LiteX
 BIOS builds do not require copying old Pano FPGA frameworks. A clean

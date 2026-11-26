@@ -1,10 +1,12 @@
 # PanoLab Direct: remote-first iteration architecture
 
+Historical remote bring-up design and evidence. See [architecture](ARCHITECTURE.md) for the current deployment and retirement requirements.
+
 **Status:** Architecture decision with live remote acceptance evidence
 (2026-11-24). The owner-approved temporary management bootstrap, authenticated
 ISE MCP tools, immutable source staging and a real licensed six-stage
 Spartan-6 bitstream build have passed on the rootless laptop. See
-[the verified vendor evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md).
+[the verified vendor evidence](EVIDENCE.md#licensed-ise-bring-up).
 The permanent self-upgrade controller and board-specific hardware acceptance
 are still outstanding. No FPGA programming was performed.
 
@@ -13,7 +15,7 @@ are still outstanding. No FPGA programming was performed.
 The first accepted, pre-ISE laboratory ran six containers; early ISE
 development used eight, including an always-running `setup` and temporary
 `trusted-maintenance`. The later
-[on-demand setup stress test](ISE14_SETUP_ONDEMAND_STRESS.md) demonstrated
+[on-demand setup stress test](EVIDENCE.md#on-demand-ise-setup) demonstrated
 three normal-MCP stop/start cycles, 20 concurrent status probes, a full
 vendor-media inspection, and a genuine six-stage licensed implementation
 while `setup` was stopped. The installer now has an opt-in
@@ -251,7 +253,7 @@ SPI flash, or FPGA programming.
    revisions compiled independently through all six licensed ISE stages
    without rebuilding or restarting the vendor worker. Both generated
    nonempty, differently hashed bitstreams. See
-   [the real build evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md).
+   [the real build evidence](EVIDENCE.md#licensed-ise-bring-up).
 4. **Recovery:** Test malformed source rejection, stage rollback, active
    build cancellation, worker restart persistence, invalid request denial,
    source race resistance and preservation of the existing secure tunnel.

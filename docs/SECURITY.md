@@ -21,7 +21,7 @@ FPGA programming.
   compatibility route is intentionally broad and can affect other
   user-owned containers/files through rootless Docker. It is not
   production-hardened, even though it has no network namespace access
-  and drops capabilities. See [the recorded retirement plan](REMOTE_ITERATION_ARCHITECTURE.md).
+  and drops capabilities. See [the retirement plan](ARCHITECTURE.md#temporary-maintenance-and-retirement).
 - Rootless container UID 0 maps to the ordinary laptop owner's
   host UID, **not host root**. It can still read/write that owner's
   accessible files if a mount is granted.
@@ -40,7 +40,7 @@ FPGA programming.
   permitted source operations. The optional Git push Compose overlay mounts
   only `PANOLAB_CONFIG_DIR/github-git-auth` in the gateway, read-only at
   `/run/panolab-git-auth`. Clean, non-force `development` pushes invoke the
-  existing scoped `GIT_ASKPASS` helper. [GitHub publishing](GITHUB_PUBLISHING.md)
+  existing scoped `GIT_ASKPASS` helper. [GitHub publishing](GETTING_STARTED.md#scoped-github-push)
 
 ## Rescue appliance Ethernet trust — separate from MCP
 
@@ -73,7 +73,7 @@ carrying the previously licensed virtual Ethernet identity. The
 license and physical NICs were not edited; no vendor service port is
 published. This preserves node-locked vendor behavior, but does not
 make the legacy environment or temporary maintenance control
-production-safe. [Real build evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md).
+production-safe. [Real build evidence](EVIDENCE.md#licensed-ise-bring-up).
 
 **Owner-authorized unattended vendor installation is narrowly scoped.**
 The disposable ISE acceptance route uses the normal authenticated

@@ -10,25 +10,23 @@ import unittest
 ROOT=Path(__file__).resolve().parents[1]
 
 class BaselineDocumentation(unittest.TestCase):
-    def test_current_handoff_and_temp_register_are_discoverable(self):
-        readme=(ROOT/"README.md").read_text()
-        for file in ("docs/ENGINEERING_BASELINE.md",
-                     "docs/TEMPORARY_COMPONENTS.md",
-                     "host/README.md"):
-            with self.subTest(file=file):
-                self.assertTrue((ROOT/file).is_file())
-                self.assertIn(file,readme if file.startswith("docs/") else
-                              (ROOT/"docs/TEMPORARY_COMPONENTS.md").read_text())
+    def test_current_architecture_and_host_script_index_are_discoverable(self):
+        readme = (ROOT / "README.md").read_text()
+        architecture = (ROOT / "docs/ARCHITECTURE.md").read_text()
+        self.assertIn("docs/ARCHITECTURE.md", readme)
+        self.assertIn("docs/EVIDENCE.md", readme)
+        self.assertIn("../host/README.md", architecture)
 
     def test_broker_and_temporary_maintenance_remain_intentionally_supported(self):
-        compose=(ROOT/"docker/compose.manage.yaml").read_text()
-        broker=(ROOT/"docker/control/broker.py").read_text()
-        register=(ROOT/"docs/TEMPORARY_COMPONENTS.md").read_text()
-        self.assertIn("trusted-maintenance",compose)
-        self.assertIn("@maintenance",broker)
-        self.assertIn("docker/control/Maintenance.Dockerfile",register)
-        self.assertIn("host/trusted-maintenance.sh",register)
-        self.assertIn("DO NOT RERUN",register)
+        compose = (ROOT / "docker/compose.manage.yaml").read_text()
+        broker = (ROOT / "docker/control/broker.py").read_text()
+        architecture = (ROOT / "docs/ARCHITECTURE.md").read_text()
+        host_index = (ROOT / "host/README.md").read_text()
+        self.assertIn("trusted-maintenance", compose)
+        self.assertIn("@maintenance", broker)
+        self.assertIn("docker/control/Maintenance.Dockerfile", architecture)
+        self.assertIn("host/trusted-maintenance.sh", architecture)
+        self.assertIn("DO NOT RERUN", host_index)
 
     def test_historical_one_time_scripts_have_explicit_do_not_rerun_marker(self):
         for path in ("host/reconcile-and-upgrade.sh",

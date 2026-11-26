@@ -42,7 +42,7 @@ The ISE 14.7 worker implementation lives in `docker/ise14/mcp/`.
 **Vendor implementation acceptance for generic unconstrained XC6SLX150
 smoke designs was achieved on 2026-11-24:** two real runs completed all
 six stages and generated independently hashed nonempty bitstreams
-([evidence](ISE14_REMOTE_BRINGUP_EVIDENCE.md)).
+([evidence](EVIDENCE.md#licensed-ise-bring-up)).
 The node-locked license is satisfied by an explicitly managed,
 Docker-**internal** virtual Ethernet identity without publishing the
 private host ID. This does **not** qualify any board-specific pinout,
@@ -54,7 +54,7 @@ the five worker operations. Those adapter operations are not extra
 mandatory tools inside the vendor worker. During development, the
 owner-approved `@ise14` compatibility route and temporary maintenance
 bridge provide remote control; see
-[remote iteration design](REMOTE_ITERATION_ARCHITECTURE.md).
+[temporary maintenance controls](ARCHITECTURE.md#temporary-maintenance-and-retirement).
 
 **Disposable installation acceptance is a separate normal control-plane
 workflow, not a sixth mandatory vendor worker tool.** The authenticated

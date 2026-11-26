@@ -1,116 +1,57 @@
-# PanoLab Direct — agent engineering contract
+# PanoLab mandatory agent execution and hard-stop policy
 
-This file is executable-session guidance for the **current
-baseline**, not an experiment log. Start at the repository
-[README](README.md), the [engineering handoff](docs/ENGINEERING_BASELINE.md)
-and the [temporary-component register](docs/TEMPORARY_COMPONENTS.md);
-then read [architecture](docs/ARCHITECTURE.md),
-[installation/operations](docs/GETTING_STARTED.md),
-[development](docs/DEVELOPMENT.md), [security](docs/SECURITY.md),
-and the [five-tool ISE contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
-Read [PanoLab Rescue v1](specs/PANOLAB_RESCUE_V1.md) for the
-approved forward boot/update/recovery standard (not yet fully implemented or physically qualified).
-Read the [iteration-15 Rescue checkpoint](projects/rescue/experiments/iteration-15/README.md) and [stock research](research/pano-stock/README.md) before resuming G2 hardware work. Keep original experimental evidence separate from the canonical project build.
-Read the [LiteX BIOS implementation plan](docs/RESCUE_IMPLEMENTATION.md)
-for the timed/button-held recovery workflow and the deliberately unpaired
-Trusted-LAN appliance profile. That device mode does **not** waive
-owner approval for physical writes through the laptop MCP agent.
+**Authority:** owner-directed engineering process. Applies equally to ChatGPT (systems engineering, orchestration, independent verification) and Codex (implementation, integration, engineering documentation and tests). These binding rules govern engineering sessions.
 
-**Source/project architecture authority:** Read the
-[PanoLab Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md)
-before adding, moving, or changing a project, board BSP, reusable RTL,
-upstream source snapshot, product dependency, source license or release
-workflow. it is the authoritative organization and provenance standard. The
-source migration has established `projects/`, `shared/` and
-`third_party/` in the development source candidate; **do not assume
-the running laptop containers have been cut over** until the recorded
-runtime acceptance gates pass.
+## Admission before work
 
-**Mandatory hard-stop policy:** Both ChatGPT and Codex SHALL follow [Agent execution and hard-stop policy](docs/AGENT_EXECUTION_POLICY.md) before every session and dependent gate. Missing required resources or execution-framework failures are immediate `INFRASTRUCTURE_BLOCKED` outcomes: stop, report first, correct the cause and verify the original path before resuming. No silent skips or workarounds.
+At every new session/job and before each dependent gate, identify the exact task authority, required canonical source files/directories, revision, tools, permissions, environment and evidence. Read the current policy and the task's actual controlling documents; check required paths and access via their approved interfaces, the expected revision, tool readiness and result retrieval. Check applicable dependencies before consuming substantial compute or editing. Use the canonical source, not chat summaries, stale copies or unverified substitutes. A deliberately limited mount is not authority to ignore a required input. If a required resource is unavailable, STOP before dependent work. Do not access private/unauthorized data to satisfy admission.
 
-**Delegated engineering and frozen Rescue boundary:** ChatGPT owns in-scope system design, scope control and independent acceptance; Codex owns implementation, engineering tests and technical implementation documentation. Do not wait for routine owner decisions already supported by the specifications. `projects/rescue/` is immutable engineering history; Anchor must contain its own selected product source and tests and must build/test/stage without Rescue. Use only declared BSP/shared/upstream/platform dependencies. See the binding [agent execution policy](docs/AGENT_EXECUTION_POLICY.md) and [source architecture §6.1](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md#61-anchor-product-independence-and-frozen-rescue-history).
+## HARD STOP — execution infrastructure
 
-## What is real, and what is planned
+A missing, inaccessible, unreadable, truncated, stale or unverifiable REQUIRED specification/source/directory/dependency/artifact; wrong revision or unavailable mount; permission or authentication failure; missing required executable/tool; unexpected execution timeout, lost job, transport/RPC failure, malformed result, insufficient tool output or other framework failure that prevents the prescribed engineering action or verification is an **INFRASTRUCTURE_BLOCKED** condition. This includes a required file or operation that an agent cannot reach because of the approved interface. It is not permission to infer, substitute, skip or route around the failure.
 
-- The owner's laptop currently runs **seven** rootless PanoLab
-  containers: authenticated tunnel, manager, broker, Git gateway,
-  modern HDL/Codex development, persistent licensed ISE worker, and
-  **temporary trusted maintenance**. The optional ISE setup container
-  is **stopped** with `restart: no`. The proposed steady state has
-  six services after independently qualifying and retiring the
-  temporary maintenance bridge. Local authenticated MCP, licensed
-  builds and resource-limit evidence exist.
-- GitHub `main` at `006b6ee` is the accepted software lab baseline.
-  The owner's canonical checkout at `~/Projects/repos/panolab-direct-main`
-  is now on `development`, tracking GitHub `development`; source tests,
-  clean project reinstall, authenticated MCP and post-reboot service
-  recovery passed on that **already provisioned** laptop.
-- The unified modern image recipe pins LiteX, LiteEth, LiteSPI, Migen,
-  VexRiscv, RISC-V C tools and BIOS. The unified rootless Docker image
-  **was rebuilt and laptop-verified** with 23 tests and a live generic LiteX
-  BIOS session ([PLR-ENV-003](docs/UNIFIED_DEV_IMAGE_ACCEPTANCE.md)).
-  Licensed ISE 14.7 has now completed multiple genuine six-stage
-  Spartan-6 implementations, including **two unattended disposable
-  vendor installations entirely through the normal MCP path**.
-  Physical FPGA acceptance, **completely unprovisioned-host installation**
-  and the revised six-service reboot test remain **PENDING**. The
-  historical six-service laptop reboot test passed only after setting
-  the standalone dev container restart policy; source tests or CI
-  alone cannot prove the expanded operating state.
-- Target Pano Logic **G2 Rev B**, XC6SLX150-2-FGG484. Planned
-  CPU-less LiteX/LiteEth/Etherbone, bounded CSR access, then LiteScope
-  and coherent framebuffer observation. USB3300 is not baseline RTL.
-- Persistent vendor build worker and MCP server reside in **one
-  runtime container**. Exactly five agent-facing build tools:
-  `toolchain_info`, `build_start`, `build_status`,
-  `build_result`, `build_cancel`. No added vendor-specific tools
-  without explicit owner approval.
+On first detection, stop the affected job and its dependent work immediately. Preserve existing files, logs and completed evidence safely; do not launch additional dependent tests, builds, searches, edits, retries or replacement paths just to continue. Return the blocker as the first and most prominent result, not a footnote at the end. Do not report PASS or partial completion as acceptance. Report:
 
-## Toolchain warning and legacy-builder policy
+- Status: INFRASTRUCTURE_BLOCKED; affected task/gate and job ID if known.
+- Exact required resource or operation, canonical path/interface, expected behavior, observed error (redacted where needed), and the last completed step.
+- What work stopped, preserved evidence, and any independent work still running that is demonstrably unaffected.
+- Smallest proposed root-cause correction, relevant permission/approval boundary, and exact normal-path retest needed before resumption.
 
-Never silently silence BIOS compiler/linker warnings. The pinned-context
-[Rescue BIOS build overlay](projects/rescue/soc/bios_source_overlay.py)
-creates modified **build-output copies**, leaving pinned Git and
-installed Pythondata files intact. The G2 build must fail on an RWE/RWX
-ELF load segment. When upstream changes, update six exact SHA-256 guards
-and rerun the BIOS, HDL and source regression tests before publishing.
-Docker CLI Buildx belongs in the owner-local CLI plugin directory,
-not the general development image and not another BuildKit container.
-The [exact owner-approved rollback cleanup](docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md)
-is a separate, guarded host operation; never globally prune.
+Codex must end the affected session promptly and return that status to ChatGPT. ChatGPT must surface it to the owner immediately when observed, not continue the dependent engineering task. ChatGPT may diagnose and orchestrate the narrowly scoped infrastructure repair when authorized, including via the existing owner-trusted maintenance process; Codex may be assigned a separate repair job with its own verified prerequisites. Do not weaken access controls, invent substitute data, use copied sources as a workaround, silently skip a required test, or use a different execution path merely to avoid the broken normal interface. Preserve unrelated independent jobs only if their inputs and environment are unaffected and explicitly report their state. After the root cause is corrected, verify the original required operation through the intended interface, then restart the affected work from its admission check. No automatic approval of physical operations or security changes.
 
-## Unified container policy
+## Engineering correction — closed-loop responsibility
 
-Maintain **one** modern FPGA development Dockerfile at
-[`docker/modern/Dockerfile`](docker/modern/Dockerfile) for compatible
-open-source tools (RTL, firmware, LiteX, agents). Group the dependency
-recipe into coherent, version-pinned functional sections; use BSPs for
-board adaptation. Do **not** create per-tool development images or
-long-lived services when another modern tool is needed. Licensed legacy
-ISE 14.7 is a justified **separate vendor worker**.
+A validly executed test that exposes a product defect, incomplete implementation, failed design/qualification criterion or genuine architecture conflict is an engineering finding, not an execution-framework failure. **A failed engineering prerequisite blocks dependent work and gate acceptance; it does not stop the corrective engineering loop.** Do not build later features on an invalidated foundation. ChatGPT owns system-level diagnosis, dependency analysis, selection of a coherent corrective direction, assignment to Codex, and independent acceptance. Codex owns implementation/refactoring, engineering documentation, simulations, test implementation and execution. The owner owns product direction and reserved approvals.
 
-When upgrading the modern image, use the explicit, rollback-capable
-[development-container procedure](docs/UNIFIED_DEV_IMAGE_UPGRADE.md).
-Preserve the workspace, private Codex mount and all management services;
-never silently replace an active container. Local development SHA
-`f1ca3a66` and GitHub development have historically different ancestry:
-follow the content-verified local backup/ref reconciliation before
-changing the laptop checkout.
+Within established product requirements, authorization and security boundaries, ChatGPT SHALL actively work with Codex to resolve engineering findings without asking the owner to arbitrate routine implementation decisions. Determine the root cause; choose the smallest coherent correction using the system architecture and evidence; have Codex implement and test it; independently review source, evidence and actual behavior; repeat until the prerequisite passes or a genuine unresolved decision or infrastructure blocker prevents further work. Do not use workarounds, suppress warnings, relax timing constraints without engineering justification, waive tests, invent inputs or mark an incomplete gate accepted. Report material engineering findings, decisions and corrections proactively, including why the chosen solution fits the whole system, alternatives or tradeoffs that matter, and the independent verification results. Do not silently change the design.
 
-## GitHub source publishing boundary
+Timing failures are engineering findings when the implementation and reports are actually available. Correct relevant clocking, CDC, reset, timing constraints, placement or RTL at the earliest practical integration gate. A preliminary exploratory build may be explicitly unqualified for timing; it is not an accepted timing-dependent baseline. Rerun affected simulation, regression, vendor implementation, routed timing and resource analysis after relevant changes; validate constraints themselves as well as reported slack. Repeat dependent acceptance tests when a change invalidates earlier evidence. Never proceed to timing-dependent product qualification with unresolved required timing. Apply the same dependency discipline to firmware, protocols, state machines, storage, recovery and other engineering requirements.
 
-GitHub `main` is the default branch and is **not** the active Rescue
-source. The [`development` branch](https://github.com/sirchuckalot/panolab-direct/tree/development)
-contains the implementation. Rescue now selects source-verified
-`third_party/` snapshots via its `project.toml`; historical upstream
-checkouts inside the current modern image are toolchain bootstrap inputs,
-**not** the authority for a Rescue product build.
-The connected GitHub app is already authorized for server-side commits.
-The laptop `repo-git` gateway previously failed direct `repo_push`
-due to missing HTTPS authentication; the optional
-[one-time owner-private push setup](docs/GITHUB_PUBLISHING.md)
-allows **only** non-force `development` pushes. Never request token
-material in chat, mount it in `dev`, or publish it in logs.
+Escalate only decisions genuinely outside delegated engineering authority: changed normative product requirements, material scope/cost/safety/security tradeoffs, unavailable required factual inputs, physical operation authorization, release/main promotion, or a genuine architectural conflict not resolvable under the approved requirements. An escalation must state the issue, evidence, recommended decision and consequences. Do not require owner approval for every correction within existing scope. An infrastructure blocker remains a separate immediate hard stop: stop and prominently report the affected work, then coordinate authorized root-cause repair as a separate task; verify the original required operation before restarting dependent work.
+
+Expected negative-test failures and explicitly non-required future capabilities are not infrastructure failures. A planned test venue may differ by design only if declared up front, approved and appropriate for that gate; never change venue after a failure just to conceal it.
+
+## Delegated design authority and implementation separation
+
+The owner sets the product direction, overarching specifications, scope and reserved approvals. ChatGPT has broad delegated discretion to close design gaps, select and reconcile existing components, settle routine architecture and integration decisions, and correct implementation-level design defects that fit the approved requirements. Consult the actual specification and evidence first; do not ask the owner to repeat decisions already made. Do not treat the owner's absence as a blocker for an otherwise authorized engineering decision.
+
+ChatGPT SHALL direct, review and independently verify; Codex SHALL perform engineering implementation, source changes, refactoring, build/test implementation and execution, and technical implementation documentation. ChatGPT may inspect, execute existing verification procedures independently, author system-level requirements and decisions, and orchestrate approved publication/deployment, but must not repair, complete or substitute Codex's implementation or engineering documents. Return specific deficiencies to Codex for correction and verify the next result. A worker's successful execution does not imply engineering acceptance.
+
+Every assignment must identify a named completion gate, the applicable requirements, the existing source to reuse, the intended ownership boundaries and measurable acceptance criteria. Prefer the minimum complete integration over additional features, new abstractions, alternative implementations or speculative experiments. Challenge unnecessary additions during review. Record material design decisions, their rationale and evidence, the scope impact, and the verification result; no silent architecture changes. Escalate only unresolved material decisions outside the existing specification, genuine ambiguities that cannot be settled from evidence, or reserved approval boundaries. If source ownership or directory placement is genuinely ambiguous after examining the source architecture, stop the affected decision and consult the owner rather than invent another directory or concept. Do not build dependent work on an unresolved decision.
+
+## Anchor completion and the frozen Rescue boundary
+
+The exploratory Rescue project is frozen engineering history. Treat the entire `projects/rescue/` tree, including its active historical entry points, experiments, tests, documentation and evidence, as read-only. Do not edit, delete, reorganize, or make Anchor depend on that tree. Use it as a source of reviewed historical implementations and provenance during consolidation only. The approved product is Anchor: finish the smallest coherent implementation satisfying the existing requirements and finite Gates A–G. Do not reopen exploratory Rescue development.
+
+Codex must copy only the selected necessary Rescue-owned source, fixtures and tests into their appropriate active Anchor ownership locations, preserving attribution, original notices, applicable licenses and exact checkpoint-relative provenance. Anchor-specific code belongs under the existing `projects/anchor/` structure; board-specific code belongs in the established BSP under `boards/<board-id>/`; genuinely reused PanoLab code belongs in `shared/`; approved upstream source remains in the central pinned `third_party/` registry. Do not duplicate the upstream dependency tree, create unnecessary folders, copy every experiment, or move code just for tidiness.
+
+Anchor must build, test, stage vendor inputs and prepare its product source package without access to `projects/rescue/`, archived experimental outputs, or an unstated workspace path. No imports, includes, symlinks, scripts, fixtures, build-time copies or runtime dependencies on the frozen project. Historical references and separately scoped provenance/equivalence audits may identify or read Rescue; those audits are not dependencies of the normal Anchor build/test/release entry points. Require declared source closure and an independent isolated build/test/staging check with Rescue absent, using only Anchor and its explicitly approved board/shared/upstream/platform dependencies. Verify the preserved Rescue source against its historical checkpoint. Fail closed on missing required active inputs; never use an archive as a fallback for an incomplete product package.
+
+## Session enforcement and reporting
+
+The canonical container-readable authority is `/repo/AGENTS.md`. Before invoking Codex, the orchestrator must load the current policy and make it part of the session instructions, verify all declared required inputs or report INFRASTRUCTURE_BLOCKED, and record the policy revision with the job. No unguarded engineering sessions. A worker's process exit code is not a gate verdict. Record explicit engineering outcome, execution outcome and infrastructure blockers separately. A missing required final verdict or inaccessible report is itself an infrastructure blocker for acceptance. Before claiming completion, independently verify the actual normal-path operation and relevant evidence. Do not imply that policy text alone guarantees automatic detection of every possible runtime error; implement and test admission and reporting controls, and require both agents to honor the policy.
+
+This policy does not change product scope, protected identity, authorization, licensing, physical-operation approval or source publication boundaries.
 
 ## Mandatory development process
 
@@ -142,56 +83,69 @@ material in chat, mount it in `dev`, or publish it in logs.
    MCP, ISE installation or hardware. If CI is justified, state
    its narrow test purpose, budget and what success establishes.
 
-## Fresh-host admission versus acceptance
+## Toolchain warning and legacy-builder policy
 
-The read-only `panolab-install.sh --fresh-host-check` inventories
-prerequisites before Docker or private credentials exist. It reports
-missing facilities and **does not install packages or provision secrets**.
-The [fresh-host admission report](docs/FRESH_HOST_ACCEPTANCE.md)
-documents an isolated empty-checkout/home check and installer corrections.
-This is **not** an accepted clean laptop deployment: the normal
-environment cannot create an independent KVM/QEMU host, and first-time
-OS/runtime/private-credential provisioning is still unresolved.
-Do not claim a fresh-host PASS from the read-only fixture or the
-separately successful disposable ISE vendor-install runs.
+Never silently silence BIOS compiler/linker warnings. The pinned-context
+[Rescue BIOS build overlay](projects/rescue/soc/bios_source_overlay.py)
+creates modified **build-output copies**, leaving pinned Git and
+installed Pythondata files intact. The G2 build must fail on an RWE/RWX
+ELF load segment. If the active implementation adopts new upstream inputs, update the applicable exact SHA-256 guards
+and rerun the BIOS, HDL and source regression tests before publishing. The six original guards remain part of the frozen Rescue checkpoint.
+Docker CLI Buildx belongs in the owner-local CLI plugin directory,
+not the general development image and not another BuildKit container.
+The [exact owner-approved rollback cleanup](docs/DEV_TOOLCHAIN_WARNING_CLEANUP.md)
+is a separate, guarded host operation; never globally prune.
 
-## Security and change boundaries
+## Unified container policy
 
-- Rootless container UID 0 maps to the ordinary owner's UID, not
-  host root. Restricted broker access to the user Docker socket
-  still carries broad authority over the owner's Docker resources.
-- No host `sudo`, package installation, system/rootful Docker
-  changes, broad `$HOME` mounts, privileged containers or global
-  Docker cleanup. Never bypass MCP broker allowlists.
-- Preserve the running manager, tunnel, Codex authentication, private
-  ISE media/license, project workspace and other applications.
-  The [external-storage candidate](docs/EXTERNAL_STORAGE_CUTOVER.md) keeps
-  secrets in `PANOLAB_CONFIG_DIR` and operational data in `PANOLAB_DATA_DIR`,
-  outside the checkout. The live baseline uses `docker/private/` and ignored
-  `docker/.env` until cutover. Keep all of these private. The candidate dev
-  mount exposes the canonical checkout read-only at `/repo` with a read-only
-  `/repo/.git` mask, and has dedicated writable workspace and Codex auth binds.
-- No physical FPGA programming, JTAG, SPI flash modification, volatile
-  configuration or unbounded Etherbone access without specific
-  owner authorization and a credible recovery path.
-- A software source PASS, licensed toolchain PASS and physical board
-  PASS are **different evidence levels**. State commands,
-  execution location and limitations accurately.
+Maintain **one** modern FPGA development Dockerfile at
+[`docker/modern/Dockerfile`](docker/modern/Dockerfile) for compatible
+open-source tools (RTL, firmware, LiteX, agents). Group the dependency
+recipe into coherent, version-pinned functional sections; use BSPs for
+board adaptation. Do **not** create per-tool development images or
+long-lived services when another modern tool is needed. Licensed legacy
+ISE 14.7 is a justified **separate vendor worker**.
 
-## Documentation and publication hygiene
+When upgrading the modern image, use the explicit, rollback-capable
+[development-container procedure](docs/GETTING_STARTED.md#controlled-development-image-upgrade).
+Preserve the workspace, private Codex mount and all management services;
+never silently replace an active container.
 
-Maintain the **current operational baseline** in
-[architecture](docs/ARCHITECTURE.md) and the **authoritative future source/project
-structure, third-party, provenance and licensing decisions** in the
-[source and project standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md).
-Do not duplicate or silently override either authority. The verified first software
-laboratory milestone and its evidence are recorded in
-[LM1 acceptance](specs/LAB_MILESTONE_1.md). Keep implementation instructions
-in [getting started](docs/GETTING_STARTED.md), test and Git workflow
-in [development](docs/DEVELOPMENT.md), safety in
-[security](docs/SECURITY.md) and the stable vendor API in
-[toolchain contract](docs/TOOLCHAIN_MCP_CONTRACT.md).
-Update the root README navigation when paths change. Do not
-reintroduce duplicate decisions, debugging logs, dead links or
-per-iteration commits. Preserve future design
-requirements without claiming they are implemented.
+## Session references and reserved operations
+
+Start with [README](README.md) and admit the actual controlling documents for the
+assignment. Read the [source and project standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md)
+before changing project, BSP, shared RTL, upstream source, dependencies,
+licensing or release workflow. For G2 hardware work, consult the
+[boot and recovery standard](specs/PANOLAB_RESCUE_V1.md), the
+[BIOS plan](docs/RESCUE_IMPLEMENTATION.md), the
+[iteration-15 checkpoint](projects/rescue/experiments/iteration-15/README.md)
+and [stock research](research/pano-stock/README.md). Keep historical
+artifacts separate from active builds. The Trusted-LAN device profile leaves
+the laptop MCP physical-approval requirement in force.
+
+Use the owner-user rootless Engine. No host sudo, system package installation,
+system/rootful Docker changes, broad home mounts, privileged containers, global
+Docker cleanup or bypass of MCP allowlists. Preserve manager, tunnel, Codex
+authentication, private ISE media/license, workspace and unrelated applications.
+Keep external configuration and operational data private, including legacy
+rollback material. Physical FPGA programming, JTAG, SPI flash modification,
+volatile configuration and unbounded Etherbone access require specific owner
+approval and a credible recovery path.
+
+The vendor worker exposes exactly the five tools in the
+[toolchain contract](docs/TOOLCHAIN_MCP_CONTRACT.md). Vendor-specific additions
+require explicit owner approval. Use the reviewed connected GitHub route, or the
+separately [owner-provisioned gateway](docs/GETTING_STARTED.md#scoped-github-push) for non-force
+development pushes. Keep token material out of chat, dev and logs. The active
+product resolves verified committed source via its manifest and central
+registry. Image bootstrap inputs remain toolchain inputs.
+
+Report source, licensed implementation and physical acceptance individually.
+Give commands, venue and limitations. A read-only fresh-host audit and
+disposable vendor installations cannot establish unprovisioned-host acceptance.
+Maintain deployment state in [architecture](docs/ARCHITECTURE.md), procedures
+in [operations](docs/GETTING_STARTED.md) and [development](docs/DEVELOPMENT.md),
+and access boundaries in [security](docs/SECURITY.md). Update README navigation
+when paths change. Preserve unique evidence and future requirements and avoid
+duplicate decisions, transient logs, dead links and per-iteration commits.

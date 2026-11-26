@@ -1,5 +1,7 @@
 # Development Toolchain Warning Cleanup — Scoped Maintenance
 
+Historical record of the exact owner-approved maintenance operation. See [operations](GETTING_STARTED.md) for current entry points.
+
 **Record:** PLR-ENV-004 | **Date:** November 23, 2026 Pacific / November 24 UTC | **Status:** **LAPTOP_MAINTENANCE_ACCEPTED**: warning-free G2 BIOS source build; owner-side Buildx installation and exact rollback-container deletion completed, with six live services independently verified. A fresh image rebuild using Buildx remains separately untested.
 
 ## System boundary

@@ -2,8 +2,7 @@
 
 **Status:** Adopted source/project authority. Selected source snapshots,
 PanoLab licensing files and project entrypoints are committed in
-`development`; a full new-host or live source-mount/worker migration
-acceptance is separate and still unverified.
+`development`; current deployment evidence and open gates are in [architecture](../docs/ARCHITECTURE.md).
 **Date:** 2026-11-23  
 **Scope:** PanoLab Direct repository organization, source ownership, third-party integration, build provenance, project packaging, and licensing  
 **Implementation boundary:** This document records decisions; it does not itself authorize moving source, rewriting builds, installing tools, flashing hardware, or promoting `main`.
@@ -78,9 +77,8 @@ panolab-direct/
   LICENSES/                  # Existing license/attribution index; upstream full texts retained in snapshots
 ```
 
-This tree is the approved source-ownership model. The owner approved the research source root and preservation of the iteration-15 Rescue experiment checkpoint. Frozen experiments may retain relative source variants for evidence/reproduction; they are not independent active project/dependency roots. Consolidate reviewed changes into the owning BSP/project/shared source rather than maintaining parallel production implementations. Generated outputs remain private workspace artifacts until separately reviewed for release. The migration
-candidate now contains the implementation paths, but live host mount and
-Docker-service acceptance remains a separate gate. Names selected for the target architecture: **`projects/` rather than `products/`**, since each item is an engineering implementation and may or may not become a commercial product. `products/` is not a second source root. A release or manufactured product is built *from* a project.
+This tree is the approved source-ownership model. The owner approved the research source root and preservation of the iteration-15 Rescue experiment checkpoint. Frozen experiments may retain relative source variants for evidence/reproduction; they are not independent active project/dependency roots. Consolidate reviewed changes into the owning BSP/project/shared source rather than maintaining parallel production implementations. Generated outputs remain private workspace artifacts until separately reviewed for release. Current deployment and source mount evidence are recorded separately in
+[architecture](../docs/ARCHITECTURE.md). Names selected for the target architecture: **`projects/` rather than `products/`**, since each item is an engineering implementation and may or may not become a commercial product. `products/` is not a second source root. A release or manufactured product is built *from* a project.
 
 Do not create another general development environment per board, tool, or project. One modern pinned development image remains the default. Legacy licensed Xilinx ISE 14.7 remains an isolated vendor worker. Board adaptations belong in BSPs, not duplicate Docker toolchains.
 
@@ -122,7 +120,7 @@ A product's build inputs may be shared elsewhere in the same repository; **compl
 
 Owner-directed consolidation boundary (2026-11-25): `projects/rescue/` is frozen read-only engineering history, including its tests, build definitions, experiments, documentation and evidence. Anchor is the active product, owned by `projects/anchor/`. Select and copy necessary Rescue-owned implementations and regression fixtures into the established appropriate Anchor, BSP or genuinely shared source locations; retain exact origin/revision/path, applicable licenses and attribution. Do not modify Rescue or establish a second active implementation. Do not create extra ownership categories or directories without a demonstrated need.
 
-Anchor's declared build, test, vendor-stage and product package paths SHALL be independent of the frozen Rescue tree and historical build artifacts. A historical provenance comparison may read Rescue as a separate audit, but the normal product entry points shall not require it. Acceptance requires an isolated source-closure build/test/staging verification with Rescue absent and only declared Anchor, board, shared, platform and pinned upstream inputs present. Keep the central source registry and existing project structure; complete does not mean duplicating every dependency. Follow the [agent execution policy](../docs/AGENT_EXECUTION_POLICY.md) for delegated design authority, implementation ownership, dependency blockers and scope control.
+Anchor's declared build, test, vendor-stage and product package paths SHALL be independent of the frozen Rescue tree and historical build artifacts. A historical provenance comparison may read Rescue as a separate audit, but the normal product entry points shall not require it. Acceptance requires an isolated source-closure build/test/staging verification with Rescue absent and only declared Anchor, board, shared, platform and pinned upstream inputs present. Keep the central source registry and existing project structure; complete does not mean duplicating every dependency. Follow the [engineering session policy](../AGENTS.md) for delegated design authority, implementation ownership, dependency blockers and scope control.
 
 The **source project manifest is different from the on-device FPGA image/release manifest** in [Rescue v1](PANOLAB_RESCUE_V1.md). The former selects how to build; the latter identifies a produced board-compatible image, digest and, where applicable, its signature and installation constraints. Do not merge those responsibilities.
 

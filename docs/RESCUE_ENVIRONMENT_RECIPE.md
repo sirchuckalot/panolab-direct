@@ -1,6 +1,8 @@
 # PanoLab Rescue — Rootless LiteX Development Environment Recipe
 
-**Record:** PLR-ENV-001 | **Date:** 2026-11-23 (US Pacific) | **Status:** Versioned Docker recipe; fresh isolated bootstrap + G2 BIOS source build validated; rebuilt full Docker image **laptop-verified** (2026-11-24 UTC); see [acceptance evidence](UNIFIED_DEV_IMAGE_ACCEPTANCE.md). The [unified development image and controlled migration](UNIFIED_DEV_IMAGE_UPGRADE.md) supersedes the original image-refresh note and provides the explicit owner-laptop upgrade command.
+Historical bootstrap and source-build record. See [operations](GETTING_STARTED.md) for the current environment.
+
+**Record:** PLR-ENV-001 | **Date:** 2026-11-23 (US Pacific) | **Status:** Versioned Docker recipe; fresh isolated bootstrap + G2 BIOS source build validated; rebuilt full Docker image **laptop-verified** (2026-11-24 UTC); see [acceptance evidence](EVIDENCE.md#unified-development-image). The [unified development image and controlled migration](GETTING_STARTED.md#controlled-development-image-upgrade) supersedes the original image-refresh note and provides the explicit owner-laptop upgrade command.
 
 **Source of truth:** [modern Dockerfile](../docker/modern/Dockerfile), [bootstrap utility](../docker/modern/litex-bootstrap.py), [upstream lock](../docker/modern/litex-upstream.lock.json), [Python package pins](../docker/modern/litex-requirements.txt), [rootless installer](../host/rootless-install.sh). The identical [G2 reference lock](../third_party/registry.toml) is checked by [offline unit tests](../tests/test_litex_recipe.py).
 
@@ -60,7 +62,7 @@ python3 /repo/projects/rescue/tests/test_rescue_soc.py
 
 Use the proper checkout paths if mounted elsewhere; the read-only `/repo/boards` path above is the installer default. `build_probe.sh` checks all pinned upstream Git SHAs and compiles LiteX BIOS + generates Verilog/UCF but **never calls ISE or flashes hardware**. Use a unique lab MAC per board; this is not yet a permanent identity implementation.
 
-**Existing-container migration policy:** An ordinary `--install` rebuilds the same modern tools image without replacing the running dev. The additional **explicit** `--upgrade-dev` mode performs [the guarded, rollback-capable dev-only replacement](UNIFIED_DEV_IMAGE_UPGRADE.md) after validating all mounts, source revisions and the new image. It retains the previous dev stopped for verification and never restarts manager/ISE/tunnel.
+**Existing-container migration policy:** An ordinary `--install` rebuilds the same modern tools image without replacing the running dev. The additional **explicit** `--upgrade-dev` mode performs [the guarded, rollback-capable dev-only replacement](GETTING_STARTED.md#controlled-development-image-upgrade) after validating all mounts, source revisions and the new image. It retains the previous dev stopped for verification and never restarts manager/ISE/tunnel.
 
 ## Verification completed
 
@@ -72,7 +74,7 @@ In the existing rootless development container, from a fresh source and virtuale
 - The existing nine G2 source/simulation tests passed, and Icarus parsed the generated Verilog using black boxes for Xilinx and VexRiscv primitives.
 - The upstream generic LiteX live Verilator BIOS/SPI simulation had already reached the `litex>` prompt. The restricted rootless network simulator is **not** claimed to run over Ethernet.
 
-**Laptop Docker image rebuilt and verified:** `panolab-direct-modern:local` was accepted on the rootless laptop with 23 tests and a simulated LiteX BIOS prompt; see [PLR-ENV-003](UNIFIED_DEV_IMAGE_ACCEPTANCE.md). **Not yet verified:** clean GitHub runner build; Spartan-6 ISE placement/routing/bitstream; physical Pano G2 boot, PHY, button/recovery, or Ethernet A/B updater. A valid source/BIOS build must not be represented as proven FPGA hardware.
+**Laptop Docker image rebuilt and verified:** `panolab-direct-modern:local` was accepted on the rootless laptop with 23 tests and a simulated LiteX BIOS prompt; see [PLR-ENV-003](EVIDENCE.md#unified-development-image). **Not yet verified:** clean GitHub runner build; Spartan-6 ISE placement/routing/bitstream; physical Pano G2 boot, PHY, button/recovery, or Ethernet A/B updater. A valid source/BIOS build must not be represented as proven FPGA hardware.
 
 ## Drift prevention and qualification
 

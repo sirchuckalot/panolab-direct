@@ -1,5 +1,7 @@
 # PanoLab Rescue — LiteX BIOS-Based Implementation Plan
 
+Historical Rescue design plan. Rescue is frozen, and Anchor is the active product.
+
 **Record:** PLR-IMPL-001 | **Date:** 2026-11-23 | **Status:** Implementation underway: [first G2 Rev B LiteX SoC](../projects/rescue/README.md) and [verification record](RESCUE_BUILD_EVIDENCE.md) published; full recovery functionality and physical hardware qualification pending
 **Normative:** [PanoLab Rescue v1](../specs/PANOLAB_RESCUE_V1.md)  
 **Source research:** [Upstream implementation review](../specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md)

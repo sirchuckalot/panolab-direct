@@ -1,7 +1,7 @@
 # Install and operate the rootless laptop laboratory
 
 This describes the **current supported deployment recipe** and its
-explicit prerequisites. Read the [engineering baseline](ENGINEERING_BASELINE.md)
+explicit prerequisites. Read the [operating baseline](ARCHITECTURE.md)
 for current acceptance results and the
 [host script index](../host/README.md) before running an old helper.
 The installer does not perform host Docker installation and has not
@@ -63,9 +63,9 @@ symlinks.
 
 The installer requires these inputs to exist and preserves the existing
 vendor installation. Keep credential contents, license details and archives
-private. On the already provisioned laptop, follow the guarded
-[external storage cutover](EXTERNAL_STORAGE_CUTOVER.md) before using this
-candidate's launcher. The cutover has its own live acceptance gate.
+private. The owner laptop completed the external-storage migration. The
+[cutover runbook](EXTERNAL_STORAGE_CUTOVER.md) preserves the original rollback
+procedure and checkpoint-specific inputs.
 
 ## 3. Commands
 
@@ -95,36 +95,24 @@ changes unrelated containers or programs an FPGA.
 
 GitHub publishes through the connected integration even without a laptop PAT.
 To enable direct `repo_push` through the existing container, use the
-[one-time fine-grained GitHub setup](GITHUB_PUBLISHING.md), which puts
+[one-time fine-grained GitHub setup](#scoped-github-push), which puts
 only a narrowly scoped token in the external owner configuration directory.
 Never put that token in the ordinary development container or Git config.
 
 A first-time Codex account may need an interactive owner-approved
 login **inside the local development container** before installation
-can complete; existing Codex credentials are kept in the private
-volume. A successful local tunnel start still needs independent
-confirmation that remote `lab_status` and `repo_status` work.
+can complete. The dedicated private authentication bind preserves the login.
+After a local tunnel start, verify remote `lab_status` and `repo_status`.
 
 ## 4. Operate and inspect
 
-The original LM1 deployment ran `tunnel`, `manager`,
-`docker-broker`, `repo-git`, `setup` and `dev`. The ISE bring-up
-temporarily ran eight containers. The subsequent
-[on-demand setup acceptance](ISE14_SETUP_ONDEMAND_STRESS.md) removed
-the manager/tunnel startup dependencies on setup and placed it behind
-the opt-in `ise-setup` profile. Setup is now **stopped**, with
-`restart: no`. The active configuration has **seven running
-containers**: tunnel, manager, broker, repo-git, modern dev, licensed
-ISE worker, and the explicitly temporary trusted-maintenance sidecar.
-The proposed six-service steady state removes that last temporary
-sidecar; it has **not** been reboot-accepted. The setup container must
-already exist for normal `lab_lifecycle start`; creation from absence
-and fresh-host installation are still separate work.
+See [architecture](ARCHITECTURE.md) for current services and reboot evidence.
+The optional setup container must already exist for normal `lab_lifecycle start`.
 
 Inspect with authenticated PanoLab MCP `lab_status` / `repo_status`
 or the read-only `--status` command.
 The ordinary installer is **not yet** a clean-room reproducer of this
-expanded configuration; see [the ISE milestone review](ISE14_REMOTE_MILESTONE_REVIEW.md). The user Docker socket is
+expanded configuration; see [the ISE milestone review](EVIDENCE.md#remote-ise-milestone). The user Docker socket is
 `/run/user/$(id -u)/docker.sock`; never manage PanoLab through
 the default system/rootful Docker Engine.
 
@@ -140,21 +128,52 @@ stages immutable RTL revisions and calls the installed licensed worker.
 Neither grants authorization to JTAG, SPI, flash or hardware programming.
 Avoid restarting the authenticated tunnel or worker for ordinary source edits.
 
-The installer reuses existing services with `--no-recreate`; it is
-**not** a destructive repair utility. The explicit `--upgrade-dev` mode uses [the safeguarded unified image migration](UNIFIED_DEV_IMAGE_UPGRADE.md): validate the new image before renaming/stopping only the dev container, retain its previous instance stopped for rollback, and reuse the same owner workspace and Codex credentials with the approved read-only source bind. It neither creates a new development service nor restarts management/ISE. If the modern tools image recipe
-is newer, the installer rebuilds the image tag and performs its read-only
-LiteX environment smoke check, but **preserves the running old dev
-container** and reports the pending explicit container migration.
+The installer reuses existing services with `--no-recreate`. When the modern
+image recipe changes, it rebuilds and smoke-tests the image tag and reports
+that the running dev container still needs an explicit
+[dev-only upgrade](#controlled-development-image-upgrade).
 See the [LiteX environment recipe](RESCUE_ENVIRONMENT_RECIPE.md). Before any service replacement,
 review effects on the remote tunnel, host resources, private mounts,
 licenses and persistent results. Do not globally prune Docker.
 Reboot recovery was accepted for the **earlier six-service LM1 configuration**
 on the owner's provisioned laptop, using `unless-stopped` for the
-standalone developer container. The later eight-service deployment,
-Docker-internal node-locked ISE network, and trusted maintenance bridge
-**have not yet undergone a clean reboot acceptance test**. The earlier
+standalone developer container. Clean reboot acceptance remains open for the current setup-on-demand
+deployment and the proposed six-service topology. The earlier
 test does not prove unattended headless startup before login or a
 fresh-host installation.
+
+### On-demand ISE setup controls
+
+For the existing setup service, use authenticated `lab_lifecycle` with
+`Container=panolab-direct-connect-setup-1` and `Operation=start`.
+Inspect it using `@setup info`, `@setup status` or `@setup inspect`.
+When finished, use the same lifecycle call with `Operation=stop`.
+Vendor installation requires separate owner authorization, approved terms
+and checksum validation.
+
+### Controlled development image upgrade
+
+1. Verify the clean canonical development checkout and reviewed revision.
+   Use the guarded synchronization procedure in [development](DEVELOPMENT.md).
+2. Run `bash ./panolab-install.sh --check`, then the explicitly authorized
+   `bash ./panolab-install.sh --upgrade-dev`. The helper checks rootless
+   preconditions, exact mounts and the recipe label, then smoke-tests the
+   reviewed modern image offline before swapping the running dev.
+3. Confirm the same dev name, workspace, private login, limits and read-only
+   source with its Git mask. Verify live tool health and the relevant source
+   checks. Keep the exact old container stopped for rollback. The helper
+   attempts scoped rollback on failure. Cleanup needs a separate decision.
+
+Keep the approved workspace, private Codex authentication bind and management
+services available throughout the upgrade. The installer reuses the single
+modern image tag and leaves the ISE worker separate.
+
+Record the reviewed source SHA, applicable `SOURCE_UPDATE` result,
+`LITEX_REQUIRED_TOOLS`, `DEV_UPGRADE_RESULT`, image ID, generated BIOS/HDL
+artifacts and any `ROLLBACK_CONTAINER` line. For failures, report the exact
+step and nonsecret error. Confirm live tool health, baseline simulation and
+normal service availability via authenticated MCP before deciding separately
+whether to remove the stopped rollback container. See [laptop evidence](EVIDENCE.md#unified-development-image).
 
 ### Disposable unattended ISE 14.7 acceptance
 
@@ -204,5 +223,38 @@ acceptance. Use guarded fast-forward sync only while the checkout
 is clean and source history permits it; never reset or force-push
 to hide divergence. Follow [development and publishing](DEVELOPMENT.md)
 and [LM1 evidence](../specs/LAB_MILESTONE_1.md).
+
+### Scoped GitHub push
+
+Use the existing `repo-git` service for direct pushes. Keep GitHub write
+credentials out of the modern development container.
+
+The token goes in this ignored, owner-private file.
+
+```text
+${PANOLAB_CONFIG_DIR}/github-git-auth/github-push-token
+```
+The containing directory is mode **0700**, token file **0600**. The opt-in [Compose overlay](../docker/compose.git-push.yaml) mounts **only that directory** read-only at `/run/panolab-git-auth` in the existing `repo-git` service. Owner credentials and operational data are stored in the external roots. No GitHub credential goes in the runtime `.env`, `~/.gitconfig`, a remote URL, git command-line argument, Dockerfile, test log or chat.
+
+The helper [`docker/control/github_askpass.py`](../docker/control/github_askpass.py) is enabled **only** for the gateway's allowlisted push. It reads the token directly from the read-only mount. The gateway continues to verify the expected GitHub origin and clean working tree, refuses force pushes, and permits direct pushes **only** to `refs/heads/development`. Remote branch protections and GitHub's normal permissions still apply.
+
+#### Owner-local setup and renewal
+
+1. In your browser, use [GitHub fine-grained personal access tokens](https://github.com/settings/personal-access-tokens/new). Choose owner **`sirchuckalot`**, access to **only `panolab-direct`**, repository permission **Contents: Read and write**, and a finite expiration. Metadata read permission is added automatically. Do not select broad organization/all-repository scopes.
+2. From the local checkout, run the one command below as your ordinary laptop user **without sudo**. It will prompt for the token *without echoing it*, write it to the ignored private file, rebuild **only** the existing `repo-git` image and recreate **only** its service with the opt-in read-only mount. No ISE, dev-container or FPGA changes.
+3. The script validates the mount scope and checks authentication through
+   the credential helper with `git push --dry-run origin HEAD:refs/heads/development`.
+
+```bash
+cd "$HOME/Projects/repos/panolab-direct-main" && bash ./panolab-install.sh --enable-github-push
+```
+
+**Never paste a token into ChatGPT or send `github-push-token` file contents.** If it expires, revoke it in GitHub and use the same owner-local renewal workflow after inspecting the existing private file; the script deliberately refuses silently overwriting an existing credential.
+
+The gateway permits explicit-file commits of at most 20 paths, checks parent
+directories and recognizes the approved `research/` root. For larger atomic
+changes, use reviewed local staging or the connected integration. Verify the
+expected remote SHA after publication. Historical authentication results are
+in [the evidence index](EVIDENCE.md#scoped-github-authentication).
 
 [Architecture](ARCHITECTURE.md) · [Security](SECURITY.md)

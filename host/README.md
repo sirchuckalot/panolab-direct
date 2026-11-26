@@ -5,16 +5,14 @@ The supported ordinary-user entrypoint is
 [`rootless-install.sh`](rootless-install.sh). Do not run migration or
 recovery scripts solely because they remain in this directory.
 
-The canonical operational state is
-[the engineering baseline](../docs/ENGINEERING_BASELINE.md);
-the [temporary-component register](../docs/TEMPORARY_COMPONENTS.md)
-is authoritative for retaining and later retiring legacy helpers.
+See [architecture](../docs/ARCHITECTURE.md) for current operation and
+[temporary maintenance retirement](../docs/ARCHITECTURE.md#temporary-maintenance-and-retirement).
 
 ## Supported entrypoint and explicit operations
 
 | File | Status | Expected use |
 | --- | --- | --- |
-| `migrate-external-storage.py` | One-time owner-local storage transaction | See the [cutover and rollback procedure](../docs/EXTERNAL_STORAGE_CUTOVER.md) |
+| `migrate-external-storage.py` | Historical owner-local storage transaction | See the [cutover and rollback procedure](../docs/EXTERNAL_STORAGE_CUTOVER.md) |
 | `rootless-install.sh` | Current supported host launcher | Ordinary-user, rootless Docker, already provisioned private inputs; default setup remains on demand |
 | `fresh-host-audit.py` | Current read-only diagnostic | `panolab-install.sh --fresh-host-check`; **never** treats prerequisite readiness as a successful fresh-host install |
 | `compose.rootless-laptop.yaml` | Current host-specific Compose overlay | Rootless owner mapping, safe private mounts and resource policy |
@@ -26,7 +24,7 @@ is authoritative for retaining and later retiring legacy helpers.
 | `ise14-bringup.py` / `ise14-diagnose.py` | Guarded specialized vendor tools | Historical/diagnostic commissioning; normal remote builds use `@ise14`, disposable installation uses `@ise-e2e` |
 | `trusted-maintenance.sh` | **Active temporary** | Only to inspect, correct or recover normal remote infrastructure |
 
-## Historical — do not rerun on current branch
+## Historical — DO NOT RERUN on current branch
 
 The following revision-locked operations are preserved for provenance and
 recovery research but are **not routine commands**:

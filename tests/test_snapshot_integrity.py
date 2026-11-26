@@ -23,7 +23,7 @@ DOCS = (
     "projects/rescue/ARTIFACTS.md",
     "shared/README.md",
     "LICENSES/README.md",
-    "tests/fixtures/GATEWARE_FIXTURE_README.md",
+    "docs/EVIDENCE.md",
     "specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md",
 )
 

@@ -5,7 +5,7 @@
 **Historical evidence notice:** This record captures the first G2 builds before the repository
 source migration. Linked source paths point at their migrated locations,
 but previously observed outputs remain historical results. See
-[SOURCE_MIGRATION_ACCEPTANCE.md](SOURCE_MIGRATION_ACCEPTANCE.md) for
+[Source layout migration](EVIDENCE.md#source-layout-migration) for
 candidate source-verified build evidence and the separate unverified cutover.
 
 **Record:** PLR-EVID-002 | **Date:** November 23, 2026 (Pacific) | **Status:** First SoC/Bios source milestone verified; NOT an accepted physical FPGA image.
