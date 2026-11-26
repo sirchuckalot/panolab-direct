@@ -23,6 +23,8 @@ verified before claiming the running laptop uses the new paths.
 
 Follow the [agent execution and hard-stop policy](AGENT_EXECUTION_POLICY.md) for every engineering session and dependent gate. A required input, mount, permission, tool or RPC failure stops dependent work immediately; correct and verify the original path before restarting. Distinguish infrastructure failures from valid engineering-test findings. Report infrastructure blockers immediately and first. A failed engineering prerequisite blocks downstream work, not the in-scope ChatGPT–Codex diagnosis, implementation, regression and independent-verification loop; resolve it at the earliest applicable gate and report material findings, decisions and evidence without requiring owner approval of routine engineering corrections.
 
+For Anchor, preserve the entire Rescue project as read-only history. The normal Anchor build, test, vendor staging and source package must work with Rescue absent; select and integrate only necessary historical code and fixtures into the correct active ownership locations. Independently verify this closure and the preserved checkpoint. ChatGPT directs and independently accepts; Codex implements and corrects engineering work. See the [source architecture independence rule](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md#61-anchor-product-independence-and-frozen-rescue-history) and [agent execution policy](AGENT_EXECUTION_POLICY.md).
+
 ## Choose the test venue
 
 | Goal | Default execution |

@@ -28,6 +28,8 @@ runtime acceptance gates pass.
 
 **Mandatory hard-stop policy:** Both ChatGPT and Codex SHALL follow [Agent execution and hard-stop policy](docs/AGENT_EXECUTION_POLICY.md) before every session and dependent gate. Missing required resources or execution-framework failures are immediate `INFRASTRUCTURE_BLOCKED` outcomes: stop, report first, correct the cause and verify the original path before resuming. No silent skips or workarounds.
 
+**Delegated engineering and frozen Rescue boundary:** ChatGPT owns in-scope system design, scope control and independent acceptance; Codex owns implementation, engineering tests and technical implementation documentation. Do not wait for routine owner decisions already supported by the specifications. `projects/rescue/` is immutable engineering history; Anchor must contain its own selected product source and tests and must build/test/stage without Rescue. Use only declared BSP/shared/upstream/platform dependencies. See the binding [agent execution policy](docs/AGENT_EXECUTION_POLICY.md) and [source architecture §6.1](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md#61-anchor-product-independence-and-frozen-rescue-history).
+
 ## What is real, and what is planned
 
 - The owner's laptop currently runs **seven** rootless PanoLab

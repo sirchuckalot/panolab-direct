@@ -118,6 +118,12 @@ Every project has **one obvious entry point** at `projects/<name>/README.md` and
 
 A product's build inputs may be shared elsewhere in the same repository; **complete** does not mean copying the whole dependency tree into every project. The manifest must allow an engineer or automated build to resolve all inputs without guessing. Define and validate the concrete TOML schema before enforcing it; the field list above is the required contract, not a claim that a parser already exists.
 
+### 6.1 Anchor product independence and frozen Rescue history
+
+Owner-directed consolidation boundary (2026-11-25): `projects/rescue/` is frozen read-only engineering history, including its tests, build definitions, experiments, documentation and evidence. Anchor is the active product, owned by `projects/anchor/`. Select and copy necessary Rescue-owned implementations and regression fixtures into the established appropriate Anchor, BSP or genuinely shared source locations; retain exact origin/revision/path, applicable licenses and attribution. Do not modify Rescue or establish a second active implementation. Do not create extra ownership categories or directories without a demonstrated need.
+
+Anchor's declared build, test, vendor-stage and product package paths SHALL be independent of the frozen Rescue tree and historical build artifacts. A historical provenance comparison may read Rescue as a separate audit, but the normal product entry points shall not require it. Acceptance requires an isolated source-closure build/test/staging verification with Rescue absent and only declared Anchor, board, shared, platform and pinned upstream inputs present. Keep the central source registry and existing project structure; complete does not mean duplicating every dependency. Follow the [agent execution policy](../docs/AGENT_EXECUTION_POLICY.md) for delegated design authority, implementation ownership, dependency blockers and scope control.
+
 The **source project manifest is different from the on-device FPGA image/release manifest** in [Rescue v1](PANOLAB_RESCUE_V1.md). The former selects how to build; the latter identifies a produced board-compatible image, digest and, where applicable, its signature and installation constraints. Do not merge those responsibilities.
 
 ## 7. Build and provenance contract
