@@ -6,6 +6,7 @@ identify the scope and limitations of earlier checkpoints. Original reports link
 
 | Record | Scope and later evidence |
 | --- | --- |
+| [Published development milestones](#published-development-milestones) | Original commits in order, acceptance evidence and pending integration. |
 | [G2 engineering handoff](#g2-engineering-handoff) | Earlier deployment decisions and the G2 development stopping point. |
 | [LM1](../specs/LAB_MILESTONE_1.md) | Reinstall and six-service reboot on the already provisioned laptop before ISE. Preserves legacy paths and the separate LM2 simulation fixture. |
 | [First Rescue build](RESCUE_BUILD_EVIDENCE.md) and [upstream review](../specs/PANOLAB_RESCUE_UPSTREAM_ADOPTION_REVIEW.md) | Source selection, initial generated BIOS/RTL and generic simulation. Later diagnostic evidence is recorded at iteration 15. |
@@ -21,6 +22,51 @@ identify the scope and limitations of earlier checkpoints. Original reports link
 | [External storage runbook](#external-storage-cutover) | Historical owner-local migration procedure and rollback details. See architecture for the accepted cutover evidence. |
 | [Rescue BIOS plan](RESCUE_IMPLEMENTATION.md) and [iteration 15](../projects/rescue/experiments/iteration-15/README.md) | Historical implementation design and later G2 diagnostic timing and simulation. Physical recovery and product qualification are open. |
 | [Stock research](../research/pano-stock/README.md) | Physical stock discovery and readback, with private evidence and restore limits. |
+
+## Published development milestones
+
+The index follows publication order in the verified development history
+from `9490e0c` through `db8b329`. Each link identifies an original commit.
+
+| Milestone | Published commits in order |
+| --- | --- |
+| Pinned LiteX and unified rootless development image | [9490e0c](https://github.com/sirchuckalot/panolab-direct/commit/9490e0c8e7d938d593785c4d65cab4b2d2dfda5c), [27c0122](https://github.com/sirchuckalot/panolab-direct/commit/27c0122d0edb13a5118f254f4c0a705a6da854ad), [8878d1c](https://github.com/sirchuckalot/panolab-direct/commit/8878d1c998793519beb1e6a2c7f2d04c1d2e6c94) |
+| Guarded BIOS warning cleanup, owner-local Buildx and rollback cleanup | [f03660d](https://github.com/sirchuckalot/panolab-direct/commit/f03660d759bd532834c4b1948e054dde69b963ea), [9e00f98](https://github.com/sirchuckalot/panolab-direct/commit/9e00f983376c13cc76a2f145c0009477cc686513) |
+| Opt-in scoped GitHub publishing and authentication evidence | [04632b4](https://github.com/sirchuckalot/panolab-direct/commit/04632b4c26ef2efa03f7c08e3cfc8219abea2e6e), [3f28679](https://github.com/sirchuckalot/panolab-direct/commit/3f28679f2b50e2736d082d4fcef94e00bae5d695) |
+| Source ownership standard and source-visible G2 layout with pinned provenance | [fa33395](https://github.com/sirchuckalot/panolab-direct/commit/fa33395bb907186e1d6f16fcf632fcee5786eb9a), [3286ab3](https://github.com/sirchuckalot/panolab-direct/commit/3286ab33b76885ce6b5c367b922c5d8f39601039) |
+| Licensed ISE worker, immutable build inputs and temporary remote integration | [48782c2](https://github.com/sirchuckalot/panolab-direct/commit/48782c296224b69fc09cc854a5f1dfcd84283688), [3e5e6c3](https://github.com/sirchuckalot/panolab-direct/commit/3e5e6c37841bb4d1607886749268b2ce3cd5ced3) |
+| On-demand setup, disposable licensed acceptance, read-only fresh-host audit and engineering handoff | [df741db](https://github.com/sirchuckalot/panolab-direct/commit/df741db54dc6ce55cd687c2153cddfbd81a34e10), [fdffa91](https://github.com/sirchuckalot/panolab-direct/commit/fdffa9159639793a33c3ae048b5f692115596fe4), [5e5768a](https://github.com/sirchuckalot/panolab-direct/commit/5e5768aefa3b309e624f3de1ae03b981261ff4e1), [ef250a4](https://github.com/sirchuckalot/panolab-direct/commit/ef250a4fe2641c27939027dcec0aba13e52cf37a) |
+| Research root approval, stock G2 research and preserved Rescue iteration-15 checkpoint | [029141f](https://github.com/sirchuckalot/panolab-direct/commit/029141fc6b212660e781461c5e4f1c3aa41f4da8), [50e8529](https://github.com/sirchuckalot/panolab-direct/commit/50e8529d50d25a040ebbd982668c9a96d1f137f4), [9e79ad9](https://github.com/sirchuckalot/panolab-direct/commit/9e79ad9f0c5223d15c6eb89c4c6e25004f06472a) |
+| Read-only canonical research mount | [817829e](https://github.com/sirchuckalot/panolab-direct/commit/817829e385ffc8297c17c65458115750316ca5a6) |
+| Fail-closed admission, closed-loop correction, delegated authority and the independent Anchor boundary | [520fe64](https://github.com/sirchuckalot/panolab-direct/commit/520fe64a54d47a66c643bff6aefdd67b698d4abf), [7a33408](https://github.com/sirchuckalot/panolab-direct/commit/7a334086743002804cb8f9a12832842c549f10f7), [85ddd33](https://github.com/sirchuckalot/panolab-direct/commit/85ddd33fd252dbf0277c9cf741a2ed943e30d275) |
+| Bounded text retrieval, external configuration and data, full read-only `/repo` with Git metadata masked, installer configuration and guarded cutover shipped together. Two follow-ups corrected external-directory admission and accepted the actual ISE setup and worker job record schemas. | [9549c19](https://github.com/sirchuckalot/panolab-direct/commit/9549c19402b59cf9e7aa1ed91e322dad9b2f4ec8), [897cd12](https://github.com/sirchuckalot/panolab-direct/commit/897cd12e8dc47765b58c246faff807db4783a90d), [31534ed](https://github.com/sirchuckalot/panolab-direct/commit/31534ed99072af490360a7882103031de8609594) |
+| Documentation sweep and canonical agent launcher enforcement shipped together | [2ab466c](https://github.com/sirchuckalot/panolab-direct/commit/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6) |
+| Final platform operations, architecture and research documentation consolidation | [db8b329](https://github.com/sirchuckalot/panolab-direct/commit/db8b329ff53f1b3d9874c91332c90226e48e4213) |
+
+Publish one independently reviewed commit per dependency-coherent milestone.
+Keep code with its directly required documentation and tests, and commit
+unrelated general documentation sweeps separately. Multiple reviewed local
+milestone commits may be published together in a single expected-parent
+fast-forward. Keep trial and error local and preserve published commit
+boundaries. See [working milestone and commit discipline](GETTING_STARTED.md#working-milestone-and-commit-discipline).
+
+- **Storage cutover.** Laptop verification recorded 172 migration tests,
+  about 43 GiB transferred and verified, and seven services restored.
+  Licensed ISE smoke job `1795685528446716627` passed all six stages and
+  produced a 4,220,305-byte bitstream. See the
+  [accepted migration baseline](ARCHITECTURE.md#accepted-external-storage-and-source-mounts).
+- **Launcher and documentation.** Managed startup canary
+  `2281bc2389b944f2a22a7283b0eacbc6` verified startup with canonical root
+  instructions. Documentation consolidation recorded 193 passing Python
+  tests and reduced first-party documentation candidates from 47 to 36,
+  excluding upstream and frozen material.
+- **Pending ISE integration.** Separate candidate job
+  `a40ed5cca0ef4a7daf771a1413a9d0bd` reported source-only `COMPLETED` with
+  201 passing Python tests. It reproduced the historical report retrieval
+  issue and the live false license validation field. Candidate Go tests and
+  deployment verification remain pending. Full fresh-host installation,
+  reboot qualification for the current topology and physical FPGA
+  qualification remain open.
 
 ## G2 engineering handoff
 
