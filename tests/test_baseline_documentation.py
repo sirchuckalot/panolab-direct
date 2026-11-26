@@ -64,6 +64,27 @@ class BaselineDocumentation(unittest.TestCase):
             self.assertIn(private,ignored)
         self.assertNotIn("Xilinx.lic", "\n".join(p.name for p in (ROOT/"docker/ise14").glob("*")))
 
+    def test_ise_build_entrypoints_request_linux_amd64(self):
+        for path, target in (("host/ise14-bringup.py", "final"),
+                             ("host/ise14-repair.py", "setup-runtime")):
+            with self.subTest(path=path):
+                text = (ROOT / path).read_text()
+                self.assertIn(f'"--platform","linux/amd64","--target","{target}"', text)
+        operations = (ROOT / "docs/GETTING_STARTED.md").read_text()
+        self.assertIn("--platform linux/amd64 --target mcp-builder", operations)
+        compose = (ROOT / "docker/compose.setup.yaml").read_text()
+        self.assertRegex(compose, r"(?m)^    build: \{context: \./ise14, target: setup-runtime\}\n"
+                                  r"    image: [^\n]+\n    platform: linux/amd64$")
+
+    def test_ise_dockerfile_checks_the_requested_platform_in_both_base_stages(self):
+        dockerfile = (ROOT / "docker/ise14/Dockerfile").read_text()
+        self.assertNotRegex(dockerfile, r"(?m)^FROM\s+--platform")
+        for stage in ("mcp-builder", "runtime"):
+            with self.subTest(stage=stage):
+                self.assertRegex(dockerfile, rf"(?m)^FROM \S+ AS {stage}\n"
+                                             r"ARG TARGETOS\nARG TARGETARCH\n"
+                                             r'RUN test "\$TARGETOS/\$TARGETARCH" = linux/amd64')
+
     def test_every_local_markdown_link_has_target(self):
         # A global check catches broken links in current and historical
         # documentation without assuming that dated evidence is current.

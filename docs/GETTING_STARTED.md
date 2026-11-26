@@ -191,13 +191,13 @@ Engine from the reviewed candidate checkout. These two stages run the
 checksum-locked Go suites and compile the binaries.
 
 ```sh
-docker buildx build --builder default --load --target mcp-builder \
+docker buildx build --builder default --load --platform linux/amd64 --target mcp-builder \
   -t panolab-direct-ise14-worker:coherence-test -f docker/ise14/Dockerfile docker/ise14
 docker buildx build --builder default --load --target build \
   -t panolab-direct-manager:coherence-test -f docker/control/Manager.Dockerfile docker
 ```
 
-Build the worker `final` image for the existing guarded worker rebind,
+Build the worker `final` image with `--platform linux/amd64` for the existing guarded worker rebind,
 with its exact image ID and restart policy. Before replacement, check the
 live mounts, confirm the worker is idle and preserve the old worker
 container and image for rollback. Preserve the results bind so historical

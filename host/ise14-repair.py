@@ -103,7 +103,7 @@ def build_setup(b):
     print("BUILDING_PATCHED_ISE_SETUP_IMAGE=START",flush=True)
     # This Dockerfile runs the pinned Go unit tests in the build stage.
     b.d("buildx","build","--builder","default","--load",
-        "--target","setup-runtime","-t",NEW_IMAGE,
+        "--platform","linux/amd64","--target","setup-runtime","-t",NEW_IMAGE,
         "-f",str(ROOT/"docker/ise14/Dockerfile"),
         str(ROOT/"docker/ise14"),timeout=1800)
     print("PATCHED_ISE_SETUP_IMAGE=BUILT_AND_TESTED",flush=True)

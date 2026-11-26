@@ -321,7 +321,7 @@ def prepare_worker_inputs(private_license:Path,work:Path) -> tuple[Path,Path,Pat
 
 def build_worker_image():
     print("WORKER_IMAGE: building isolated ISE 14.7 runtime on rootless Docker",flush=True)
-    d("buildx","build","--builder","default","--load","--target","final",
+    d("buildx","build","--builder","default","--load","--platform","linux/amd64","--target","final",
       "-t",WORKER_IMAGE,"-f",str(ROOT/"docker/ise14/Dockerfile"),
       str(ROOT/"docker/ise14"),timeout=1800)
     print("WORKER_IMAGE=BUILT",flush=True)

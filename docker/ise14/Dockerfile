@@ -2,7 +2,11 @@
 # CentOS 6.10 compatibility; vendor binaries and license stay private.
 # The vendor MCP server and toolchain run in one runtime container.
 # Compile the embedded MCP binary in a local Docker build stage.
-FROM --platform=linux/amd64 golang:1.26-bookworm AS mcp-builder
+FROM golang:1.26-bookworm AS mcp-builder
+ARG TARGETOS
+ARG TARGETARCH
+RUN test "$TARGETOS/$TARGETARCH" = linux/amd64 || \
+    { echo "ISE 14.7 images require --platform linux/amd64" >&2; exit 1; }
 WORKDIR /src
 COPY mcp/go.mod mcp/go.sum ./
 RUN go mod download && go mod verify
@@ -13,7 +17,11 @@ RUN go test ./... && \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o /panolab-ise-mcp . && \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o /panolab-setup-mcp ./setup
 
-FROM --platform=linux/amd64 centos:6.10 AS runtime
+FROM centos:6.10 AS runtime
+ARG TARGETOS
+ARG TARGETARCH
+RUN test "$TARGETOS/$TARGETARCH" = linux/amd64 || \
+    { echo "ISE 14.7 images require --platform linux/amd64" >&2; exit 1; }
 RUN sed -i \
       -e 's/^mirrorlist=/#mirrorlist=/' \
       -e 's|^#baseurl=http://mirror.centos.org/centos/$releasever|baseurl=http://vault.centos.org/6.10|' \
