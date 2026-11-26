@@ -108,6 +108,31 @@ class SupervisorTests(unittest.TestCase):
         }
         self.operation = Cutover(API, args, self.records, MIGRATION, None)
 
+    def test_admit_requires_both_external_roots_to_be_empty(self):
+        tx = self.operation
+        tx.legacy.mkdir(parents=True, mode=0o700)
+        tx.config.mkdir()
+        tx.data.mkdir()
+        with (
+            patch.object(tx, "plan", []),
+            patch.object(tx, "git", return_value="development"),
+            patch.object(tx, "branch_revision", return_value=None),
+            patch.object(tx, "containers", return_value={}),
+            patch.object(API, "require_checkout"),
+            patch.object(API, "query", return_value="GNU coreutils"),
+            patch.object(API, "verify_engine"),
+        ):
+            tx.admit("supervisor")
+            for root in (tx.config, tx.data):
+                with self.subTest(root=root.name):
+                    entry = root / ".existing"
+                    entry.touch()
+                    try:
+                        with self.assertRaisesRegex(ValueError, "External roots must be empty"):
+                            tx.admit("supervisor")
+                    finally:
+                        entry.unlink()
+
     def test_recover_only_exact_labeled_replacement(self):
         tx = self.operation
         names = {INGRESS: "foreign", API.DEV: self.records[API.DEV]["id"]}

@@ -163,7 +163,7 @@ class Cutover:
         api.verify_engine(api.query, self.repo, args.socket, self.records,
                           {"broker": args.broker_image, "repo-git": args.repo_git_image},
                           extra_ids={supervisor})
-        api.require(not any(root.iterdir() for root in (self.config, self.data)),
+        api.require(not any(self.config.iterdir()) and not any(self.data.iterdir()),
                     "External roots must be empty")
         api.require(not lexists(self.stage), "Recovery staging path already exists")
         check_path(self.legacy, 0o700, True)
