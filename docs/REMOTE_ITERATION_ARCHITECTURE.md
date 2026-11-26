@@ -92,6 +92,17 @@ runnable binaries. The trusted maintenance sidecar has Docker CLI/Compose
 to execute those builds and container swaps *remotely*, without another
 owner-run activation script. Source and builds remain separate.
 
+The [external-storage cutover candidate](EXTERNAL_STORAGE_CUTOVER.md) keeps
+the broker's live `docker/control/` bind and gives the development container
+one read-only canonical checkout at `/repo`, with `/repo/.git` masked by
+read-only tmpfs. The workspace comes from `PANOLAB_DATA_DIR/agent-workspace`
+and Codex authentication from `PANOLAB_CONFIG_DIR/codex-auth` on dedicated
+writable mounts. The Git gateway uses the canonical checkout and a separate
+data-root RPC directory. Its optional Git push credential is a dedicated
+read-only bind from the configuration root. The legacy checkout-local
+private paths still belong to the running baseline until owner-local cutover
+and runtime verification.
+
 The live-mounted `host/trusted-maintenance.sh` implements:
 
 - `status` and `check` for rootless Docker and MCP health

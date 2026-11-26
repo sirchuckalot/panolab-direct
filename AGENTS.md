@@ -165,8 +165,12 @@ separately successful disposable ISE vendor-install runs.
   Docker cleanup. Never bypass MCP broker allowlists.
 - Preserve the running manager, tunnel, Codex authentication, private
   ISE media/license, project workspace and other applications.
-  Private files in `docker/private/` and ignored `docker/.env`
-  must never be published.
+  The [external-storage candidate](docs/EXTERNAL_STORAGE_CUTOVER.md) keeps
+  secrets in `PANOLAB_CONFIG_DIR` and operational data in `PANOLAB_DATA_DIR`,
+  outside the checkout. The live baseline uses `docker/private/` and ignored
+  `docker/.env` until cutover. Keep all of these private. The candidate dev
+  mount exposes the canonical checkout read-only at `/repo` with a read-only
+  `/repo/.git` mask, and has dedicated writable workspace and Codex auth binds.
 - No physical FPGA programming, JTAG, SPI flash modification, volatile
   configuration or unbounded Etherbone access without specific
   owner authorization and a credible recovery path.

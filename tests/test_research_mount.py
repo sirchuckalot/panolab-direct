@@ -7,26 +7,39 @@ import socket
 import subprocess
 import tempfile
 import unittest
+import uuid
+import importlib.util
+import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 DEV = "panolab-direct-dev-1"
 RELS = ("projects", "boards", "shared", "third_party", "research", "agent",
         "specs", "tests", "docs", "host", "docker/modern")
 
+SOURCE = ROOT / "docker/control/dev_source.py"
+SPEC = importlib.util.spec_from_file_location("dev_source", SOURCE)
+dev_source = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(dev_source)
+TMPFS = {"/tmp": "", "/home": "", "/repo/.git": dev_source.MASK}
+
+
+def masked(mounts):
+    return TMPFS if any(m.get("Destination") == "/repo" for m in mounts) else {}
+
+
 
 def layout(root, workspace, auth, case):
     paths = [(workspace, "/workspace", True), (auth, "/codex-auth", True)]
-    for rel in RELS:
-        if rel == "research" and case in ("previous", "legacy"):
-            continue
-        if case == "legacy" and rel in ("projects", "shared", "third_party"):
-            continue
-        paths.append((f"{root}/{rel}", f"/repo/{rel}",
-                      rel == "agent" or (rel == "research" and case == "writable")))
-    if case == "legacy":
-        paths.append((f"{root}/gateware", "/repo/gateware", True))
-    if case == "wrong_source":
-        paths[6] = (f"{root}/other", "/repo/research", False)
+    if case in ("legacy", "previous"):
+        for rel in RELS:
+            if rel == "research" or (case == "legacy" and rel in ("projects", "shared", "third_party")):
+                continue
+            paths.append((f"{root}/{rel}", f"/repo/{rel}", rel == "agent"))
+        if case == "legacy":
+            paths.append((f"{root}/gateware", "/repo/gateware", True))
+    else:
+        source = f"{root}/other" if case == "wrong_source" else str(root)
+        paths.append((source, "/repo", case == "writable"))
     if case == "private":
         paths.append((f"{root}/docker/private", "/repo/docker/private", False))
     mounts = [dict(Type="bind", Source=src, Destination=dst, RW=rw)
@@ -34,6 +47,54 @@ def layout(root, workspace, auth, case):
     if case == "unexpected_type":
         mounts.append(dict(Type="volume", Destination="/repo/.git"))
     return mounts
+
+
+class CanonicalSourceAdmissionTests(unittest.TestCase):
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.root = Path(temp.name)
+        for name in dev_source.ROOT_DIRS:
+            directory = self.root / name
+            directory.mkdir(parents=True, exist_ok=True)
+            (directory / "fixture.py").touch()
+        for name in dev_source.ROOT_FILES:
+            (self.root / name).touch()
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        subprocess.run(["git", "-C", str(self.root), "add", "."], check=True)
+
+    def test_clean_checkout_and_associated_bytecode_cache(self):
+        dev_source.checkout(self.root)
+        cache = self.root / "agent/__pycache__"
+        cache.mkdir()
+        (cache / "fixture.cpython-312.pyc").touch()
+        dev_source.checkout(self.root)
+        (cache / "unrelated.pyc").touch()
+        with self.assertRaisesRegex(ValueError, "Unapproved source entry"):
+            dev_source.checkout(self.root)
+
+    def test_legacy_private_paths_and_untracked_files_are_rejected(self):
+        for name in ("docker/.env", "docker/private", "agent/extra"):
+            with self.subTest(name=name):
+                path = self.root / name
+                path.touch()
+                with self.assertRaises(ValueError):
+                    dev_source.checkout(self.root)
+                path.unlink()
+
+    def test_tracked_source_replaced_with_symlink_is_rejected(self):
+        source = self.root / "README.md"
+        source.unlink()
+        source.symlink_to(self.root / "LICENSE")
+        with self.assertRaisesRegex(ValueError, "Unapproved source entry"):
+            dev_source.checkout(self.root)
+
+    def test_incorrect_git_mask_is_rejected(self):
+        mounts = layout("/canonical", "/work", "/auth", "current")
+        self.assertTrue(dev_source.mount_layout(mounts, TMPFS, "/canonical", "/work", "/auth"))
+        for mask in ("rw,nosuid,nodev,noexec,size=64k", "ro"):
+            self.assertFalse(dev_source.mount_layout(
+                mounts, dict(TMPFS, **{"/repo/.git": mask}), "/canonical", "/work", "/auth"))
 
 
 class BrokerResearchMountTests(unittest.TestCase):
@@ -54,7 +115,8 @@ class BrokerResearchMountTests(unittest.TestCase):
         self.approved_image = "sha256:original"
         self.probe_failure = None
         self.context = dict(json=json, os=os, command=self.command, REPO="/canonical",
-                            W="/work", CODEX_AUTH="/auth", CONTAINER_DEV_USER="0:0")
+                            W="/work", CODEX_AUTH="/auth", CONTAINER_DEV_USER="0:0",
+                            Path=Path, dev_source=dev_source, uuid=uuid)
         exec(compile(tree, "broker definitions", "exec"), self.context)
         self.dispatch = self.context["dispatch"]
 
@@ -68,12 +130,14 @@ class BrokerResearchMountTests(unittest.TestCase):
                 return dict(ok=False)
             if len(call) == 2:
                 return dict(ok=True)
-            output = (json.dumps(self.mounts[name]) if ".Mounts" in call[2] else
+            output = ((json.dumps(self.mounts[name]) + " " + json.dumps(masked(self.mounts[name]))) if ".Mounts" in call[2] else
                       f'true|{str(self.running).lower()}|'
                       f'{json.dumps(self.policy)}|sha256:original')
             return dict(ok=True, stdout=output)
         if op == "image":
             return dict(ok=True, stdout=self.approved_image)
+        if op == "run" and "--name" not in call:
+            return dict(ok=True)
         if op == "run":
             mounts = []
             for i, item in enumerate(call):
@@ -87,7 +151,7 @@ class BrokerResearchMountTests(unittest.TestCase):
         elif op == "rm":
             self.mounts.pop(name, None)
         elif op == "exec":
-            return dict(ok=call[3] != self.probe_failure)
+            return dict(ok=call[3] != self.probe_failure and not (self.probe_failure == "stage" and "-stage-" in call[3]))
         elif op not in ("start", "stop", "update"):
             raise AssertionError(call)
         return dict(ok=True)
@@ -95,7 +159,7 @@ class BrokerResearchMountTests(unittest.TestCase):
     def test_create_only_approved_binds_and_restart_policy(self):
         self.assertTrue(self.dispatch({"action": "create"})["ok"])
         self.assertEqual(self.mounts[DEV], layout("/canonical", "/work", "/auth", "current"))
-        run = next(call for call in self.calls if call[0] == "run")
+        run = next(call for call in self.calls if call[0] == "run" and "--name" in call)
         self.assertEqual(run[run.index("--restart")+1], "unless-stopped")
 
     def test_attach_repairs_missing_wrong_or_extra_mounts(self):
@@ -108,22 +172,22 @@ class BrokerResearchMountTests(unittest.TestCase):
                 self.assertTrue(result["migrated"])
                 self.assertEqual(self.mounts[result["rollback"]], old)
                 self.assertEqual(self.mounts[DEV], layout("/canonical", "/work", "/auth", "current"))
-                stage, active = [call for call in self.calls if call[0] == "run"]
+                stage, active = [call for call in self.calls if call[0] == "run" and "--name" in call]
                 self.assertEqual(stage[stage.index("--restart")+1], "no")
                 self.assertEqual(active[active.index("--restart")+1], "on-failure:3")
                 self.assertEqual(active[-3], "sha256:original")
                 for probe in (call[-1] for call in self.calls if call[0] == "exec"):
-                    for path in ("/repo/docker/private", "/repo/docker/.env", "/repo/.git"):
+                    for path in ("/repo/docker/private", "/repo/docker/.env"):
                         self.assertIn("test ! -e " + path, probe)
 
     def test_attach_already_current_leaves_dev_alone(self):
         self.mounts[DEV] = layout("/canonical", "/work", "/auth", "current")
         self.assertTrue(self.dispatch({"action": "attach_checkout"})["already_configured"])
-        self.assertEqual([call[0] for call in self.calls], ["inspect", "inspect"])
+        self.assertEqual([call[0] for call in self.calls], ["inspect", "inspect", "exec"])
 
     def test_failed_stage_leaves_live_dev_alone(self):
         self.mounts[DEV] = layout("/canonical", "/work", "/auth", "previous")
-        self.probe_failure = self.context["STAGE"]
+        self.probe_failure = "stage"
         self.assertFalse(self.dispatch({"action": "attach_checkout"})["ok"])
         self.assertEqual(list(self.mounts), [DEV])
         self.assertNotIn(["stop", DEV], self.calls)
@@ -147,7 +211,7 @@ class BrokerResearchMountTests(unittest.TestCase):
         self.mounts[DEV] = layout("/canonical", "/work", "/auth", "previous")
         result = self.dispatch({"action": "attach_checkout"})
         self.assertTrue(result["ok"])
-        active = [call for call in self.calls if call[0] == "run"][-1]
+        active = [call for call in self.calls if call[0] == "run" and "--name" in call][-1]
         self.assertEqual(active[active.index("--restart")+1], "always")
         self.assertIn(["update", "--restart", "no", result["rollback"]], self.calls)
 
@@ -177,6 +241,7 @@ docker() {
     'info --format') echo '["name=rootless"]';;
     'container inspect') [[ "$3" == "$DEV" && "$CASE" != absent ]];;
     "inspect $DEV") cat "$MOCK_INSPECT";;
+    'inspect --format') cat "$REPLACEMENT_LAYOUT";;
     'inspect -f')
       case "$3" in
         *'State.Running'*) echo true;;
@@ -214,17 +279,34 @@ class HostResearchUpgradeTests(unittest.TestCase):
                     replacement_writable=False):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            repo, work, auth = (base / name for name in ("repo", "work", "auth"))
+            repo, config, data = (base / name for name in ("repo", "config", "data"))
+            for root in (config, data):
+                root.mkdir(mode=0o700)
+            work, auth = data / "agent-workspace", config / "codex-auth"
             for path in (work, auth, repo / ".git", *(repo / rel for rel in RELS)):
                 path.mkdir(parents=True)
+            for rel in dev_source.ROOT_DIRS:
+                directory = repo / rel
+                directory.mkdir(exist_ok=True, parents=True)
+                (directory / "fixture").touch()
+            for rel in dev_source.ROOT_FILES:
+                (repo / rel).touch()
+            shutil.copy(SOURCE, repo / "docker/control/dev_source.py")
+            shutil.copy(ROOT / "host/storage_paths.py", repo / "host/storage_paths.py")
+            subprocess.run(["git", "init", "-q", str(repo)], check=True)
+            subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
             inspect = base / "inspect.json"
             inspect.write_text(json.dumps([{
                 "Config": {"Labels": {"panolab.managed": "true"}, "User": "0:0",
                            "WorkingDir": "/workspace", "Env": ["CODEX_HOME=/codex-auth"]},
                 "HostConfig": {"Privileged": False, "SecurityOpt": ["no-new-privileges:true"],
-                               "CapDrop": ["ALL"]},
+                               "CapDrop": ["ALL"], "Tmpfs": TMPFS},
                 "Mounts": layout(repo, str(work), str(auth), case),
             }]))
+            replacement = base / "replacement"
+            replacement.write_text(json.dumps(layout(repo, str(work), str(auth),
+                                         "writable" if replacement_writable else "current")) +
+                                   " " + json.dumps(TMPFS))
             log = base / "calls"
             sock = str(base / "fake.sock")
             with socket.socket(socket.AF_UNIX) as fixture:
@@ -238,7 +320,8 @@ class HostResearchUpgradeTests(unittest.TestCase):
                          "REPLACEMENT_WRITABLE": str(replacement_writable).lower(),
                          "HAS_ROLLBACK": "yes" if has_rollback else "no",
                          "MOCK_LOG": str(log), "MOCK_INSPECT": str(inspect),
-                         "MOCK_ROOT": str(repo)},
+                         "MOCK_ROOT": str(repo), "REPLACEMENT_LAYOUT": str(replacement),
+                         "PANOLAB_CONFIG_DIR": str(config), "PANOLAB_DATA_DIR": str(data)},
                     text=True, capture_output=True, check=False,
                 )
             return result, log.read_text()
@@ -250,13 +333,13 @@ class HostResearchUpgradeTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn("DEV_UPGRADE_RESULT=PASS", result.stdout)
                 run = next(line for line in calls.splitlines() if line.startswith("run -d"))
-                self.assertIn("dst=/repo/research,readonly", run)
+                self.assertIn("dst=/repo,readonly", run)
+                self.assertIn("--tmpfs /repo/.git:" + dev_source.MASK, run)
                 self.assertIn("--restart unless-stopped", run)
                 self.assertTrue(run.endswith("sha256:current sleep infinity"))
-                for path in ("/repo/docker/private", "/repo/docker/.env", "/repo/.git", "dst=/repo "):
+                for path in ("/repo/docker/private", "/repo/docker/.env"):
                     self.assertNotIn(path, run)
-                    if path != "dst=/repo ":
-                        self.assertIn("test ! -e " + path, calls)
+                    self.assertIn("test ! -e " + path, calls)
                 self.assertNotIn("\nrm ", calls)
                 self.assertNotIn("\nrename panolab-direct-dev-1-rollback-", calls)
                 if case != "absent":

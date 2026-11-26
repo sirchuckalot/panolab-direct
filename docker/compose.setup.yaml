@@ -3,6 +3,7 @@
 # both files and the rootless overlay are required by the installer.
 services:
   setup:
+    container_name: panolab-direct-connect-setup-1
     # Commissioning / repair only. A pre-provisioned stopped service can
     # be started through the normal PanoLab lab_lifecycle API.
     # The manager, tunnel and licensed worker must never require it online.
@@ -13,12 +14,35 @@ services:
     user: "1000:1000"
     environment: {HOME: /work}
     volumes:
-      - ${PANOLAB_ISE_TARBALL:?Installer path from launcher}:/media/ise.tar:ro
-      - ./private/Xilinx.lic:/licenses/Xilinx.lic:ro
+      - type: bind
+        source: ${PANOLAB_ISE_TARBALL:?Installer path from launcher}
+        target: /media/ise.tar
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PANOLAB_CONFIG_DIR:?Required external config directory}/Xilinx.lic
+        target: /licenses/Xilinx.lic
+        read_only: true
+        bind:
+          create_host_path: false
       - ./ise14/ise-system-edition.batch:/config/ise-system-edition.batch:ro
-      - ./private/mcp-bearer:/run/secrets/mcp-bearer:ro
-      - ./private/Xilinx:/opt/Xilinx
-      - ./private/ise-work:/work
+      - type: bind
+        source: ${PANOLAB_CONFIG_DIR:?Required external config directory}/mcp-bearer
+        target: /run/secrets/mcp-bearer
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PANOLAB_DATA_DIR:?Required external data directory}/Xilinx
+        target: /opt/Xilinx
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PANOLAB_DATA_DIR:?Required external data directory}/ise-work
+        target: /work
+        bind:
+          create_host_path: false
     networks: [lab-backend]
     read_only: true
     tmpfs: ["/tmp:rw,nosuid,nodev,size=32m"]
@@ -26,6 +50,7 @@ services:
     security_opt: ["no-new-privileges:true"]
     restart: "no"
   tunnel:
+    container_name: panolab-direct-connect-tunnel-1
     image: ghcr.io/openai/tunnel-client:v0.0.21
     entrypoint: ["/usr/bin/tunnel-client", "run"]
     command:
@@ -37,8 +62,18 @@ services:
     environment:
       CONTROL_PLANE_TUNNEL_ID: ${PANOLAB_TUNNEL_ID:?Missing tunnel ID}
     volumes:
-      - ./private/tunnel-api-key:/run/secrets/tunnel-api-key:ro
-      - ./private/mcp-bearer:/run/secrets/mcp-bearer:ro
+      - type: bind
+        source: ${PANOLAB_CONFIG_DIR:?Required external config directory}/tunnel-api-key
+        target: /run/secrets/tunnel-api-key
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PANOLAB_CONFIG_DIR:?Required external config directory}/mcp-bearer
+        target: /run/secrets/mcp-bearer
+        read_only: true
+        bind:
+          create_host_path: false
     networks: [lab-backend]
     read_only: true
     tmpfs: ["/tmp:rw,nosuid,nodev,size=16m", "/run:rw,nosuid,nodev,size=4m"]

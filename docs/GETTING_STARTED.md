@@ -46,21 +46,26 @@ Read [the actual test and remaining gates](FRESH_HOST_ACCEPTANCE.md).
 
 ## 2. Owner-private inputs
 
-Copy `docker/.env.example` to ignored `docker/.env` and supply
-the tunnel ID and MCP token. Provision ignored
-`docker/private/` with owner-only permissions:
+Provision two separate owner-owned mode 0700 directories outside the
+checkout. The defaults are `${XDG_CONFIG_HOME:-$HOME/.config}/panolab`
+and `${XDG_DATA_HOME:-$HOME/.local/share}/panolab`. Use
+`PANOLAB_CONFIG_DIR` and `PANOLAB_DATA_DIR` to override them with absolute,
+non-overlapping paths. The roots and their path components must be free of
+symlinks.
 
-| File or directory | Requirement |
+| Directory | Owner-provisioned input |
 | --- | --- |
-| `tunnel-api-key` | Tunnel control-plane secret, mode 0600 |
-| `mcp-bearer` | Exactly `Bearer <PANOLAB_MCP_TOKEN>`, mode 0600 |
-| `Xilinx.lic` | Owner-supplied license file, never commit |
-| One ISE `*.tar`, `*.tar.gz`, `*.tgz` or `*.tar.bz2` | Existing vendor media; installer does **not** perform vendor installation |
-| `agent-workspace/`, `repo-rpc/`, `codex-auth/`, `Xilinx/`, `ise-work/` | Existing, persistent owner-controlled directories |
+| Config | Copy `docker/.env.example` to `.env`, mode 0600, and supply the tunnel ID and MCP token |
+| Config | `tunnel-api-key`, `mcp-bearer`, and `Xilinx.lic`, mode 0600. The bearer file contains `Bearer <PANOLAB_MCP_TOKEN>` |
+| Config | `codex-auth/` plus optional `github-git-auth/`, mode 0700 |
+| Data | `agent-workspace/`, `repo-rpc/`, `Xilinx/`, `ise-work/`, mode 0700 |
+| Data | Exactly one owner-provided ISE archive (`.tar`, `.tar.gz`, `.tgz`, or `.tar.bz2`). Existing `sync-backups/` and worker credentials remain under this root |
 
-The authenticated setup and management services require the
-pre-existing private inputs. Never publish or paste the actual
-credential, archive, host ID or private directory contents.
+The installer requires these inputs to exist and preserves the existing
+vendor installation. Keep credential contents, license details and archives
+private. On the already provisioned laptop, follow the guarded
+[external storage cutover](EXTERNAL_STORAGE_CUTOVER.md) before using this
+candidate's launcher. The cutover has its own live acceptance gate.
 
 ## 3. Commands
 
@@ -91,7 +96,7 @@ changes unrelated containers or programs an FPGA.
 GitHub publishes through the connected integration even without a laptop PAT.
 To enable direct `repo_push` through the existing container, use the
 [one-time fine-grained GitHub setup](GITHUB_PUBLISHING.md), which puts
-only a narrowly scoped token in an ignored, private owner directory.
+only a narrowly scoped token in the external owner configuration directory.
 Never put that token in the ordinary development container or Git config.
 
 A first-time Codex account may need an interactive owner-approved
@@ -136,7 +141,7 @@ Neither grants authorization to JTAG, SPI, flash or hardware programming.
 Avoid restarting the authenticated tunnel or worker for ordinary source edits.
 
 The installer reuses existing services with `--no-recreate`; it is
-**not** a destructive repair utility. The explicit `--upgrade-dev` mode uses [the safeguarded unified image migration](UNIFIED_DEV_IMAGE_UPGRADE.md): validate the new image before renaming/stopping only the dev container, retain its previous instance stopped for rollback, and reuse the same owner workspace, source mounts and Codex credentials. It neither creates a new development service nor restarts management/ISE. If the modern tools image recipe
+**not** a destructive repair utility. The explicit `--upgrade-dev` mode uses [the safeguarded unified image migration](UNIFIED_DEV_IMAGE_UPGRADE.md): validate the new image before renaming/stopping only the dev container, retain its previous instance stopped for rollback, and reuse the same owner workspace and Codex credentials with the approved read-only source bind. It neither creates a new development service nor restarts management/ISE. If the modern tools image recipe
 is newer, the installer rebuilds the image tag and performs its read-only
 LiteX environment smoke check, but **preserves the running old dev
 container** and reports the pending explicit container migration.

@@ -3,6 +3,7 @@
 # overrides service UIDs for owner-only credentials and socket access.
 services:
   docker-broker:
+    container_name: panolab-direct-connect-docker-broker-1
     build:
       context: ./control
       dockerfile: Broker.Dockerfile
@@ -12,6 +13,9 @@ services:
     entrypoint: ["python3", "/usr/local/lib/panolab-control/broker.py"]
     environment:
       PANOLAB_ROOTLESS_MODE: "1"
+      PANOLAB_CONFIG_DIR: ${PANOLAB_CONFIG_DIR:?Required external config directory}
+      PANOLAB_DATA_DIR: ${PANOLAB_DATA_DIR:?Required external data directory}
+      PANOLAB_ISE_TARBALL: ${PANOLAB_ISE_TARBALL:?Required approved ISE media}
       PANOLAB_WORKSPACE_HOST: ${PANOLAB_WORKSPACE_HOST:?Missing PanoLab workspace}
       PANOLAB_REPO_HOST: ${PANOLAB_REPO_HOST:?Missing owner Git clone path}
       PANOLAB_CODEX_AUTH_HOST: ${PANOLAB_CODEX_AUTH_HOST:?Missing protected Codex auth path}
@@ -44,6 +48,8 @@ services:
     user: "0:0"
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
+      PANOLAB_CONFIG_DIR: ${PANOLAB_CONFIG_DIR:?Required external config directory}
+      PANOLAB_DATA_DIR: ${PANOLAB_DATA_DIR:?Required external data directory}
       PANOLAB_TRUSTED_MAINTENANCE: "1"
       PANOLAB_ROOTLESS_SOCKET: ${PANOLAB_ROOTLESS_SOCKET:?Required rootless socket}
       PANOLAB_REPO_HOST: ${PANOLAB_REPO_HOST:?Required canonical repo}
@@ -59,6 +65,12 @@ services:
         target: ${PANOLAB_REPO_HOST:?Required canonical repo}
         read_only: true
       - type: bind
+        source: ${PANOLAB_CONFIG_DIR:?Required external config directory}/.env
+        target: /run/panolab-compose.env
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
         source: ${PANOLAB_WORKSPACE_HOST:?Required agent workspace}
         target: /workspace
     network_mode: none
@@ -68,6 +80,7 @@ services:
     security_opt: ["no-new-privileges:true"]
     restart: unless-stopped
   repo-git:
+    container_name: panolab-direct-connect-repo-git-1
     build:
       context: ./control
       dockerfile: Repo.Dockerfile
@@ -75,16 +88,11 @@ services:
     user: "1000:1000"
     volumes:
       - ../:/repo
-      - ./private/repo-rpc:/repo-rpc
-      # This empty, non-populated volume masks ALL private installer media and keys.
-      - type: volume
-        source: repo-private-mask
-        target: /repo/docker/private
-        read_only: true
-        volume:
-          nocopy: true
-      # Mask the ignored docker/.env so the Git gateway cannot read tokens.
-      - /dev/null:/repo/docker/.env:ro
+      - type: bind
+        source: ${PANOLAB_DATA_DIR:?Required external data directory}/repo-rpc
+        target: /repo-rpc
+        bind:
+          create_host_path: false
     networks: [lab-backend]
     read_only: true
     tmpfs:
@@ -93,6 +101,7 @@ services:
     security_opt: ["no-new-privileges:true"]
     restart: unless-stopped
   manager:
+    container_name: panolab-direct-connect-manager-1
     build:
       context: .
       dockerfile: control/Manager.Dockerfile
@@ -102,9 +111,23 @@ services:
       HOME: /tmp
     volumes:
       - management-rpc:/rpc
-      - ./private/repo-rpc:/repo-rpc:ro
-      - ./private/agent-workspace:/workspace
-      - ./private/mcp-bearer:/run/secrets/mcp-bearer:ro
+      - type: bind
+        source: ${PANOLAB_DATA_DIR:?Required external data directory}/repo-rpc
+        target: /repo-rpc
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PANOLAB_DATA_DIR:?Required external data directory}/agent-workspace
+        target: /workspace
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PANOLAB_CONFIG_DIR:?Required external config directory}/mcp-bearer
+        target: /run/secrets/mcp-bearer
+        read_only: true
+        bind:
+          create_host_path: false
     networks: [lab-backend]
     read_only: true
     tmpfs:
@@ -127,5 +150,6 @@ services:
       manager:
         condition: service_started
 volumes:
-  management-rpc: {}
-  repo-private-mask: {}
+  management-rpc:
+    external: true
+    name: panolab-direct-connect_management-rpc

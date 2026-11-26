@@ -139,7 +139,7 @@ if __name__=="__main__":
         sys.exit(4)
 '''
 
-def stage_project(project, command, workspace_host, repo_host):
+def stage_project(project, command, workspace_host, data_host):
     if not isinstance(project,str) or not PROJECT.fullmatch(project):
         return ise_proxy.fail("INVALID_PROJECT_ID")
     try:
@@ -149,8 +149,9 @@ def stage_project(project, command, workspace_host, repo_host):
             return ise_proxy.fail("ISE_WORKER_MOUNTS_UNAVAILABLE")
         mounts=json.loads(inspect["stdout"])
         entries=[m for m in mounts if m.get("Destination")=="/projects"]
-        expected=repo_host+"/docker/private/ise-work/worker/projects"
-        if len(entries)!=1 or entries[0].get("Source")!=expected or entries[0].get("RW") is not False:
+        expected=data_host+"/ise-work/worker/projects"
+        if (len(entries)!=1 or entries[0].get("Type")!="bind" or
+                entries[0].get("Source")!=expected or entries[0].get("RW") is not False):
             return ise_proxy.fail("ISE_PROJECT_MOUNT_CHANGED")
         image=command(["docker","inspect","--format","{{.Image}}",BROKER],15)
         if not image.get("ok"):

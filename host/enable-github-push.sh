@@ -16,10 +16,14 @@ case "$(git -C "$root" remote get-url origin)" in
 esac
 r() { docker -H "unix://$sock" "$@"; }
 [[ "$(r info --format '{{json .SecurityOptions}}')" == *'"name=rootless"'* ]] || fail "Use rootless Docker."
-dir="$root/docker/private/github-git-auth"
+storage="$(python3 -B "$root/host/storage_paths.py" "$root")" || fail "External storage unavailable."
+export PANOLAB_CONFIG_DIR="${storage%%$'\n'*}" PANOLAB_DATA_DIR="${storage#*$'\n'}"
+: "${PANOLAB_REPO_HOST:?Invoke via the installer}" "${PANOLAB_ISE_TARBALL:?Invoke via the installer}"
+python3 -B "$root/docker/control/dev_source.py" "$root" || fail "Canonical source admission failed."
+dir="$PANOLAB_CONFIG_DIR/github-git-auth"
 [[ ! -L "$dir" ]] || fail "Credential directory is a symlink."
 mkdir -p -m 0700 "$dir"
-[[ -O "$dir" ]] || fail "Credential directory ownership mismatch."
+[[ -O "$dir" && -G "$dir" && -d "$dir" ]] || fail "Credential directory ownership mismatch."
 chmod 0700 "$dir"
 secret="$dir/github-push-token"
 [[ ! -L "$secret" ]] || fail "Token path is a symlink."
@@ -44,8 +48,8 @@ else
 fi
 # Activate the opt-in Compose overlay for ONLY the existing repo-git service.
 export PANOLAB_ROOTLESS_SOCKET="$sock"
-compose=(docker -H "unix://$sock" compose --project-name panolab-direct-connect
-  --env-file "$root/docker/.env"
+compose=(docker -H "unix://$sock" compose --project-name panolab-direct-external
+  --env-file "$PANOLAB_CONFIG_DIR/.env"
   -f "$root/docker/compose.setup.yaml"
   -f "$root/docker/compose.manage.yaml"
   -f "$root/host/compose.rootless-laptop.yaml"

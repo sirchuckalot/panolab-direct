@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from storage_paths import provisioned_roots
 import re
 import secrets
 import shutil
@@ -22,8 +23,8 @@ import tarfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECT = "panolab-direct-connect"
-SETUP = PROJECT + "-setup-1"
+PROJECT = "panolab-direct-external"
+SETUP = "panolab-direct-connect-setup-1"
 WORKER = "panolab-direct-ise14-worker-1"
 WORKER_IMAGE = "panolab-direct-ise14-worker:local"
 ISE_LICENSE_NETWORK = "panolab-direct-ise14-license-internal"
@@ -160,17 +161,17 @@ def check_docker_state(strict_source=True):
     print("PREFLIGHT: approved checkout, rootless Engine and isolated setup service PASS",flush=True)
 
 def private_inputs() -> tuple[Path,Path,Path]:
-    private=ROOT/"docker/private"
+    private,data=provisioned_roots(ROOT)
     lic=private/"Xilinx.lic"
-    work=private/"ise-work"
+    work=data/"ise-work"
     if private.is_symlink() or lic.is_symlink() or not lic.is_file() or not work.is_dir():
         raise RuntimeError("Expected protected ISE license/workspace absent")
     if stat.S_IMODE(lic.stat().st_mode) & 0o077:
         raise RuntimeError("Original Xilinx license must not be group/world-readable")
     archives=[]
     for pattern in ("*.tar","*.tar.gz","*.tgz","*.tar.bz2"):
-        archives.extend(private.glob(pattern))
-    if len(archives)!=1 or archives[0].is_symlink():
+        archives.extend(data.glob(pattern))
+    if len(archives)!=1 or not archives[0].is_file() or archives[0].is_symlink():
         raise RuntimeError("Exactly one owner-supplied ISE archive required")
     return lic,work,archives[0]
 
@@ -350,13 +351,15 @@ def verify_ise_license_network():
          ISE_LICENSE_NETWORK).strip()!="true|true":
         raise RuntimeError("Could not verify isolated ISE licensing network")
 
-def ensure_worker(projects:Path,results:Path,license_copy:Path,token:Path):
+def ensure_worker(projects:Path,results:Path,license_copy:Path,token:Path, *, image=WORKER_IMAGE, restart="unless-stopped", transaction=None):
     # Query exact container identity first. A missing Docker container can produce
     # [] (valid JSON), not merely an empty output; indexing [0] was unsafe.
     ids=d("ps","-a","--filter",f"name=^/{WORKER}$","--format","{{.ID}}").splitlines()
     if len(ids)>1:
         raise RuntimeError("Ambiguous ISE worker identity; refusing replacement")
     if ids:
+        if transaction is not None:
+            raise RuntimeError("Canonical worker name still occupied")
         inspected=json.loads(d("inspect",ids[0]))
         if len(inspected)!=1 or inspected[0].get("Name")!="/"+WORKER:
             raise RuntimeError("Unexpected ISE worker inspection response")
@@ -365,7 +368,7 @@ def ensure_worker(projects:Path,results:Path,license_copy:Path,token:Path):
             raise RuntimeError("Unrecognized ISE worker container name occupied")
         mounts={m["Destination"]:(m["Source"],not m["RW"]) for m in c["Mounts"] if m["Type"]=="bind"}
         expected={
-            "/opt/Xilinx":(str(ROOT/"docker/private/Xilinx"),True),
+            "/opt/Xilinx":(str(provisioned_roots(ROOT)[1]/"Xilinx"),True),
             "/licenses/Xilinx.lic":(str(license_copy),True),
             "/results":(str(results),False),
             "/projects":(str(projects),True),
@@ -378,13 +381,15 @@ def ensure_worker(projects:Path,results:Path,license_copy:Path,token:Path):
             d("start",WORKER)
         print("ISE_WORKER=REUSED",flush=True)
         return
-    installed=ROOT/"docker/private/Xilinx"
+    installed=provisioned_roots(ROOT)[1]/"Xilinx"
     if installed.is_symlink() or not installed.is_dir():
         raise RuntimeError("Private installed ISE volume missing")
     verify_ise_license_network()
     interface_mac=verified_node_locked_interface(license_copy)
     cmd=[
-        "run","-d","--name",WORKER,"--restart","unless-stopped",
+        *(["create", "--label", f"panolab.cutover={transaction}"]
+          if transaction is not None else ["run", "-d"]),
+        "--name",WORKER,"--restart",restart,
         "--label","panolab.managed=true",
         "--network",ISE_LICENSE_NETWORK,"--mac-address",interface_mac,
         "--read-only","--cap-drop","ALL",
@@ -399,11 +404,13 @@ def ensure_worker(projects:Path,results:Path,license_copy:Path,token:Path):
         "--mount",f"type=bind,src={results},dst=/results",
         "--mount",f"type=bind,src={token},dst=/run/secrets/ise-worker-token,readonly",
         "--env","PANOLAB_MCP_TRANSPORT=http",
-        "--entrypoint","/bin/bash",WORKER_IMAGE,
+        "--entrypoint","/bin/bash",image,
         "-c",'export PANOLAB_MCP_TOKEN="$(cat /run/secrets/ise-worker-token)"; exec /usr/local/bin/panolab-ise-entrypoint mcp'
     ]
-    d(*cmd,timeout=120)
-    print("ISE_WORKER=CREATED (rootless, internal-only licensed identity, restricted mounts)",flush=True)
+    identity = d(*cmd,timeout=120)
+    if transaction is None:
+        print("ISE_WORKER=CREATED (rootless, internal-only licensed identity, restricted mounts)",flush=True)
+    return identity
 
 def smoke_build():
     # Worker TCP is deliberately not exposed to the laptop or network.
@@ -460,12 +467,39 @@ def smoke_build():
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode",nargs="?",choices=["inspect","install-smoke","smoke-only"],default="install-smoke")
+    parser.add_argument("mode",nargs="?",choices=["inspect","install-smoke","smoke-only","rebind-worker"],default="install-smoke")
+    parser.add_argument("--expected-worker-image")
+    parser.add_argument("--worker-restart", default="unless-stopped")
     args=parser.parse_args()
     global DOCKER_SOCK
     DOCKER_SOCK=Path(os.environ.get("XDG_RUNTIME_DIR",f"/run/user/{os.getuid()}"))/"docker.sock"
     if not DOCKER_SOCK.is_socket():
         raise RuntimeError("Expected the owner-user rootless Docker socket")
+    if args.mode == "rebind-worker":
+        image = args.expected_worker_image or ""
+        if not re.fullmatch(r"sha256:[a-f0-9]{64}", image) or not re.fullmatch(
+            r"(?:no|always|unless-stopped|on-failure(?::[1-9][0-9]*)?)", args.worker_restart
+        ):
+            raise RuntimeError("Expected exact worker image ID and valid restart policy")
+        if os.getuid() == 0 or '"name=rootless"' not in d("info", "--format", "{{json .SecurityOptions}}"):
+            raise RuntimeError("Owner-user rootless Docker required")
+        if d("ps", "-aq", "--filter", f"name=^{WORKER}$").strip():
+            raise RuntimeError("Canonical worker name still occupied")
+        if d("image", "inspect", "--format", "{{.Id}}", WORKER_IMAGE).strip() != image:
+            raise RuntimeError("Approved worker tag differs from preserved image ID")
+        license_file, work, _ = private_inputs()
+        worker = work / "worker"
+        projects, results = worker / "projects", worker / "results"
+        license_copy, token = worker / "license/Xilinx.lic", worker / "worker-token"
+        paths = (projects, results, license_copy, token)
+        if any(path.resolve() != path for path in paths) or not (
+            projects.is_dir() and results.is_dir() and license_copy.is_file() and token.is_file()
+        ):
+            raise RuntimeError("Preserved worker inputs unavailable")
+        if license_file.read_bytes() != license_copy.read_bytes():
+            raise RuntimeError("Preserved worker license differs from owner license")
+        ensure_worker(*paths, image=image, restart=args.worker_restart)
+        return
     check_docker_state(strict_source=(args.mode=="install-smoke"))
     license_file,work,archive=private_inputs()
     if args.mode=="inspect":

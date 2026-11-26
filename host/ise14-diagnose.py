@@ -5,16 +5,18 @@ Reads only install state and the installer log under the private work directory.
 Never opens or displays the Xilinx license, private tokens, or the vendor archive.
 """
 from pathlib import Path
+from storage_paths import provisioned_roots
 import json
 import re
 import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-WORK = ROOT / "docker/private/ise-work"
+DATA = provisioned_roots(ROOT)[1]
+WORK = DATA / "ise-work"
 STATE = WORK / "install-state.json"
 LOG = WORK / "ise-install.log"
-INSTALLED = ROOT / "docker/private/Xilinx/14.7/ISE_DS/settings64.sh"
+INSTALLED = DATA / "Xilinx/14.7/ISE_DS/settings64.sh"
 
 SIGNATURES = (
     ("STORAGE_EXHAUSTED", r"no space left|disk full|out of disk|not enough space|insufficient disk|enospc"),
@@ -30,7 +32,7 @@ SIGNATURES = (
 )
 # Every string printed from private files is sanitized before printing.
 def redact(line: str) -> str:
-    line = line.replace(str(ROOT), "<REPO>")
+    line = line.replace(str(ROOT), "<REPO>").replace(str(DATA), "<DATA>")
     line = re.sub(r"/home/[^/\s]+", "<HOME>", line)
     line = re.sub(r"/work/ise-media/[^\s]+", "<PRIVATE_MEDIA_PATH>", line)
     line = re.sub(r"/opt/Xilinx/[^\s]+", "<ISE_PATH>", line)
@@ -95,7 +97,7 @@ def diagnose():
         print("WORKSPACE_FREE_GIB=UNAVAILABLE")
     # A failed install may have left partial files. Report only number of top-level
     # paths, never print their names or private path contents.
-    root=ROOT/"docker/private/Xilinx"
+    root=DATA/"Xilinx"
     if root.is_dir() and not root.is_symlink():
         print("ISE_INSTALL_ROOT_TOP_LEVEL_ENTRIES="+str(len(list(root.iterdir()))))
     else:

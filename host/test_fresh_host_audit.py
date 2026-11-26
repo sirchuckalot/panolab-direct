@@ -28,14 +28,16 @@ class FreshHostAdmission(unittest.TestCase):
 
     def test_private_admission_reads_metadata_only(self):
         with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            private = root / "docker/private"
-            private.mkdir(parents=True)
-            (root / "docker/.env").write_text("PRIVATE-NO-LOG")
-            for name in ("tunnel-api-key","mcp-bearer","Xilinx.lic"):
-                (private/name).write_text("PRIVATE-NO-LOG")
-            (private/"archive.tar").write_text("PRIVATE-NO-LOG")
-            result = mod.scan(root, home=root/"empty-home")
+            root = Path(temp) / "checkout"
+            home = Path(temp) / "home"
+            config, data = mod.storage_paths(root, home)
+            for path in (config, data):
+                path.mkdir(parents=True, mode=0o700)
+            for name in (".env","tunnel-api-key","mcp-bearer","Xilinx.lic"):
+                (config/name).write_text("PRIVATE-NO-LOG")
+                (config/name).chmod(0o600)
+            (data/"archive.tar").write_text("PRIVATE-NO-LOG")
+            result = mod.scan(root, home=home)
             for name in ("private_env_and_directory","tunnel_api_key",
                          "mcp_bearer","xilinx_license","ise_archive"):
                 self.assertTrue(result[name],name)
@@ -52,13 +54,15 @@ class FreshHostAdmission(unittest.TestCase):
 
     def test_ambiguous_media_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
-            private = Path(temp)/"docker/private"
-            private.mkdir(parents=True)
-            self.assertFalse(mod.scan(Path(temp))["ise_archive"])
-            (private/"one.tar").write_bytes(b"a")
-            self.assertTrue(mod.scan(Path(temp))["ise_archive"])
-            (private/"two.tgz").write_bytes(b"b")
-            self.assertFalse(mod.scan(Path(temp))["ise_archive"])
+            root = Path(temp) / "checkout"
+            home = Path(temp) / "home"
+            _, data = mod.storage_paths(root, home)
+            data.mkdir(parents=True, mode=0o700)
+            self.assertFalse(mod.scan(root, home=home)["ise_archive"])
+            (data/"one.tar").write_bytes(b"a")
+            self.assertTrue(mod.scan(root, home=home)["ise_archive"])
+            (data/"two.tgz").write_bytes(b"b")
+            self.assertFalse(mod.scan(root, home=home)["ise_archive"])
 
     def test_clean_host_is_blocked_not_misreported_ready(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -79,8 +83,10 @@ class FreshHostAdmission(unittest.TestCase):
                 ("panolab-install.sh",root/"panolab-install.sh"),
                 ("rootless-install.sh",host/"rootless-install.sh"),
                 ("fresh-host-audit.py",host/"fresh-host-audit.py"),
+                ("storage_paths.py",host/"storage_paths.py"),
             ):
-                destination.write_text((source/source_name).read_text())
+                original = source.parent / source_name if source_name == "panolab-install.sh" else source / source_name
+                destination.write_text(original.read_text())
             (root/".git").mkdir()
             env=os.environ.copy()
             env["HOME"]=str(root/"empty-home")

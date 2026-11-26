@@ -30,16 +30,17 @@ FPGA programming.
 - `tunnel` connects out to the platform and uses private on-disk
   credentials. The internal MCP endpoint is bearer-protected; a
   request without a bearer must be rejected.
-- The Git gateway masks `docker/private/` and `docker/.env`;
-  no credentials, media, license or bitstreams go to GitHub.
-- Optional GitHub direct-push authentication uses a **separate** ignored
-  `docker/private/github-git-auth` owner-only directory. The opt-in Compose
-  overlay mounts that **single directory** read-only in `repo-git` at
-  `/run/panolab-git-auth` without unmasking `/repo/docker/private`.
-  Only the gateway's clean, non-force `development` push invokes the
-  scoped `GIT_ASKPASS` helper. Tokens never enter the dev container,
-  general Git config, remote URLs or AI output. See
-  [GitHub publishing](GITHUB_PUBLISHING.md).
+- The external config and data roots keep credentials, media and operational
+  state outside the canonical checkout. Source admission rejects legacy
+  private files, unsafe links and unapproved entries before creating new dev
+  mounts. The whole checkout is read-only at `/repo`, with an empty read-only
+  tmpfs masking `/repo/.git`. The agent workspace and Codex credentials have
+  separate writable mounts.
+- The Git gateway retains the checkout and its Git metadata to perform its
+  permitted source operations. The optional Git push Compose overlay mounts
+  only `PANOLAB_CONFIG_DIR/github-git-auth` in the gateway, read-only at
+  `/run/panolab-git-auth`. Clean, non-force `development` pushes invoke the
+  existing scoped `GIT_ASKPASS` helper. [GitHub publishing](GITHUB_PUBLISHING.md)
 
 ## Rescue appliance Ethernet trust — separate from MCP
 

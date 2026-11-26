@@ -123,20 +123,14 @@ workspace-install PASS and static recipe tests do **not** demonstrate
 a new Docker image build, ISE bitstream, real FPGA boot, or TAP Ethernet
 simulation (upstream TAP setup still needs a nonprivileged solution).
 
-The default standalone development container mounts **selected**
-repository subtrees only, not the checkout root. Consequently the
-full `test_snapshot_integrity.py` suite needs to run from the host
-ordinary-user checkout or an approved full-source test environment;
-it will fail with missing paths if run inside the deliberately
-limited `/repo` container mount. That is **not** a reason to enlarge
-its source mounts or weaken private isolation.
-
-The LM2 simulation-only CSR fixture *can* be run inside the restricted
-development container, since `gateware` and `tests` are already
-mounted:
+After the [external storage cutover](EXTERNAL_STORAGE_CUTOVER.md), the
+standalone development container sees the entire canonical source checkout
+at read-only `/repo`. Git administration is masked. Run source integrity and
+simulation tests against `/repo`, and put build output and writable engineering
+checkouts under `/workspace`.
 
 ```sh
-python3 -m unittest discover -s /repo/tests -p 'test_panolab_csr_demo.py' -v
+python3 -B -m unittest discover -s /repo/tests -p 'test_panolab_csr_demo.py' -v
 ```
 
 On the owner-host checkout, rerun the full source suite; tests

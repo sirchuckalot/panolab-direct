@@ -21,7 +21,7 @@ ALLOWED = ("agent", "boards", "docker/control", "docker/ise14", "docker/modern",
 # These names are reviewed source roots; private Docker source remains denied.
 ROOT_FILES = ("AGENTS.md", "README.md", "panolab-install.sh", "LICENSE")
 # Explicit top-level Docker recipes are readable/editable without opening the
-# entire docker/ directory or exposing docker/private and docker/.env.
+# entire docker/ directory. Keep denying legacy private paths during migration.
 CONFIG_FILES = ("docker/compose.setup.yaml", "docker/compose.manage.yaml",
                 "docker/compose.git-push.yaml")
 SENSITIVE_SUFFIXES = (".key", ".pem", ".p12", ".pfx", ".lic")

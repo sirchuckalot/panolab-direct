@@ -5,14 +5,15 @@ set -Eeuo pipefail
 umask 077
 ACTION=status
 if [[ "$#" -gt 0 ]]; then ACTION="$1"; fi
-PROJECT=panolab-direct-connect
+PROJECT=panolab-direct-external
+TUNNEL=panolab-direct-connect-tunnel-1
 BROKER=panolab-direct-connect-docker-broker-1
 MANAGER=panolab-direct-connect-manager-1
 MAINT=panolab-direct-trusted-maintenance
 REPO="$PANOLAB_REPO_HOST"
 [[ "$PANOLAB_TRUSTED_MAINTENANCE" == 1 ]] || { echo "TRUSTED_MAINTENANCE_DISABLED"; exit 9; }
 [[ "$DOCKER_HOST" == unix:///var/run/docker.sock ]] || { echo "WRONG_DOCKER_SOCKET"; exit 9; }
-[[ -d "$REPO/docker/control" && -f "$REPO/docker/.env" ]] || { echo "REPO_NOT_MOUNTED"; exit 9; }
+[[ -d "$REPO/docker/control" ]] || { echo "REPO_NOT_MOUNTED"; exit 9; }
 docker info --format '{{json .SecurityOptions}}' | grep -Fq '"name=rootless"' || {
   echo "ROOTLESS_DOCKER_REQUIRED"; exit 9;
 }
@@ -32,7 +33,7 @@ PY
 }
 composed() {
  docker compose --project-name "$PROJECT" --profile trusted-maintenance \
-  --env-file "$REPO/docker/.env" \
+  --env-file /run/panolab-compose.env \
   -f "$REPO/docker/compose.setup.yaml" \
   -f "$REPO/docker/compose.manage.yaml" \
   -f "$REPO/host/compose.rootless-laptop.yaml" "$@"
@@ -40,7 +41,7 @@ composed() {
 canary() {
   docker exec "$BROKER" python3 -c \
     'import sys;sys.path.insert(0,"/usr/local/lib/panolab-control");import ise_proxy,ise_staging;assert "build_start" in ise_proxy.TOOLS'
-  for name in "$BROKER" "$MANAGER" "$MAINT" "$PROJECT-tunnel-1"; do
+  for name in "$BROKER" "$MANAGER" "$MAINT" "$TUNNEL"; do
     [[ "$(docker inspect --format '{{.State.Running}}' "$name")" == true ]]
   done
   probe="$(cat <<'PY'
@@ -67,7 +68,7 @@ PY
 )"
   docker run --rm --network "$PROJECT"_lab-backend --read-only --cap-drop ALL \
    --security-opt no-new-privileges:true \
-   --mount "type=bind,src=$REPO/docker/private/mcp-bearer,dst=/run/secrets/mcp-bearer,readonly" \
+   --mount "type=bind,src=$PANOLAB_CONFIG_DIR/mcp-bearer,dst=/run/secrets/mcp-bearer,readonly" \
    --entrypoint python3 python:3.12-alpine -c "$probe"
 }
 case "$ACTION" in

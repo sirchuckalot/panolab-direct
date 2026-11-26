@@ -48,7 +48,7 @@ Specific evidence: [LM1](../specs/LAB_MILESTONE_1.md),
 | Security/licensing | [Security boundaries](SECURITY.md), [source architecture](../specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md), [license summary](../LICENSES/README.md) and original upstream notices |
 | Git publishing | [Scoped development-branch push](GITHUB_PUBLISHING.md); `main` remains frozen |
 
-**Not Git artifacts:** `docker/private/`, `docker/.env`, personal
+**Owner-private artifacts:** operational state in the [external config and data roots](EXTERNAL_STORAGE_CUTOVER.md), personal
 tokens, Codex login state, node-locked license, proprietary Xilinx archive
 and installed binaries, generated HDL/build directories, bitstreams and
 private diagnostic traces. Local Docker image tags and backup containers

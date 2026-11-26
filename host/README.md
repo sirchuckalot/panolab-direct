@@ -14,6 +14,7 @@ is authoritative for retaining and later retiring legacy helpers.
 
 | File | Status | Expected use |
 | --- | --- | --- |
+| `migrate-external-storage.py` | One-time owner-local storage transaction | See the [cutover and rollback procedure](../docs/EXTERNAL_STORAGE_CUTOVER.md) |
 | `rootless-install.sh` | Current supported host launcher | Ordinary-user, rootless Docker, already provisioned private inputs; default setup remains on demand |
 | `fresh-host-audit.py` | Current read-only diagnostic | `panolab-install.sh --fresh-host-check`; **never** treats prerequisite readiness as a successful fresh-host install |
 | `compose.rootless-laptop.yaml` | Current host-specific Compose overlay | Rootless owner mapping, safe private mounts and resource policy |

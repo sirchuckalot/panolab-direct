@@ -2,6 +2,7 @@
 # mounting and engine verification are enforced by Compose and broker code.
 FROM python:3.12-alpine
 RUN apk add --no-cache docker-cli
+COPY dev_source.py /usr/local/bin/dev_source.py
 COPY broker.py /usr/local/bin/panolab-broker.py
 COPY ise_proxy.py /usr/local/bin/ise_proxy.py
 COPY ise_staging.py /usr/local/bin/ise_staging.py

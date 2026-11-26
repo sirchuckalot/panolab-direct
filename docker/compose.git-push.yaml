@@ -5,7 +5,7 @@ services:
   repo-git:
     volumes:
       - type: bind
-        source: ./private/github-git-auth
+        source: ${PANOLAB_CONFIG_DIR:?Required external config directory}/github-git-auth
         target: /run/panolab-git-auth
         read_only: true
         bind:

@@ -93,6 +93,12 @@ real six-stage Spartan-6 builds and distinct bitstream hashes on
 the original [LM1 record](../specs/LAB_MILESTONE_1.md) remains historical
 and correctly excludes these later achievements.
 
+The [external-storage cutover candidate](EXTERNAL_STORAGE_CUTOVER.md) moves
+owner configuration and operational data to separate protected roots. It
+binds the canonical checkout directly and read-only at `/repo` and masks
+`/repo/.git` with read-only tmpfs. Workspace and Codex authentication remain
+separate writable mounts. Live migration and service acceptance are pending.
+
 ## Accepted functional design (planned)
 
 - **Board:** Pano Logic G2 **Rev B**, Xilinx Spartan-6

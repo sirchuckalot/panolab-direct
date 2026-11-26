@@ -15,12 +15,13 @@ INSTALLER = Path(os.environ.get(
 MOCK = r"""set -euo pipefail
 dev=panolab-direct-dev-1
 root="$(mktemp -d)"
-mkdir "$root/research"
+mkdir -p "$root/docker/control"
+cp "$MOCK_SOURCE" "$root/docker/control/dev_source.py"
 PANOLAB_WORKSPACE_HOST=/test/ws
 PANOLAB_CODEX_AUTH_HOST=/test/auth
 started=0
 log="$(mktemp)"
-trap 'rm -f "$log"; rmdir "$root/research" "$root"' EXIT
+trap 'rm -f "$log"; rm -rf "$root"' EXIT
 fail() { echo "BLOCKED: $*" >&2; exit 9; }
 say() { :; }
 new_exists() { [[ "$CASE" != fresh ]]; }
@@ -32,18 +33,12 @@ r() {
   case "$1" in
     inspect)
       case "$3" in
-        *'/workspace'*)
-          [[ "$CASE" == bad_workspace ]] && echo /unexpected/ws || echo /test/ws;;
-        *'/codex-auth'*)
-          [[ "$CASE" == bad_auth ]] && echo /unexpected/auth || echo /test/auth;;
-        *'/repo/projects'*)
-          [[ "$CASE" == bad_source ]] && echo /unexpected/repo || echo "$root/projects";;
-        *'/repo/research'*)
+        *'.Mounts'*)
           case "$CASE" in
-            missing_research) ;;
-            writable_research) echo "bind|$root/research|true";;
-            wrong_research) echo "bind|$root/elsewhere|false";;
-            *) echo "bind|$root/research|false";;
+            bad_workspace|bad_auth|bad_source|missing_research|writable_research|wrong_research)
+              echo '[] {}';;
+            *)
+              printf '[{"Type":"bind","Source":"%s","Destination":"/repo","RW":false},{"Type":"bind","Source":"/test/ws","Destination":"/workspace","RW":true},{"Type":"bind","Source":"/test/auth","Destination":"/codex-auth","RW":true}] {"/tmp":"","/home":"","/repo/.git":"ro,nosuid,nodev,noexec,size=64k"}\n' "$root";;
           esac;;
         *'RestartPolicy.Name'*)
           [[ "$CASE" == existing_correct ]] && echo unless-stopped || echo no;;
@@ -69,7 +64,7 @@ class RestartPolicyContract(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         source = INSTALLER.read_text()
-        beginning = '[[ -d "$root/research"'
+        beginning = 'if ! new_exists "$dev"; then'
         ending = 'current_modern_image='
         cls.snippet = source.split(beginning, 1)[1].split(ending, 1)[0]
         assert cls.snippet and ending in source
@@ -79,7 +74,7 @@ class RestartPolicyContract(unittest.TestCase):
         script = MOCK + "\n" + self.snippet + '\necho MOCK_PASS\ncat "$log"\n'
         result = subprocess.run(
             ["bash", "-c", script],
-            env={**os.environ, "CASE": name},
+            env={**os.environ, "CASE": name, "MOCK_SOURCE": str(ROOT / "docker/control/dev_source.py")},
             capture_output=True, text=True, check=False,
         )
         if expect_success:
@@ -94,20 +89,21 @@ class RestartPolicyContract(unittest.TestCase):
         output = self.mock_case("fresh")
         self.assertIn("run -d --name panolab-direct-dev-1 --restart unless-stopped", output)
 
-        self.assertIn("dst=/repo/research,readonly", output)
-        for target in ("/repo/docker/private", "/repo/docker/.env", "/repo/.git", "dst=/repo "):
+        self.assertIn("dst=/repo,readonly", output)
+        self.assertIn("--tmpfs /repo/.git:ro,nosuid,nodev,noexec,size=64k", output)
+        for target in ("/repo/docker/private", "/repo/docker/.env", "dst=/repo "):
             self.assertNotIn(target, output)
 
     def test_existing_dev_without_research_requires_controlled_upgrade(self):
         output = self.mock_case("missing_research", expect_success=False)
-        self.assertIn("panolab-install.sh --upgrade-dev", output)
+        self.assertIn("Use the guarded upgrade", output)
         self.assertNotIn("update --restart", output)
 
     def test_wrong_research_mount_is_rejected(self):
         for case in ("wrong_research", "writable_research"):
             with self.subTest(case=case):
                 output = self.mock_case(case, expect_success=False)
-                self.assertIn("unexpected /repo/research mount", output)
+                self.assertIn("differs from the approved root mount", output)
                 self.assertNotIn("update --restart", output)
 
     def test_legacy_running_container_policy_repaired(self):
@@ -129,7 +125,7 @@ class RestartPolicyContract(unittest.TestCase):
         for name in ("bad_workspace", "bad_auth", "bad_source"):
             with self.subTest(mount=name):
                 output = self.mock_case(name, expect_success=False)
-                self.assertIn("unexpected bind mounts", output)
+                self.assertIn("differs from the approved root mount", output)
                 self.assertNotIn("update --restart", output)
 
 

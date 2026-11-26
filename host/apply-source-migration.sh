@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Historical legacy-path procedure. For external storage, see docs/EXTERNAL_STORAGE_CUTOVER.md.
 # HISTORICAL / REVISION-LOCKED. DO NOT RERUN ON CURRENT DEVELOPMENT.
 # Preserved for source-migration provenance; see host/README.md and
 # docs/TEMPORARY_COMPONENTS.md for the current controlled path.

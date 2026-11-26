@@ -25,7 +25,7 @@ No new general development image, Docker service, GitHub repository or privilege
 
 The host's ignored, owner-private file is:
 ```text
-docker/private/github-git-auth/github-push-token
+${PANOLAB_CONFIG_DIR}/github-git-auth/github-push-token
 ```
 The containing directory is mode **0700**, token file **0600**. The opt-in [Compose overlay](../docker/compose.git-push.yaml) mounts **only that directory** read-only at `/run/panolab-git-auth` in the existing `repo-git` service. The gateway's normal `/repo/docker/private` path remains masked by an empty Docker volume, preventing access to the other project secrets. No GitHub credential goes in `docker/.env`, `~/.gitconfig`, a remote URL, git command-line argument, Dockerfile, test log or chat.
 

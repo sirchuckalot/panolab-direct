@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Historical legacy-path procedure. For external storage, see docs/EXTERNAL_STORAGE_CUTOVER.md.
 """HISTORICAL / ONE-TIME REPAIR. DO NOT RERUN ON CURRENT DEVELOPMENT.
 
 See host/README.md and docs/TEMPORARY_COMPONENTS.md. This source is

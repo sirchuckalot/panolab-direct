@@ -66,7 +66,7 @@ def call_setup(request,command):
     if not check.get("ok"):
         return {"ok":True,"operation":operation,"available":False,"state":"not_created"}
     parts=(check.get("stdout") or "").strip().split("|")
-    if len(parts)!=4 or parts[0]!="/"+SETUP or parts[2]!="panolab-direct-connect" or parts[3]!="false":
+    if len(parts)!=4 or parts[0]!="/"+SETUP or parts[2]!="panolab-direct-external" or parts[3]!="false":
         return {"ok":False,"error":"SETUP_IDENTITY_CHANGED"}
     if parts[1]=="false":
         return {"ok":True,"operation":operation,"available":False,"state":"stopped"}

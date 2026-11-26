@@ -1,5 +1,11 @@
 # Unified PanoLab Development Image — Build and Controlled Upgrade
 
+For the external-storage candidate, complete the
+[storage and source mount cutover](EXTERNAL_STORAGE_CUTOVER.md) first. The
+upgrade uses the external workspace and Codex mounts, puts the canonical
+checkout at read-only `/repo`, and verifies the empty Git tmpfs mask.
+
+
 **Record:** PLR-ENV-002 | **Date:** 2026-11-23 | **Status:** **LAPTOP_VERIFIED** on 2026-11-24 UTC. The full owner-run rootless image build, same-container-name migration, 23 tests and independent live BIOS simulation passed. See [acceptance evidence](UNIFIED_DEV_IMAGE_ACCEPTANCE.md).
 
 ## System architecture (accepted decision)

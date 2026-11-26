@@ -4,7 +4,9 @@ import ast
 from pathlib import Path
 import unittest
 
-SOURCE=Path("/usr/local/bin/panolab-broker.py")
+SOURCE=Path(__file__).with_name("broker.py")
+if not SOURCE.is_file():
+    SOURCE=Path("/usr/local/bin/panolab-broker.py")
 
 class TrustedMaintenanceRouteTests(unittest.TestCase):
     def setUp(self):

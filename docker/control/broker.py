@@ -3,7 +3,9 @@
 
 The MCP manager communicates through private RPC, not via direct Docker access.
 """
-import json, os, socket, subprocess, threading, importlib
+import json, os, socket, subprocess, threading, importlib, uuid
+from pathlib import Path
+import dev_source
 import ise_proxy
 import ise_staging
 import ise_setup
@@ -21,11 +23,6 @@ MAINTENANCE="panolab-direct-trusted-maintenance"
 CONTAINER_DEV_USER="0:0" if ROOTLESS_MODE else "1000:1000"
 # Restricted dev-container reconfiguration uses project-scoped temporary
 # names and restores the prior dev container if the replacement fails.
-STAGE="panolab-direct-dev-stage"
-BACKUP="panolab-direct-dev-backup"
-SOURCE_MOUNTS=(("projects","ro"),("boards","ro"),("shared","ro"),
-               ("third_party","ro"),("research","ro"),("agent","rw"),("specs","ro"),
-               ("tests","ro"),("docs","ro"),("host","ro"),("docker/modern","ro"))
 DEV="panolab-direct-dev-1"
 NAMES=(DEV,"panolab-direct-connect-setup-1","panolab-direct-connect-tunnel-1")
 IMAGES=("panolab-direct-modern:local","python:3.12-slim","ubuntu:24.04")
@@ -53,6 +50,16 @@ def image_allowed(image):
     return image
 
 def launch_dev(name,image,restart="unless-stopped"):
+    checked_source = command([
+        "docker", "run", "--rm", "--network", "none", "--read-only",
+        "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true",
+        "--user", CONTAINER_DEV_USER, "--memory", "512m", "--cpus", "1",
+        "--pids-limit", "64", "--mount", f"type=bind,src={REPO},dst=/source,readonly",
+        "--entrypoint", "python3", image, "-B", "-I", "-c",
+        Path(dev_source.__file__).read_text(), "/source",
+    ], 120)
+    if not checked_source["ok"]:
+        return {"ok": False, "error": "Canonical source admission failed"}
     cmd=["docker","run","-d","--name",name,"--label","panolab.managed=true",
          "--restart",restart,"--user",CONTAINER_DEV_USER,"--workdir","/workspace","--cap-drop","ALL",
          "--security-opt","no-new-privileges:true","--memory","4g","--cpus","2",
@@ -61,33 +68,23 @@ def launch_dev(name,image,restart="unless-stopped"):
          "--mount","type=bind,src="+W+",dst=/workspace",
          "--mount","type=bind,src="+CODEX_AUTH+",dst=/codex-auth",
          "--env","CODEX_HOME=/codex-auth"]
-    for relative,mode in SOURCE_MOUNTS:
-        source=os.path.join(REPO,relative)
-        target="/repo/"+relative
-        cmd+=["--mount","type=bind,src="+source+",dst="+target+(",readonly" if mode=="ro" else "")]
+    cmd += ["--mount", f"type=bind,src={REPO},dst=/repo,readonly",
+            "--tmpfs", "/repo/.git:" + dev_source.MASK]
     return command(cmd+[image,"sleep","infinity"],120)
 
 def repo_configured(name):
-    out=command(["docker","inspect","--format","{{json .Mounts}}",name],15)
-    if not out["ok"]:
+    result = command(["docker", "inspect", "--format",
+                      "{{json .Mounts}} {{json .HostConfig.Tmpfs}}", name], 15)
+    if not result["ok"]:
         raise ValueError("could not inspect dev mounts")
-    mounts=json.loads(out["stdout"])
-    expected={"/workspace":(W,False),"/codex-auth":(CODEX_AUTH,False)}
-    expected.update({"/repo/"+relative:(os.path.join(REPO,relative),mode=="ro")
-                     for relative,mode in SOURCE_MOUNTS})
-    mounts=[m for m in mounts if not (m["Type"]=="tmpfs" and m["Destination"] in ("/tmp","/home"))]
-    active={m["Destination"]:(m["Source"],not m["RW"]) for m in mounts if m["Type"]=="bind"}
-    return len(active)==len(mounts) and active==expected
+    mounts, end = json.JSONDecoder().raw_decode(result["stdout"])
+    return dev_source.mount_layout(mounts, json.loads(result["stdout"][end:]),
+                                   REPO, W, CODEX_AUTH)
 
 def verify_dev_sources(name):
-    if not repo_configured(name):
-        return False
-    probe=" && ".join(
-        ["test -d /repo/"+relative for relative,_ in SOURCE_MOUNTS]
-        + ["test -d /workspace", "test ! -e /repo/docker/private",
-           "test ! -e /repo/docker/.env", "test ! -e /repo/.git"])
-    return command(["docker","exec","--user",CONTAINER_DEV_USER,name,
-                    "/bin/sh","-c",probe],30)["ok"]
+    return repo_configured(name) and command(
+        ["docker", "exec", "--user", CONTAINER_DEV_USER, name,
+         "/bin/sh", "-ec", dev_source.PROBE], 30)["ok"]
 
 def migrate_dev(image=None):
     old=command(["docker","inspect","--format",
@@ -98,7 +95,7 @@ def migrate_dev(image=None):
     managed,running,policy,old_image=old["stdout"].strip().split("|")
     if managed!="true":
         raise ValueError("existing dev container not PanoLab-managed")
-    if repo_configured(DEV):
+    if verify_dev_sources(DEV):
         return {"ok":True,"already_configured":True}
     restart_policy=json.loads(policy)
     restart=restart_policy["Name"] or "no"
@@ -110,6 +107,9 @@ def migrate_dev(image=None):
         if not approved["ok"] or approved["stdout"].strip()!=old_image:
             raise ValueError("current dev image differs from the approved modern image; select an approved image explicitly")
         target_image=old_image
+    suffix = uuid.uuid4().hex
+    STAGE = DEV + "-stage-" + suffix
+    BACKUP = DEV + "-rollback-" + suffix
     if command(["docker","inspect",STAGE],15)["ok"] or command(["docker","inspect",BACKUP],15)["ok"]:
         raise ValueError("staged or backup container already exists; inspect before migration")
     prepared=launch_dev(STAGE,target_image,"no")
@@ -157,7 +157,7 @@ def maintenance_identity(command_fn):
        '{{.Name}}|{{.State.Running}}|{{index .Config.Labels "com.docker.compose.project"}}|{{.HostConfig.NetworkMode}}|{{.HostConfig.Privileged}}',
        MAINTENANCE],15)
     if not inspect.get("ok") or inspect.get("stdout","").strip()!=(
-        "/"+MAINTENANCE+"|true|panolab-direct-connect|none|false"):
+        "/"+MAINTENANCE+"|true|panolab-direct-external|none|false"):
         raise ValueError("trusted maintenance service unavailable or misconfigured")
 
 def dispatch(r):
@@ -175,7 +175,12 @@ def dispatch(r):
         image=image_allowed(r.get("image","panolab-direct-modern:local"))
         if command(["docker","inspect",DEV],15)["ok"]:
             raise ValueError("development instance already exists; use dev_attach_checkout")
-        return launch_dev(DEV,image)
+        launched = launch_dev(DEV, image)
+        if launched["ok"] and not verify_dev_sources(DEV):
+            removed = command(["docker", "rm", "-f", DEV], 30)
+            return {"ok": False, "error": "Canonical source mount probe failed",
+                    "candidate_removed": removed["ok"]}
+        return launched
     if a=="attach_checkout":
         return migrate_dev(image_allowed(r["image"]) if "image" in r else None)
     if a=="lifecycle":
@@ -226,7 +231,7 @@ def dispatch(r):
         if TRUSTED_MAINTENANCE:
             importlib.reload(ise_proxy)
             importlib.reload(ise_staging)
-        return ise_staging.stage_project(r.get("project"),command,W,REPO)
+        return ise_staging.stage_project(r.get("project"),command,W,os.environ["PANOLAB_DATA_DIR"])
     if a=="exec" and isinstance(r.get("argv"),list) and r["argv"][:1]==["@maintenance"]:
         if not TRUSTED_MAINTENANCE:
             raise ValueError("temporary trusted remote maintenance is disabled")
@@ -252,7 +257,7 @@ def dispatch(r):
         tool=argv[1]
         arguments={}
         if tool=="stage" and len(argv)==3:
-            return ise_staging.stage_project(argv[2],command,W,REPO)
+            return ise_staging.stage_project(argv[2],command,W,os.environ["PANOLAB_DATA_DIR"])
         if tool=="build_start" and len(argv)==3:
             arguments={"Profile":"ise14-implementation","Project":argv[2]}
         elif tool in ("build_status","build_cancel","build_result") and len(argv)==3:
@@ -266,6 +271,8 @@ def dispatch(r):
         return ise_proxy.call_worker({"tool":tool,"arguments":arguments},command)
     if a=="exec":
         checked(DEV)
+        if not verify_dev_sources(DEV):
+            raise ValueError("Development source mount admission failed")
         argv=r.get("argv")
         if not isinstance(argv,list) or not 1<=len(argv)<=20 or any(not isinstance(x,str) or len(x)>4096 or not x or "\x00" in x for x in argv):
             raise ValueError("invalid command arguments")

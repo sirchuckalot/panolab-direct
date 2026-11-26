@@ -16,6 +16,7 @@ build worker. The FPGA target is **Pano Logic G2 Rev B
 | [Temporary components and retirement register](docs/TEMPORARY_COMPONENTS.md) | Preserve accelerated maintenance, old one-time scripts and rollback assets until a tested replacement exists |
 | [Architecture and baseline decisions](docs/ARCHITECTURE.md) | What exists, system boundaries, G2 design and planned capabilities |
 | [Source and Project Architecture Standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md) | Authoritative planned ownership and layout for projects, BSPs, upstream source, manifests, licensing and releases |
+| [External storage cutover](docs/EXTERNAL_STORAGE_CUTOVER.md) | Guarded owner-local migration, service verification and rollback |
 | [Install and operate](docs/GETTING_STARTED.md) | Host prerequisites, private inputs, rootless deployment, status and recovery limits |
 | [Develop, test and publish](docs/DEVELOPMENT.md) | Laptop-local testing, appropriate CI use and verified low-noise commits |
 | [Security](docs/SECURITY.md) | Credentials, mounts, rootless authority, approval gates and hardware safety |

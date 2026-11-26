@@ -17,6 +17,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from storage_paths import check_path, storage_paths
+
 CHECK_NAMES = (
     "linux_x86_64", "non_root_user", "git_checkout",
     "git_cli", "bash", "python3", "docker_cli", "docker_compose_v2",
@@ -128,23 +130,35 @@ def scan(root: Path, home: Path | None = None) -> dict[str, bool]:
     result["rootless_start_path"] = result["rootless_docker_engine"] or (
         launcher.is_file() and not launcher.is_symlink() and os.access(launcher, os.X_OK)
     )
-    private = root / "docker/private"
-    env = root / "docker/.env"
+    try:
+        config, data = storage_paths(root, home)
+    except (OSError, ValueError):
+        config = data = None
+
+    def protected(path, mode, directory=False):
+        try:
+            return bool(check_path(path, mode, directory))
+        except (OSError, ValueError):
+            return False
+
+    config_ok = config is not None and protected(config, 0o700, True)
+    data_ok = data is not None and protected(data, 0o700, True)
     result["private_env_and_directory"] = (
-        env.is_file() and not env.is_symlink()
-        and private.is_dir() and not private.is_symlink()
+        config_ok and data_ok and protected(config / ".env", 0o600) and
+        all(not os.path.lexists(root / path) for path in ("docker/.env", "docker/private"))
     )
-    result["tunnel_api_key"] = private_regular(private / "tunnel-api-key")
-    result["mcp_bearer"] = private_regular(private / "mcp-bearer")
-    result["xilinx_license"] = private_regular(private / "Xilinx.lic")
+    for key, name in (("tunnel_api_key", "tunnel-api-key"),
+                      ("mcp_bearer", "mcp-bearer"), ("xilinx_license", "Xilinx.lic")):
+        result[key] = config_ok and protected(config / name, 0o600) and private_regular(config / name)
     archives = []
-    if private.is_dir():
+    if data_ok:
         for glob in ("*.tar", "*.tar.gz", "*.tgz", "*.tar.bz2"):
-            archives.extend(private.glob(glob))
+            archives.extend(data.glob(glob))
     result["ise_archive"] = len(archives) == 1 and private_regular(archives[0])
-    result["owner_workspaces"] = all(
-        (private / name).is_dir() and not (private / name).is_symlink()
-        for name in ("agent-workspace", "codex-auth", "repo-rpc")
+    result["owner_workspaces"] = (
+        config_ok and data_ok and protected(config / "codex-auth", 0o700, True) and
+        all(protected(data / name, 0o700, True)
+            for name in ("agent-workspace", "repo-rpc", "Xilinx", "ise-work"))
     )
     assert set(result) == set(CHECK_NAMES)
     return result

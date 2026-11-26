@@ -122,7 +122,7 @@ def preflight():
     worker=try_inspect("container",WORKER_ORIGINAL)
     if not setup or not worker:
         raise AcceptanceError("BASELINE_MISSING")
-    if setup["Config"]["Labels"].get("com.docker.compose.project")!="panolab-direct-connect":
+    if setup["Config"]["Labels"].get("com.docker.compose.project")!="panolab-direct-external":
         raise AcceptanceError("BASELINE_SETUP_IDENTITY_CHANGED")
     if setup["State"]["Running"] or setup["HostConfig"]["RestartPolicy"]["Name"]!="no":
         raise AcceptanceError("SETUP_MUST_BE_STOPPED_ON_DEMAND")
@@ -145,12 +145,14 @@ def preflight():
     }
     if any(k not in mounts or mounts[k][1]!=v for k,v in expected.items()):
         raise AcceptanceError("SETUP_PRIVATE_MOUNTS_CHANGED")
-    if mounts["/licenses/Xilinx.lic"][0] != ROOT+"/docker/private/Xilinx.lic":
+    if mounts["/licenses/Xilinx.lic"][0] != os.environ.get("PANOLAB_CONFIG_DIR", "")+"/Xilinx.lic":
         raise AcceptanceError("LICENSE_SOURCE_CHANGED")
-    if mounts["/run/secrets/mcp-bearer"][0] != ROOT+"/docker/private/mcp-bearer":
+    if mounts["/run/secrets/mcp-bearer"][0] != os.environ.get("PANOLAB_CONFIG_DIR", "")+"/mcp-bearer":
         raise AcceptanceError("BEARER_SOURCE_CHANGED")
     if mounts["/config/ise-system-edition.batch"][0] != ROOT+"/docker/ise14/ise-system-edition.batch":
         raise AcceptanceError("INSTALLER_BATCH_CONFIG_CHANGED")
+    if mounts["/media/ise.tar"][0] != os.environ.get("PANOLAB_ISE_TARBALL"):
+        raise AcceptanceError("INSTALLER_MEDIA_SOURCE_CHANGED")
     # Broker handles known private paths; requests supply NO host path.
     return {k:mounts[k][0] for k in expected}
 

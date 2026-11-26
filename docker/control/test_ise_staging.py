@@ -56,8 +56,8 @@ class StagingContract(unittest.TestCase):
             calls.append(argv)
             if argv[:3]==["docker","inspect","--format"] and argv[3]=="{{json .Mounts}}":
                 return {"ok":True,"stdout":json.dumps([{
-                    "Destination":"/projects",
-                    "Source":"/repo/docker/private/ise-work/worker/projects",
+                    "Type":"bind", "Destination":"/projects",
+                    "Source":"/external-data/ise-work/worker/projects",
                     "RW":False}])}
             if argv[:3]==["docker","inspect","--format"] and argv[3]=="{{.Image}}":
                 return {"ok":True,"stdout":"sha256:"+"a"*64}
@@ -67,7 +67,7 @@ class StagingContract(unittest.TestCase):
                     "sha256":digest,"already_staged":False})}
             raise AssertionError("unexpected Docker operation")
         with patch.object(ise_proxy,"validate_worker",return_value=None):
-            result=ise_staging.stage_project("smoke",fake_command,"/agent-workspace","/repo")
+            result=ise_staging.stage_project("smoke",fake_command,"/agent-workspace","/external-data")
         self.assertTrue(result["ok"],result)
         self.assertEqual(result["project"],"smoke-"+digest[:12])
         run=next(cmd for cmd in calls if cmd[:2]==["docker","run"])
@@ -77,7 +77,7 @@ class StagingContract(unittest.TestCase):
         self.assertIn("ALL",run)
         self.assertIn("--security-opt",run)
         self.assertTrue(any("src=/agent-workspace,dst=/workspace,readonly" in arg for arg in run))
-        self.assertTrue(any("src=/repo/docker/private/ise-work/worker/projects,dst=/output" in arg for arg in run))
+        self.assertTrue(any("src=/external-data/ise-work/worker/projects,dst=/output" in arg for arg in run))
         self.assertFalse(any("docker.sock" in arg or "Xilinx.lic" in arg for arg in run))
     def test_broker_rejects_staging_into_changed_worker_mount(self):
         import ise_proxy
@@ -85,10 +85,10 @@ class StagingContract(unittest.TestCase):
         def fake(argv,timeout):
             if argv[:3]==["docker","inspect","--format"]:
                 return {"ok":True,"stdout":json.dumps([{
-                    "Destination":"/projects","Source":"/other","RW":False}])}
+                    "Type":"bind", "Destination":"/projects","Source":"/other","RW":False}])}
             raise AssertionError("unsafe operation attempted")
         with patch.object(ise_proxy,"validate_worker",return_value=None):
-            result=ise_staging.stage_project("smoke",fake,"/agent-workspace","/repo")
+            result=ise_staging.stage_project("smoke",fake,"/agent-workspace","/external-data")
         self.assertEqual(result,{"ok":False,"error":"ISE_PROJECT_MOUNT_CHANGED"})
 
     def test_staging_requested_project_id_is_bounded(self):

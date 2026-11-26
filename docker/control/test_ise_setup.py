@@ -9,7 +9,7 @@ import ise_setup
 class SetupProbeContract(unittest.TestCase):
     def command(self,args,timeout):
         if args[:3]==["docker","inspect","--format"]:
-            return {"ok":True,"stdout":"/"+ise_setup.SETUP+"|true|panolab-direct-connect|false"}
+            return {"ok":True,"stdout":"/"+ise_setup.SETUP+"|true|panolab-direct-external|false"}
         if args[:3]==["docker","exec","--user"]:
             name=args[-1]
             if name=="info":

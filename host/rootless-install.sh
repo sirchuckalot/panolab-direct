@@ -4,6 +4,7 @@
 # No sudo, host packages, global Docker cleanup, CI execution or FPGA programming.
 set -Eeuo pipefail
 umask 077
+export PYTHONDONTWRITEBYTECODE=1
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
 mode="${1:---install}"
 case "$mode" in --install|--check|--status|--fresh-host-check|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help) ;; *) echo "Usage: bash ./panolab-install.sh [--fresh-host-check|--check|--status|--upgrade-dev|--finalize-maintenance|--enable-github-push|--help]" >&2; exit 2;; esac
@@ -30,14 +31,10 @@ rootless="unix://$sock"
 export PANOLAB_ROOTLESS_SOCKET="$sock"
 unset DOCKER_CONTEXT DOCKER_HOST
 r() { docker -H "$rootless" "$@"; }
-project=panolab-direct-connect
+project=panolab-direct-external
+prefix=panolab-direct-connect
 dev=panolab-direct-dev-1
-tunnel="$project-tunnel-1"
-envfile="$root/docker/.env"
-private="$root/docker/private"
-compose=(docker -H "$rootless" compose --project-name "$project" --env-file "$envfile"
-  -f "$root/docker/compose.setup.yaml" -f "$root/docker/compose.manage.yaml"
-  -f "$root/host/compose.rootless-laptop.yaml")
+tunnel="$prefix-tunnel-1"
 rootless_ok() {
   [[ -S "$sock" ]] || return 1
   [[ "$(r info --format '{{json .SecurityOptions}}' 2>/dev/null)" == *'"name=rootless"'* ]] || return 1
@@ -59,6 +56,52 @@ status() {
   else say "Rootless Engine not reachable."; fi
 }
 if [[ "$mode" == --status ]]; then status; exit 0; fi
+storage="$(python3 -B "$root/host/storage_paths.py" "$root")" || fail "External storage admission failed."
+PANOLAB_CONFIG_DIR="${storage%%$'\n'*}"
+PANOLAB_DATA_DIR="${storage#*$'\n'}"
+export PANOLAB_CONFIG_DIR PANOLAB_DATA_DIR
+envfile="$PANOLAB_CONFIG_DIR/.env"
+private="$PANOLAB_CONFIG_DIR"
+data="$PANOLAB_DATA_DIR"
+compose=(docker -H "$rootless" compose --project-name "$project" --env-file "$envfile"
+  -f "$root/docker/compose.setup.yaml" -f "$root/docker/compose.manage.yaml"
+  -f "$root/host/compose.rootless-laptop.yaml")
+python3 -B "$root/docker/control/dev_source.py" "$root" || fail "Canonical source admission failed."
+# This recipe targets only the owner-user rootless Engine.
+[[ -f "$envfile" && ! -L "$envfile" && -d "$private" && ! -L "$private" ]] || fail "Existing private configuration missing."
+for name in tunnel-api-key mcp-bearer Xilinx.lic; do
+  [[ -s "$private/$name" && ! -L "$private/$name" ]] || fail "Private $name missing."
+done
+for name in .env tunnel-api-key mcp-bearer Xilinx.lic; do
+  [[ -O "$private/$name" && -G "$private/$name" && "$(stat -c %a "$private/$name")" == 600 ]] || fail "$name must be mode 0600."
+done
+python3 - "$envfile" "$private/mcp-bearer" <<'PY'
+from pathlib import Path
+import sys
+pairs={}
+for ln in Path(sys.argv[1]).read_text().splitlines():
+    if '=' in ln and not ln.lstrip().startswith('#'):
+        k,v=ln.split('=',1)
+        if k in ('PANOLAB_MCP_TOKEN','PANOLAB_TUNNEL_ID'):
+            if k in pairs: raise SystemExit('Duplicate credential key')
+            pairs[k]=v
+if len(pairs.get('PANOLAB_MCP_TOKEN',''))<32 or not pairs.get('PANOLAB_TUNNEL_ID','').startswith('tunnel_'):
+    raise SystemExit('Existing authentication missing')
+if Path(sys.argv[2]).read_text().strip() != 'Bearer '+pairs['PANOLAB_MCP_TOKEN']:
+    raise SystemExit('Private MCP bearer does not match')
+PY
+shopt -s nullglob
+media=("$data"/*.tar "$data"/*.tar.gz "$data"/*.tgz "$data"/*.tar.bz2)
+shopt -u nullglob
+[[ "${#media[@]}" == 1 && -s "${media[0]}" && -f "${media[0]}" && ! -L "${media[0]}" && -O "${media[0]}" && -G "${media[0]}" ]] || fail "Expected exactly one owner ISE archive (no toolchain install will occur)."
+for dir in "$data"/{agent-workspace,repo-rpc,Xilinx,ise-work} "$private/codex-auth"; do
+  [[ -d "$dir" && ! -L "$dir" && -O "$dir" && -G "$dir" && "$(stat -c %a "$dir")" == 700 ]] ||
+    fail "Required owner-only data directory unavailable."
+done
+export PANOLAB_WORKSPACE_HOST="$(realpath "$data/agent-workspace")"
+export PANOLAB_CODEX_AUTH_HOST="$(realpath "$private/codex-auth")"
+export PANOLAB_REPO_HOST="$root"
+export PANOLAB_ISE_TARBALL="$(realpath "${media[0]}")"
 # Start only the known owner-user rootless service when the socket is unavailable.
 if [[ "$mode" == --install ]] && ! rootless_ok; then
   # Start the user-scoped rootless service from its pre-provisioned helper.
@@ -97,38 +140,6 @@ UNIT
   done
 fi
 rootless_ok || fail "The user rootless Engine (systemd cgroup v2) is not running."
-# This recipe targets only the owner-user rootless Engine.
-[[ -f "$envfile" && ! -L "$envfile" && -d "$private" && ! -L "$private" ]] || fail "Existing private configuration missing."
-for name in tunnel-api-key mcp-bearer Xilinx.lic; do
-  [[ -s "$private/$name" && ! -L "$private/$name" ]] || fail "Private $name missing."
-done
-for name in tunnel-api-key mcp-bearer; do
-  [[ "$(stat -c %a "$private/$name")" == 600 ]] || fail "$name must be mode 0600."
-done
-python3 - "$envfile" "$private/mcp-bearer" <<'PY'
-from pathlib import Path
-import sys
-pairs={}
-for ln in Path(sys.argv[1]).read_text().splitlines():
-    if '=' in ln and not ln.lstrip().startswith('#'):
-        k,v=ln.split('=',1)
-        if k in ('PANOLAB_MCP_TOKEN','PANOLAB_TUNNEL_ID'):
-            if k in pairs: raise SystemExit('Duplicate credential key')
-            pairs[k]=v
-if len(pairs.get('PANOLAB_MCP_TOKEN',''))<32 or not pairs.get('PANOLAB_TUNNEL_ID','').startswith('tunnel_'):
-    raise SystemExit('Existing authentication missing')
-if Path(sys.argv[2]).read_text().strip() != 'Bearer '+pairs['PANOLAB_MCP_TOKEN']:
-    raise SystemExit('Private MCP bearer does not match')
-PY
-shopt -s nullglob
-media=("$private"/*.tar "$private"/*.tar.gz "$private"/*.tgz "$private"/*.tar.bz2)
-shopt -u nullglob
-[[ "${#media[@]}" == 1 && -f "${media[0]}" && ! -L "${media[0]}" ]] || fail "Expected exactly one owner ISE archive (no toolchain install will occur)."
-for sub in agent-workspace repo-rpc codex-auth Xilinx ise-work; do [[ -d "$private/$sub" ]] || fail "Existing $sub data directory absent."; done
-export PANOLAB_WORKSPACE_HOST="$(realpath "$private/agent-workspace")"
-export PANOLAB_CODEX_AUTH_HOST="$(realpath "$private/codex-auth")"
-export PANOLAB_REPO_HOST="$root"
-export PANOLAB_ISE_TARBALL="$(realpath "${media[0]}")"
 # Evaluate the optional setup service for preflight validation, but do
 # not automatically activate the setup profile during ordinary startup.
 "${compose[@]}" --profile ise-setup config --format json | python3 -c '
@@ -195,7 +206,7 @@ UNIT
 fi
 rootless_ok || fail "Systemd-managed rootless Engine did not pass checks."
 # Fail closed if anything foreign occupies an expected rootless name.
-for n in "$project-setup-1" "$project-docker-broker-1" "$project-repo-git-1" "$project-manager-1" "$tunnel"; do
+for n in "$prefix-setup-1" "$prefix-docker-broker-1" "$prefix-repo-git-1" "$prefix-manager-1" "$tunnel"; do
   if new_exists "$n"; then new_valid "$n" || fail "Foreign rootless container: $n"; fi
 done
 if new_exists "$dev"; then dev_valid "$rootless" || fail "Foreign rootless dev container."; fi
@@ -215,10 +226,10 @@ r run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privi
    command -v riscv64-unknown-elf-gcc; command -v meson; command -v ninja;
    test -x /usr/local/bin/codex; test -x /usr/local/bin/codex-code-mode-host;
    test -s /opt/panolab/litex/env.sh;
-   python3 /opt/panolab/recipes/litex-bootstrap.py
-     --prefix /opt/panolab/litex
-     --lock /opt/panolab/recipes/litex-upstream.lock.json
-     --requirements /opt/panolab/recipes/litex-requirements.txt
+   python3 /opt/panolab/recipes/litex-bootstrap.py \
+     --prefix /opt/panolab/litex \
+     --lock /opt/panolab/recipes/litex-upstream.lock.json \
+     --requirements /opt/panolab/recipes/litex-requirements.txt \
      --verify-only' >/dev/null
 images=(panolab-direct-ise14-setup:local panolab-direct-broker:local
         panolab-direct-repo-git:local panolab-direct-manager:local)
@@ -228,12 +239,16 @@ if [[ "$need_build" == 1 ]]; then
   say "Building management images on the laptop rootless Engine."
   DOCKER_BUILDKIT=1 "${compose[@]}" --profile ise-setup build setup docker-broker repo-git manager
 fi
+# Reuse the original volume to retain authenticated broker state/results.
+r volume inspect panolab-direct-connect_management-rpc >/dev/null 2>&1 ||
+  r volume create panolab-direct-connect_management-rpc >/dev/null ||
+  fail "Could not provision management RPC volume."
 say "Starting rootless core management; on-demand ISE setup stays offline."
 "${compose[@]}" up -d --no-build --no-recreate docker-broker repo-git manager
-for n in "$project-docker-broker-1" "$project-repo-git-1" "$project-manager-1"; do
+for n in "$prefix-docker-broker-1" "$prefix-repo-git-1" "$prefix-manager-1"; do
   running_new "$n" || fail "Rootless $n not running."
 done
-broker="$project-docker-broker-1"
+broker="$prefix-docker-broker-1"
 mounted="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/var/run/docker.sock"}}{{.Source}}{{end}}{{end}}' "$broker")"
 [[ "$mounted" == "$sock" ]] || fail "Broker is not bound to rootless Docker socket."
 options="$(r exec "$broker" docker info --format '{{json .SecurityOptions}}' 2>/dev/null || true)"
@@ -241,7 +256,6 @@ options="$(r exec "$broker" docker info --format '{{json .SecurityOptions}}' 2>/
 # In the rootless user namespace, UID 0 maps to the current ordinary
 # laptop owner, allowing access to existing owner-only credentials.
 # Do not change host permissions or treat namespace root as host root.
-[[ -d "$root/research" && ! -L "$root/research" ]] || fail "Canonical research directory missing or symlinked."
 if ! new_exists "$dev"; then
   cmd=(run -d --name "$dev" --restart unless-stopped --label panolab.managed=true
     --user 0:0 --workdir /workspace --cap-drop ALL
@@ -252,28 +266,13 @@ if ! new_exists "$dev"; then
     --mount "type=bind,src=$PANOLAB_WORKSPACE_HOST,dst=/workspace"
     --mount "type=bind,src=$PANOLAB_CODEX_AUTH_HOST,dst=/codex-auth"
     --env CODEX_HOME=/codex-auth)
-  for spec in projects:ro boards:ro shared:ro third_party:ro research:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
-    rel="${spec%:*}"; perm="${spec#*:}"
-    mount="type=bind,src=$root/$rel,dst=/repo/$rel"
-    [[ "$perm" == ro ]] && mount+=",readonly"
-    cmd+=(--mount "$mount")
-  done
+  cmd+=(--mount "type=bind,src=$root,dst=/repo,readonly"
+        --tmpfs /repo/.git:ro,nosuid,nodev,noexec,size=64k)
   r "${cmd[@]}" panolab-direct-modern:local sleep infinity >/dev/null
 else
-  # The standalone dev is not a Compose service. Adopt it only when
-  # its host mounts point at this checkout and these private inputs.
-  current_workspace="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/workspace"}}{{.Source}}{{end}}{{end}}' "$dev")"
-  current_codex="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/codex-auth"}}{{.Source}}{{end}}{{end}}' "$dev")"
-  current_projects="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/projects"}}{{.Source}}{{end}}{{end}}' "$dev")"
-  [[ "$current_workspace" == "$PANOLAB_WORKSPACE_HOST" &&
-     "$current_codex" == "$PANOLAB_CODEX_AUTH_HOST" &&
-     "$current_projects" == "$root/projects" ]] ||
-    fail "Existing dev container has unexpected bind mounts; inspect before recovery."
-  current_research="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/research"}}{{.Type}}|{{.Source}}|{{.RW}}{{end}}{{end}}' "$dev")"
-  [[ -n "$current_research" ]] ||
-    fail "Existing dev lacks /repo/research. Use bash ./panolab-install.sh --upgrade-dev for controlled migration."
-  [[ "$current_research" == "bind|$root/research|false" ]] ||
-    fail "Existing dev has an unexpected /repo/research mount; inspect before recovery."
+  r inspect --format '{{json .Mounts}} {{json .HostConfig.Tmpfs}}' "$dev" |
+    python3 -B "$root/docker/control/dev_source.py" --mounts "$root" "$PANOLAB_WORKSPACE_HOST" "$PANOLAB_CODEX_AUTH_HOST" ||
+    fail "Existing dev differs from the approved root mount. Use the guarded upgrade."
 fi
 # Repair pre-policy dev containers in place; never recreate or discard work.
 restart_policy="$(r inspect -f '{{.HostConfig.RestartPolicy.Name}}' "$dev")"
@@ -296,9 +295,11 @@ else
     'test -s /opt/panolab/litex/env.sh && command -v riscv64-unknown-elf-gcc && command -v meson' >/dev/null ||
     fail "New development image lacks the pinned LiteX toolchain."
 fi
-r exec "$dev" /bin/sh -ec \
-  'test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /repo/research && test -d /workspace && test ! -e /repo/docker/private && test ! -e /repo/docker/.env && test ! -e /repo/.git && command -v yosys && command -v iverilog && command -v verilator && test -x /usr/local/bin/codex' >/dev/null ||
-  fail "Rootless development toolchain/source mounts failed."
+probe="$(python3 -B "$root/docker/control/dev_source.py" --probe)"
+r exec "$dev" /bin/sh -ec "$probe" >/dev/null ||
+  fail "Rootless canonical source probe failed."
+r exec "$dev" /bin/sh -ec 'command -v yosys && command -v iverilog && command -v verilator && test -x /usr/local/bin/codex' >/dev/null ||
+  fail "Rootless development tools failed."
 for pair in 'cpu.max:200000 100000' 'memory.max:4294967296' 'pids.max:256'; do
   key="${pair%%:*}"; expect="${pair#*:}"
   actual="$(r exec "$dev" cat "/sys/fs/cgroup/$key" | tr -d '\r')"
@@ -309,42 +310,7 @@ r exec "$dev" /usr/local/bin/codex login status >/dev/null ||
 say "PASS: tools, 2 CPU, 4 GiB, 256 PIDs, Codex credentials."
 # Authenticated MCP test from an ephemeral container on the PRIVATE bridge.
 # Never print credentials, publish MCP ports or use system Docker.
-probe="$(cat <<'PY'
-import json,sys,urllib.request,urllib.error,time
-token=open('/run/secrets/mcp-bearer').read().strip()
-url='http://manager:8767/mcp'
-def call(obj,auth=True):
-    hdr={'Content-Type':'application/json',
-         'Accept':'application/json, text/event-stream',
-         'MCP-Protocol-Version':'2025-06-18'}
-    if auth: hdr['Authorization']=token
-    req=urllib.request.Request(url,data=json.dumps(obj).encode(),headers=hdr,method='POST')
-    with urllib.request.urlopen(req,timeout=10) as res:
-        return res.status,json.load(res)
-init={'jsonrpc':'2.0','id':1,'method':'initialize','params':{
-    'protocolVersion':'2025-06-18','capabilities':{},
-    'clientInfo':{'name':'panolab-laptop-local-acceptance','version':'1'}}}
-try:
-    call(init,False)
-except urllib.error.HTTPError as e:
-    if e.code!=401: raise
-else:
-    raise RuntimeError('Anonymous MCP call was accepted')
-for attempt in range(12):
-    try:
-        code,obj=call(init)
-        assert code==200 and obj.get('result',{}).get('serverInfo',{}).get('name')=='panolab-manager'
-        break
-    except (urllib.error.URLError,AssertionError):
-        if attempt==11: raise
-        time.sleep(1)
-for i,tool in enumerate(('lab_status','repo_status'),2):
-    code,obj=call({'jsonrpc':'2.0','id':i,'method':'tools/call',
-                  'params':{'name':tool,'arguments':{}}})
-    assert code==200 and not obj.get('error') and not obj.get('result',{}).get('isError'),tool
-print('PASS: private authenticated MCP, anonymous request rejected, status and repo tools')
-PY
-)"
+probe="$(cat "$root/host/probe-management.py")"
 # Match Compose's project-scoped bridge and verify its labels before
 # attaching the one-shot authenticated MCP probe.
 mcp_network="${project}_lab-backend"

@@ -3,6 +3,7 @@
 # Preserves host-bound workspace, old container rollback, tunnel and ISE.
 set -Eeuo pipefail
 umask 077
+export PYTHONDONTWRITEBYTECODE=1
 (( $# == 4 )) || { echo "Usage (internal): upgrade-dev-image.sh ROOT SOCKET WORKSPACE CODEX_AUTH" >&2; exit 2; }
 root="$(realpath -e "$1")"; socket="$2"
 workspace="$(realpath -e "$3")"; auth="$(realpath -e "$4")"
@@ -15,14 +16,18 @@ say() { printf 'PanoLab dev upgrade: %s\n' "$*"; }
 [[ "$(id -u)" != 0 && -S "$socket" ]] || die "Expected ordinary user/rootless socket."
 [[ "$(r info --format '{{json .SecurityOptions}}')" == *'"name=rootless"'* ]] || die "Rootless Engine required."
 [[ -d "$root/.git" ]] || die "Expected PanoLab checkout missing."
-for rel in projects boards shared third_party research agent specs tests docs host docker/modern; do
-  [[ -d "$root/$rel" && ! -L "$root/$rel" ]] || die "Unexpected source directory: $rel"
-done
+storage="$(python3 -B "$root/host/storage_paths.py" "$root")" || die "External storage unavailable."
+[[ "$workspace" == "${storage#*$'\n'}/agent-workspace" && "$auth" == "${storage%%$'\n'*}/codex-auth" ]] ||
+  die "Unexpected private bind paths."
+python3 -B "$root/docker/control/dev_source.py" "$root" || die "Canonical source admission failed."
+source_probe="$(python3 -B "$root/docker/control/dev_source.py" --probe)"
 old_present=0; old_running=false; old_layout=absent
 if r container inspect "$dev" >/dev/null 2>&1; then
   old_present=1
   old_layout="$(r inspect "$dev" | python3 -c '
 import json,sys
+sys.path.insert(0,sys.argv[1]+"/docker/control")
+from dev_source import mount_layout
 c=json.load(sys.stdin)[0]; root,work,auth=sys.argv[1:]
 assert c["Config"]["Labels"].get("panolab.managed")=="true"
 assert c["Config"]["User"]=="0:0" and c["Config"]["WorkingDir"]=="/workspace"
@@ -49,6 +54,8 @@ assert len(got)==len(mounts), "Unexpected mount type or duplicate destination"
 layouts={"legacy":layout(legacy),"previous":layout(previous),
          "current":layout(previous+(("research",True),))}
 kind=next((name for name,expected in layouts.items() if got==expected),None)
+if mount_layout(c["Mounts"],c["HostConfig"].get("Tmpfs") or {},root,work,auth):
+    kind="canonical"
 assert kind is not None, "Unexpected bind mount set"
 print(kind)
 ' "$root" "$workspace" "$auth")" || die "Dev container differs from approved configuration; unchanged."
@@ -78,23 +85,20 @@ same_image=false
 if (( old_present )); then
   if [[ "$(r inspect -f '{{.Image}}' "$dev")" == "$new_id" ]]; then
     same_image=true
-    if [[ "$old_layout" == current ]]; then
+    if [[ "$old_layout" == canonical ]]; then
+      r exec "$dev" /bin/sh -ec "$source_probe"
       say "DEV_IMAGE_AND_SOURCE_MOUNTS_ALREADY_CURRENT=1; no container replacement."
       exit 0
     fi
     say "Current image uses previous source mounts; controlled source-mount replacement required."
   fi
 fi
-# Allow the research-only transition alongside one retained, stopped rollback.
-# Other upgrades still require review of any outstanding rollback.
-prior_rollbacks="$(r ps -a --format '{{.Names}}' --filter "name=^/?$dev-rollback-")"
-if [[ -n "$prior_rollbacks" ]]; then
-  [[ "$same_image" == true && "$old_layout" == previous && "$prior_rollbacks" =~ ^panolab-direct-dev-1-rollback-[0-9]{8}T[0-9]{6}Z$ ]] ||
-    die "Outstanding rollback dev containers exist; review before retry."
-  [[ "$(r inspect -f '{{.State.Status}}|{{index .Config.Labels "panolab.managed"}}' "$prior_rollbacks")" == 'exited|true' ]] ||
-    die "Existing rollback is not a stopped managed dev container; review before retry."
-fi
-backup="$dev-rollback-$(date -u +%Y%m%dT%H%M%SZ)"
+while IFS= read -r prior; do
+  [[ -z "$prior" ]] && continue
+  [[ "$(r inspect -f '{{.State.Status}}|{{index .Config.Labels "panolab.managed"}}' "$prior")" == 'exited|true' ]] ||
+    die "Existing rollback is not a stopped managed dev container."
+done <<< "$(r ps -a --format '{{.Names}}' --filter "name=^/?$dev-rollback-")"
+backup="$dev-rollback-$(date -u +%Y%m%dT%H%M%SZ)-$(python3 -B -c 'import uuid;print(uuid.uuid4().hex)')"
 r container inspect "$backup" >/dev/null 2>&1 && die "Backup container name already occupied."
 renamed=0
 rollback() {
@@ -136,21 +140,17 @@ cmd=(run -d --name "$dev" --restart unless-stopped --label panolab.managed=true
   --mount "type=bind,src=$workspace,dst=/workspace"
   --mount "type=bind,src=$auth,dst=/codex-auth"
   --env CODEX_HOME=/codex-auth)
-for spec in projects:ro boards:ro shared:ro third_party:ro research:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
-  rel="${spec%:*}"; perm="${spec#*:}"
-  mount="type=bind,src=$root/$rel,dst=/repo/$rel"
-  [[ "$perm" == ro ]] && mount+=",readonly"
-  cmd+=(--mount "$mount")
-done
+cmd+=(--mount "type=bind,src=$root,dst=/repo,readonly"
+  --tmpfs /repo/.git:ro,nosuid,nodev,noexec,size=64k)
 say "Starting replacement dev with new source mounts, unchanged quotas, security and name."
 r "${cmd[@]}" "$new_id" sleep infinity >/dev/null
 [[ "$(r inspect -f '{{.State.Running}}' "$dev")" == true ]]
 [[ "$(r inspect -f '{{.Image}}' "$dev")" == "$new_id" ]]
-[[ "$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/research"}}{{.Type}}|{{.Source}}|{{.RW}}{{end}}{{end}}' "$dev")" == "bind|$root/research|false" ]]
+r inspect --format '{{json .Mounts}} {{json .HostConfig.Tmpfs}}' "$dev" |
+  python3 -B "$root/docker/control/dev_source.py" --mounts "$root" "$workspace" "$auth"
+r exec "$dev" /bin/sh -ec "$source_probe"
 say "Testing new dev tools, source, Codex credentials and firmware."
 r exec -e PYTHONDONTWRITEBYTECODE=1 "$dev" /bin/sh -ec '
-test -d /repo/boards && test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /repo/research && test -d /workspace
-test ! -e /repo/docker/private && test ! -e /repo/docker/.env && test ! -e /repo/.git
 command -v yosys; command -v iverilog; command -v verilator
 command -v riscv64-unknown-elf-gcc; command -v meson; command -v ninja
 test -x /usr/local/bin/codex; test -s /opt/panolab/litex/env.sh'
