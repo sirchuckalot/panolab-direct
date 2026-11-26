@@ -26,6 +26,8 @@ source migration has established `projects/`, `shared/` and
 the running laptop containers have been cut over** until the recorded
 runtime acceptance gates pass.
 
+**Mandatory hard-stop policy:** Both ChatGPT and Codex SHALL follow [Agent execution and hard-stop policy](docs/AGENT_EXECUTION_POLICY.md) before every session and dependent gate. Missing required resources or execution-framework failures are immediate `INFRASTRUCTURE_BLOCKED` outcomes: stop, report first, correct the cause and verify the original path before resuming. No silent skips or workarounds.
+
 ## What is real, and what is planned
 
 - The owner's laptop currently runs **seven** rootless PanoLab

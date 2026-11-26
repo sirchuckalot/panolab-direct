@@ -19,6 +19,10 @@ commands below still describe the previous deployed toolchain where
 not explicitly superseded; a service/mount cutover must be separately
 verified before claiming the running laptop uses the new paths.
 
+## Mandatory execution admission
+
+Follow the [agent execution and hard-stop policy](AGENT_EXECUTION_POLICY.md) for every engineering session and dependent gate. A required input, mount, permission, tool or RPC failure stops dependent work immediately; correct and verify the original path before restarting. Distinguish infrastructure failures from valid engineering-test findings. Report blockers before results.
+
 ## Choose the test venue
 
 | Goal | Default execution |
