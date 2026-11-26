@@ -12,7 +12,7 @@ worker. The reference target is the Pano Logic G2 Rev B (XC6SLX150-2-FGG484).
 | [Engineering sessions](AGENTS.md) | Binding session, repository ownership and commit rules for ChatGPT and Codex |
 | [Managed launcher](agent/README.md) | Job admission, result records and activation |
 | [Vendor API](docs/TOOLCHAIN_MCP_CONTRACT.md) | Five persistent worker operations and control-plane adapters |
-| [Evidence index](docs/EVIDENCE.md) | Verified results, revision references and qualification limits |
+| [Engineering milestone ledger](docs/EVIDENCE.md) | Chronological significant changes, exact commits, verified results and limits |
 | [Source and project standard](specs/PANOLAB_SOURCE_AND_PROJECT_ARCHITECTURE.md) | Ownership, dependencies, source closure, provenance and licensing |
 
 The [system specification](specs/PANOLAB_DIRECT_v1_0.txt) covers the CPU-less

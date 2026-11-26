@@ -39,7 +39,7 @@ Expected negative-test failures and explicitly non-required future capabilities 
 
 The owner sets the product direction, overarching specifications, scope and reserved approvals. ChatGPT has broad delegated discretion to close design gaps, select and reconcile existing components, settle routine architecture and integration decisions, and correct implementation-level design defects that fit the approved requirements. Consult the actual specification and evidence first; do not ask the owner to repeat decisions already made. Do not treat the owner's absence as a blocker for an otherwise authorized engineering decision.
 
-ChatGPT SHALL direct, review and independently verify; Codex SHALL perform engineering implementation, source changes, refactoring, build/test implementation and execution, and technical implementation documentation. ChatGPT may inspect, execute existing verification procedures independently, author system-level requirements and decisions, and orchestrate approved publication/deployment, but must not repair, complete or substitute Codex's implementation or engineering documents. Return specific deficiencies to Codex for correction and verify the next result. A worker's successful execution does not imply engineering acceptance.
+ChatGPT SHALL direct, review and independently verify; Codex SHALL perform engineering implementation, source changes, refactoring, build/test implementation and execution, and technical implementation documentation. ChatGPT may inspect, execute existing verification procedures independently, author system-level requirements and decisions, and orchestrate approved publication/deployment, but must not repair, complete or substitute Codex's implementation or engineering documents. The curated milestone ledger is an explicit editorial exception: ChatGPT alone owns, decides and edits its published entries under [engineering milestone ledger](#engineering-milestone-ledger); Codex supplies evidence and recommendations, not independent ledger edits. Return specific deficiencies to Codex for correction and verify the next result. A worker's successful execution does not imply engineering acceptance.
 
 Every assignment must identify a named completion gate, the applicable requirements, the existing source to reuse, the intended ownership boundaries and measurable acceptance criteria. Prefer the minimum complete integration over additional features, new abstractions, alternative implementations or speculative experiments. Challenge unnecessary additions during review. Record material design decisions, their rationale and evidence, the scope impact, and the verification result; no silent architecture changes. Escalate only unresolved material decisions outside the existing specification, genuine ambiguities that cannot be settled from evidence, or reserved approval boundaries. If source ownership or directory placement is genuinely ambiguous after examining the source architecture, stop the affected decision and consult the owner rather than invent another directory or concept. Do not build dependent work on an unresolved decision.
 
@@ -82,8 +82,10 @@ This policy does not change product scope, protected identity, authorization, li
    diff and commit order for unnecessary files, duplicated content, broken
    references, unrelated scope and accurate chronology. Run the applicable
    tests and record the exact revision, changes, verified acceptance and
-   pending gates or limitations in the appropriate existing owner. Draft
-   work with incomplete required gates needs explicit approval.
+   pending gates or limitations in the appropriate existing owner. Codex
+   returns the milestone evidence to ChatGPT for the ledger decision;
+   apply [engineering milestone ledger](#engineering-milestone-ledger)
+   at closure. Draft work with incomplete required gates needs explicit approval.
 5. Publish reviewed milestones in dependency order. A single final push may
    contain multiple sequential, independently reviewed milestone commits.
    Use the connected GitHub integration or approved scoped gateway with an
@@ -113,17 +115,59 @@ file placement, escalate unresolved ownership or material scope conflicts.
 | [Architecture](docs/ARCHITECTURE.md) | Current structure, design, security and trust boundaries |
 | [Operations](docs/GETTING_STARTED.md) | Installation, deployment, development, maintenance and recovery procedures |
 | [Existing specifications](specs/) | Requirements and interfaces |
-| [Evidence index](docs/EVIDENCE.md) | Concise verified results, limits and references to exact revisions and historical evidence |
+| [Engineering milestone ledger](docs/EVIDENCE.md) | ChatGPT-owned chronological record of significant published changes, verified acceptance, limits and exact commit references |
 | Existing scoped READMEs | Distinct local usage for their owning component |
 | Existing licensing, upstream and frozen historical files | Original terms, notices, provenance and preserved history |
 
-Retain the evidence index as the consolidated platform evidence owner because
-it makes verified checkpoints and their limits discoverable across revisions.
-Link to architecture and operations for current design and procedures. Use Git
-history for chronology. Do not create per-task worklogs, status files or
-reports in the repository. Keep transient logs and generated artifacts in
-the approved workspace outside the repository. Preserve licensing, notices,
-upstream material and frozen history in their existing locations.
+Retain the existing evidence ledger as the consolidated platform evidence
+owner. Link to architecture and operations for current design and procedures.
+Do not create per-task worklogs, status files or reports in the repository.
+Keep transient logs and generated artifacts in the approved workspace outside
+the repository. Preserve licensing, notices, upstream material and frozen
+history in their existing locations.
+
+### Engineering milestone ledger
+
+[docs/EVIDENCE.md](docs/EVIDENCE.md) is the sole curated, chronological
+ledger of significant published engineering milestones. Git is the complete
+change history and the exact revision identity; do not reproduce every
+commit, file edit, character change, intermediate attempt or routine test
+as a separate ledger entry. No artificial release/version sequence is
+required; use actual commit IDs and dates. This does not replace an
+explicitly approved product release or compatibility version when needed.
+
+**Single editorial owner:** ChatGPT is accountable for milestone selection,
+grouping, wording, editing and independent verification of the ledger.
+Codex implements and tests changes, returns the relevant commit scope,
+rationale, evidence, dependencies and limitations, and may recommend how
+to group them. Codex SHALL NOT independently edit the ledger, append entries
+or create another ledger. ChatGPT must not transfer the editorial decision
+to Codex or treat a worker's completion verdict as acceptance. The owner
+retains product direction and reserved approval authority.
+
+At admission, identify the intended coherent milestone and consult relevant
+existing ledger entries. At closure, ChatGPT checks the actual reviewed
+commit sequence, publication identity, acceptance and limitations, then
+records one concise entry per material milestone in publication order.
+Include the UTC date, meaningful outcome and reason, exact immutable commit
+link(s) in dependency order, verified acceptance and material open gates
+or limits; link to the existing technical evidence or owning specification
+instead of copying it. Several related commits can form one milestone.
+Routine fixes, drafts, retries, incidental edits and ledger maintenance
+itself do not warrant entries. Do not create self-referential or recursive
+ledger commits. Keep failed attempts in workspace job records; record a
+material unresolved gate as a limitation, not a completed milestone.
+
+After the functional revision is fixed and published, add a concise
+ledger-only follow-up commit if needed so the entry can link to the actual
+immutable revision. Multiple milestones may be indexed together after a
+single reviewed sequential push. Preserve existing historical records and
+correct factual errors transparently; append a dated correction or
+superseding milestone for a material change, without rewriting published
+Git history. Prefer references over duplicate narrative and review each
+entry for noise, scope and evidence before publication. Architecture,
+operations, requirements and component guidance remain in their existing
+owners, not in the ledger.
 
 ## Toolchain warning and legacy-builder policy
 
