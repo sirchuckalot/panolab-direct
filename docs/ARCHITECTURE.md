@@ -92,9 +92,10 @@ independent verification recorded matching clean laptop and GitHub revisions,
 seven running services, actual private mount boundaries, 172 migration tests
 and successful managed Codex canary `93b0b562e05b42ec925d6ce594b8ee25`.
 Generic ISE job `1795685528446716627` succeeded and returned metadata for
-eight artifacts, including a 4,220,305-byte bitstream. The
-`toolchain_info` license validation field remained false, and complete
-large timing-report retrieval remains outstanding.
+eight artifacts, including a 4,220,305-byte bitstream. At that checkpoint, `toolchain_info` still reported license validation as
+false and the remote adapter could not retrieve large timing reports.
+See the [toolchain contract](TOOLCHAIN_MCP_CONTRACT.md) for the revised
+result and license evidence interfaces.
 
 ## FPGA design and evidence boundaries
 

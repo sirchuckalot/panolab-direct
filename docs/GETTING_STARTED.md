@@ -184,6 +184,39 @@ and verify authenticated normal service behavior. Keep the owner-local
 recovery path available. See the
 [retirement gate](ARCHITECTURE.md#approved-future-retirement-gate).
 
+### Verify ISE result retrieval and license evidence
+
+Build and test the worker and manager in the approved laptop rootless
+Engine from the reviewed candidate checkout. These two stages run the
+checksum-locked Go suites and compile the binaries.
+
+```sh
+docker buildx build --builder default --load --target mcp-builder \
+  -t panolab-direct-ise14-worker:coherence-test -f docker/ise14/Dockerfile docker/ise14
+docker buildx build --builder default --load --target build \
+  -t panolab-direct-manager:coherence-test -f docker/control/Manager.Dockerfile docker
+```
+
+Build the worker `final` image for the existing guarded worker rebind,
+with its exact image ID and restart policy. Before replacement, check the
+live mounts, confirm the worker is idle and preserve the old worker
+container and image for rollback. Preserve the results bind so historical
+jobs remain available. Use the existing detached management deployment
+for the broker and compiled manager, with its authenticated canary and
+retained rollback images.
+
+After rebind, check `ise_toolchain_info` and `@ise14 toolchain_info` for
+`not_yet_validated` when the license is readable. Retrieve job
+`1795652101955866441` through both normal result routes using
+`Artifact: "design.twr"` and verify 71,042 bytes and SHA-256
+`a238e8410ad444f76cb12b36c775a88dc64825e6649192c5a66cde554a273a88`.
+Check metadata-only retrieval and rejection of an unsupported selector.
+Stage and run an approved constrained fixture through the normal build
+route. Confirm that both info adapters cite the new successful job, and
+that the verified timing report includes its expected constraint target,
+coverage and available setup and hold facts. Record source checks and live
+licensed evidence separately.
+
 ### On-demand ISE setup controls
 
 For the existing setup service, use authenticated `lab_lifecycle` with

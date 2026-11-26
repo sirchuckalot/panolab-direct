@@ -4,6 +4,7 @@ import (
  "context"
  "errors"
  "encoding/base64"
+ "encoding/json"
  "bytes"
  "os"
  "path/filepath"
@@ -128,4 +129,113 @@ func TestVendorExecutableUsesPinnedAbsoluteISEBinaryOnly(t *testing.T){
  for _,name:=range []string{"../xst","/bin/sh","bash","xst -h",""}{
   if _,err:=vendorExecutable(name);err==nil{t.Errorf("accepted unsafe vendor executable %q",name)}
  }
+}
+
+func TestTimingReportPagesFitBrokerAndRestoreExactBytes(t *testing.T) {
+ oldRoot := root
+ root = t.TempDir()
+ t.Cleanup(func() { root = oldRoot })
+ j := &job{id: "1795652101955866441", state: "succeeded", project: "counter", profile: "ise14-implementation"}
+ if err := persistJob(j); err != nil { t.Fatal(err) }
+ t.Cleanup(func() {
+  jobs.Lock()
+  delete(jobs.items, j.id)
+  jobs.Unlock()
+ })
+ payload := bytes.Repeat([]byte("R"), 71042)
+ if err := os.WriteFile(filepath.Join(root, j.id, "design.twr"), payload, 0600); err != nil { t.Fatal(err) }
+ var rebuilt []byte
+ for offset := int64(0); offset < int64(len(payload)); {
+  _, page, err := result(context.Background(), nil, JobInput{ID: j.id, Artifact: "design.twr", Offset: offset})
+  if err != nil { t.Fatal(err) }
+  raw, err := json.Marshal(page)
+  if err != nil || len(raw) >= 24000 { t.Fatalf("unsafe page size: %d (%v)", len(raw), err) }
+  fragment, err := base64.StdEncoding.DecodeString(page.ChunkBase64)
+  want := min(8192, len(payload)-int(offset))
+  if err != nil || len(fragment) != want || page.ChunkOffset != offset ||
+   page.NextOffset != offset+int64(want) || page.ChunkEOF != (page.NextOffset == int64(len(payload))) {
+   t.Fatalf("invalid page at offset %d: %v", offset, err)
+  }
+  rebuilt = append(rebuilt, fragment...)
+  offset = page.NextOffset
+ }
+ if !bytes.Equal(rebuilt, payload) { t.Fatal("timing report changed in transfer") }
+}
+
+func TestLicenseProofRequiresCurrentSuccessfulPersistedBuild(t *testing.T) {
+ oldRoot := root
+ root = t.TempDir()
+ t.Cleanup(func() { root = oldRoot })
+ reset := func() {
+  jobs.Lock()
+  defer jobs.Unlock()
+  jobs.license = licenseIdentity{}
+  jobs.licenseGeneration = 0
+  jobs.licenseJob = ""
+ }
+ reset()
+ t.Cleanup(reset)
+ path := filepath.Join(t.TempDir(), "test-license")
+ t.Setenv("XILINXD_LICENSE_FILE", path)
+ writeLicense := func(content string) {
+  t.Helper()
+  if err := os.WriteFile(path, []byte(content), 0600); err != nil { t.Fatal(err) }
+ }
+ expect := func(status, id string) {
+  t.Helper()
+  _, got, err := toolchain(context.Background(), nil, Empty{})
+  if err != nil || got.ToolchainVersion != "ISE 14.7" ||
+   got.License != (status != "unavailable") || got.LicenseValidated != (id != "") ||
+   got.LicenseValidationStatus != status || got.LicenseValidationJob != id {
+   t.Fatalf("license status = %+v, %v", got, err)
+  }
+ }
+ generation := func() uint64 {
+  jobs.Lock()
+  defer jobs.Unlock()
+  if !observeLicenseLocked() { t.Fatal("test license unavailable") }
+  return jobs.licenseGeneration
+ }
+ complete := func(ctx context.Context, id string, rc int, gen uint64) {
+  t.Helper()
+  finishJob(ctx, &job{id: id, state: "running"}, rc, true, gen)
+ }
+ ctx := context.Background()
+ expect("unavailable", "")
+ writeLicense("synthetic fixture A")
+ expect("not_yet_validated", "")
+ initial := generation()
+ complete(ctx, "1000000001", 1, initial)
+ expect("not_yet_validated", "")
+ cancelled, cancelJob := context.WithCancel(ctx)
+ cancelJob()
+ complete(cancelled, "1000000002", 0, initial)
+ expect("not_yet_validated", "")
+ if err := os.WriteFile(filepath.Join(root, "1000000003"), nil, 0600); err != nil { t.Fatal(err) }
+ complete(ctx, "1000000003", 0, initial)
+ expect("not_yet_validated", "")
+ writeLicense("synthetic fixture B")
+ complete(ctx, "1000000004", 0, initial)
+ expect("not_yet_validated", "")
+ current := generation()
+ complete(ctx, "1000000005", 0, current)
+ expect("validated", "1000000005")
+ complete(ctx, "1000000006", 1, current)
+ expect("validated", "1000000005")
+ reset()
+ if j, err := lookup("1000000005"); err != nil || j.state != "succeeded" {
+  t.Fatalf("successful job was not persisted: %v", err)
+ }
+ t.Cleanup(func() {
+  jobs.Lock()
+  delete(jobs.items, "1000000005")
+  jobs.Unlock()
+ })
+ expect("not_yet_validated", "")
+ complete(ctx, "1000000007", 0, generation())
+ expect("validated", "1000000007")
+ if err := os.Remove(path); err != nil { t.Fatal(err) }
+ expect("unavailable", "")
+ writeLicense("synthetic fixture B")
+ expect("not_yet_validated", "")
 }

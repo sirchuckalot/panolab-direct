@@ -6,8 +6,8 @@ import (
  "context"
  "crypto/sha256"
  "crypto/subtle"
- "encoding/hex"
  "encoding/base64"
+ "encoding/hex"
  "encoding/json"
  "errors"
  "fmt"
@@ -36,6 +36,8 @@ type Info struct {
  ISE bool `json:"ise_available"`
  License bool `json:"license_available"`
  LicenseValidated bool `json:"license_validated"`
+ LicenseValidationStatus string `json:"license_validation_status"`
+ LicenseValidationJob string `json:"license_validation_job_id,omitempty"`
  Programming bool `json:"programming_supported"`
 }
 type StartInput struct { Profile string `json:"profile"`; Project string `json:"project"` }
@@ -47,7 +49,7 @@ type BuildResult struct { ID string `json:"job_id"`; State string `json:"state"`
 type projectSpec struct { Top string `json:"top"`; Part string `json:"part"`; Verilog []string `json:"verilog"`; UCF string `json:"ucf"` }
 type job struct { id, state, project, profile string; exit int; cancel context.CancelFunc }
 type jobRecord struct { ID string `json:"job_id"`; State string `json:"state"`; Exit int `json:"exit_code"`; Project string `json:"project"`; Profile string `json:"profile"` }
-var jobs = struct {sync.Mutex; items map[string]*job}{items:map[string]*job{}}
+var jobs = struct {sync.Mutex; items map[string]*job; license licenseIdentity; licenseGeneration uint64; licenseJob string}{items:map[string]*job{}}
 var root="/results/jobs"
 var projectsRoot="/projects"
 var safeName=regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_-]{0,63}$`)
@@ -72,12 +74,71 @@ func readProjectFile(base,name string)([]byte,error){
  return os.ReadFile(file)
 }
 
+// License identity and proof are private and process-local. All observations
+// and proof updates are serialized with the job state.
+type licenseIdentity struct {
+ info os.FileInfo
+ digest [sha256.Size]byte
+}
+
+func readLicenseIdentity(path string) licenseIdentity {
+ const maxBytes = 1024 * 1024
+ before, err := os.Lstat(path)
+ if err != nil || !before.Mode().IsRegular() || before.Size() > maxBytes {
+  return licenseIdentity{}
+ }
+ f, err := os.Open(path)
+ if err != nil {
+  return licenseIdentity{}
+ }
+ defer f.Close()
+ opened, err := f.Stat()
+ if err != nil || !sameLicenseFile(before, opened) {
+  return licenseIdentity{}
+ }
+ hash := sha256.New()
+ size, err := io.Copy(hash, io.LimitReader(f, maxBytes+1))
+ after, statErr := os.Lstat(path)
+ if err != nil || statErr != nil || size != before.Size() || !sameLicenseFile(before, after) {
+  return licenseIdentity{}
+ }
+ var digest [sha256.Size]byte
+ copy(digest[:], hash.Sum(nil))
+ return licenseIdentity{info: before, digest: digest}
+}
+
+func sameLicenseFile(a, b os.FileInfo) bool {
+ return b.Mode().IsRegular() && os.SameFile(a, b) &&
+  a.Size() == b.Size() && a.Mode() == b.Mode() && a.ModTime().Equal(b.ModTime())
+}
+
+func observeLicenseLocked() bool {
+ current := readLicenseIdentity(os.Getenv("XILINXD_LICENSE_FILE"))
+ previous := jobs.license
+ if (current.info == nil) != (previous.info == nil) ||
+  (current.info != nil && previous.info != nil &&
+   (!sameLicenseFile(previous.info, current.info) || previous.digest != current.digest)) {
+  jobs.licenseGeneration++
+  jobs.licenseJob = ""
+ }
+ jobs.license = current
+ return current.info != nil
+}
+
 func toolchain(ctx context.Context,r *mcp.CallToolRequest,in Empty)(*mcp.CallToolResult,Info,error){
  _,ise:=os.Stat("/opt/Xilinx/14.7/ISE_DS/settings64.sh")
  instanceID,_:=os.Hostname()
- license:=os.Getenv("XILINXD_LICENSE_FILE");var lic error=errors.New("unset")
- if license!="" {_,lic=os.Stat(license)}
- return nil,Info{Name:"panolab-ise14",InterfaceVersion:"1.0",InstanceID:instanceID,Vendor:"Xilinx",ToolchainVersion:"ISE 14.7 (pending execution verification)",Profiles:[]string{"ise14-implementation"},ISE:ise==nil,License:license!="" && lic==nil,LicenseValidated:false,Programming:false},nil
+ jobs.Lock()
+ available := observeLicenseLocked()
+ proof := jobs.licenseJob
+ jobs.Unlock()
+ validation := "not_yet_validated"
+ if !available {
+  validation = "unavailable"
+ } else if proof != "" {
+  validation = "validated"
+ }
+ return nil,Info{Name:"panolab-ise14",InterfaceVersion:"1.0",InstanceID:instanceID,Vendor:"Xilinx",ToolchainVersion:"ISE 14.7",Profiles:[]string{"ise14-implementation"},ISE:ise==nil,License:available,LicenseValidated:proof!="",LicenseValidationStatus:validation,LicenseValidationJob:proof,Programming:false},nil
 }
 func loadProject(name string)(projectSpec,string,error){
  if !safeName.MatchString(name){return projectSpec{},"",errors.New("invalid project ID")}
@@ -153,38 +214,69 @@ func runBuildWith(ctx context.Context,dir string,p projectSpec,stageRunner func(
  for _,step:=range stages {
   if err:=stageRunner(ctx,dir,step.name,step.args...);err!=nil{return fmt.Errorf("%s: %w",step.name,err)}
  }
- info,err:=os.Stat(filepath.Join(dir,"design.bit"))
- if err!=nil{return err};if info.Size()==0{return errors.New("generated bitstream is empty")}
+ info,err:=os.Lstat(filepath.Join(dir,"design.bit"))
+ if err!=nil{return err};if !info.Mode().IsRegular() || info.Size()==0{return errors.New("generated bitstream is missing, nonregular or empty")}
  return nil
 }
 func start(ctx context.Context,r *mcp.CallToolRequest,in StartInput)(*mcp.CallToolResult,StartOutput,error){
  if in.Profile!="ise14-implementation"{return nil,StartOutput{},errors.New("unsupported build profile")}
  p,base,err:=loadProject(in.Project);if err!=nil{return nil,StartOutput{},err}
  if _,err=os.Stat("/opt/Xilinx/14.7/ISE_DS/settings64.sh");err!=nil{return nil,StartOutput{},errors.New("ISE environment unavailable")}
- license:=os.Getenv("XILINXD_LICENSE_FILE")
- if license==""{return nil,StartOutput{},errors.New("license path unset")}
- if _,err=os.Stat(license);err!=nil{return nil,StartOutput{},errors.New("license unavailable")}
  jobs.Lock()
+ if !observeLicenseLocked() {
+  jobs.Unlock()
+  return nil,StartOutput{},errors.New("license unavailable")
+ }
  for _,j:=range jobs.items{if j.state=="running"{jobs.Unlock();return nil,StartOutput{},errors.New("worker busy")}}
  id:=fmt.Sprintf("%d",time.Now().UnixNano())
  jobctx,cancelFn:=context.WithTimeout(context.Background(),20*time.Minute)
  j:=&job{id:id,state:"running",exit:-1,project:in.Project,profile:in.Profile,cancel:cancelFn}
- jobs.items[id]=j;jobs.Unlock()
+ jobs.items[id]=j
+ jobs.Unlock()
  dir:=filepath.Join(root,id)
  if err=os.MkdirAll(dir,0700);err==nil {err=prepare(dir,base,p)}
  if err==nil{err=persistJob(j)}
  if err!=nil{cancelFn();jobs.Lock();delete(jobs.items,id);jobs.Unlock();return nil,StartOutput{},err}
  go func(){
   defer cancelFn()
+  jobs.Lock()
+  licenseAvailable := observeLicenseLocked()
+  generation := jobs.licenseGeneration
+  jobs.Unlock()
+  if !licenseAvailable {
+   finishJob(jobctx, j, 1, false, generation)
+   return
+  }
   err:=runBuild(jobctx,dir,p)
   rc:=0;if err!=nil{rc=1;var e *exec.ExitError;if errors.As(err,&e){rc=e.ExitCode()}}
-  jobs.Lock();defer jobs.Unlock()
-  j.exit=rc
-  if jobctx.Err()!=nil{j.state="cancelled"}else if rc==0{j.state="succeeded"}else{j.state="failed"}
-  if err:=persistJob(j);err!=nil{log.Print("failed to persist job: ",err)}
+  finishJob(jobctx, j, rc, true, generation)
  }()
  return nil,StartOutput{ID:id,State:"running"},nil
 }
+func finishJob(ctx context.Context, j *job, rc int, licenseAvailable bool, generation uint64) {
+ jobs.Lock()
+ defer jobs.Unlock()
+ available := observeLicenseLocked()
+ j.exit = rc
+ switch {
+ case ctx.Err() != nil:
+  j.state = "cancelled"
+ case rc == 0:
+  j.state = "succeeded"
+ default:
+  j.state = "failed"
+ }
+ if err := persistJob(j); err != nil {
+  j.state = "failed"
+  j.exit = 125
+  log.Print("failed to persist job: ", err)
+  return
+ }
+ if j.state == "succeeded" && licenseAvailable && available && generation == jobs.licenseGeneration {
+  jobs.licenseJob = j.id
+ }
+}
+
 func lookup(id string)(job,error){
  if id==""||strings.Trim(id,"0123456789")!=""{return job{},errors.New("invalid job ID")}
  jobs.Lock();defer jobs.Unlock()
@@ -204,19 +296,41 @@ func status(ctx context.Context,r *mcp.CallToolRequest,in JobInput)(*mcp.CallToo
  j,err:=lookup(in.ID);if err!=nil{return nil,Status{},err}
  return nil,Status{ID:j.id,State:j.state,ExitCode:j.exit},nil
 }
+func openArtifact(path string) (*os.File, os.FileInfo, error) {
+ before, err := os.Lstat(path)
+ if err != nil {
+  return nil, nil, err
+ }
+ if !before.Mode().IsRegular() {
+  return nil, nil, errors.New("artifact must be a regular file")
+ }
+ file, err := os.Open(path)
+ if err != nil {
+  return nil, nil, err
+ }
+ info, err := file.Stat()
+ if err != nil || !info.Mode().IsRegular() || !os.SameFile(before, info) {
+  file.Close()
+  return nil, nil, errors.New("invalid artifact identity")
+ }
+ return file, info, nil
+}
+
 func result(ctx context.Context,r *mcp.CallToolRequest,in JobInput)(*mcp.CallToolResult,BuildResult,error){
  j,err:=lookup(in.ID);if err!=nil{return nil,BuildResult{},err}
  out:=BuildResult{ID:j.id,State:j.state,ExitCode:j.exit,Project:j.project,Profile:j.profile,Artifacts:[]Artifact{}}
  dir:=filepath.Join(root,j.id)
- // Artifact-chunk queries avoid regenerating large hashes for every 48 KiB page.
+ // Chunk queries avoid regenerating artifact hashes for every page.
  if in.Artifact!=""{
   if !artifactNames[in.Artifact]{return nil,BuildResult{},errors.New("unknown artifact")}
   if in.Offset<0{return nil,BuildResult{},errors.New("negative artifact offset")}
-  f,err:=os.Open(filepath.Join(dir,in.Artifact));if err!=nil{return nil,BuildResult{},err}
+  f,info,err:=openArtifact(filepath.Join(dir,in.Artifact));if err!=nil{return nil,BuildResult{},err}
   defer f.Close()
-  info,err:=f.Stat();if err!=nil{return nil,BuildResult{},err}
-  if !info.Mode().IsRegular()||in.Offset>info.Size(){return nil,BuildResult{},errors.New("invalid artifact or offset")}
-  const chunkLimit=49152 // 48 KiB raw / 64 KiB base64, safe for stdio JSON frames.
+  if in.Offset>info.Size(){return nil,BuildResult{},errors.New("invalid artifact offset")}
+  chunkLimit := 49152 // Preserve paging for direct clients of other artifacts.
+  if in.Artifact == "design.twr" {
+   chunkLimit = 8192 // 10,924 base64 bytes plus framing fit the broker cap.
+  }
   b:=make([]byte,chunkLimit)
   n,err:=f.ReadAt(b,in.Offset)
   if err!=nil&&!errors.Is(err,io.EOF){return nil,BuildResult{},err}
@@ -228,17 +342,25 @@ func result(ctx context.Context,r *mcp.CallToolRequest,in JobInput)(*mcp.CallToo
  if in.Artifact!=""{return nil,out,nil}
  // The MCP client defines pass/fail test criteria. No baked-in smoke assertion.
  for _,name:=range []string{"xst.log","ngdbuild.log","map.log","par.log","trce.log","bitgen.log","design.bit","design.twr"}{
-  f,err:=os.Open(filepath.Join(dir,name));if err!=nil{continue}
-  h:=sha256.New();n,copyErr:=io.Copy(h,f);_ =f.Close();if copyErr!=nil{continue}
+  f,_,err:=openArtifact(filepath.Join(dir,name));if err!=nil{continue}
+  h:=sha256.New()
+  n,copyErr:=io.Copy(h,f)
+  if copyErr!=nil {
+   f.Close()
+   continue
+  }
   mime:="text/plain";if strings.HasSuffix(name,".bit"){mime="application/octet-stream"}
   out.Artifacts=append(out.Artifacts,Artifact{Name:name,SHA256:hex.EncodeToString(h.Sum(nil)),Bytes:n,MediaType:mime})
   if strings.HasSuffix(name,".log"){
-   b,err:=os.ReadFile(filepath.Join(dir,name));if err==nil{
-    const limit=4096
-    if len(b)>limit{out.LogsTruncated=true;b=b[len(b)-limit:]}
-    out.Logs+=name+":\n"+string(b)+"\n"
+   const limit = 4096
+   if n > limit { out.LogsTruncated = true }
+   start := max(0, n-limit)
+   b := make([]byte, n-start)
+   if _, err := f.ReadAt(b, start); err == nil {
+    out.Logs += name+":\n"+string(b)+"\n"
    }
   }
+  f.Close()
  }
  if len(out.Logs)>32768{out.LogsTruncated=true;out.Logs=out.Logs[len(out.Logs)-32768:]}
 

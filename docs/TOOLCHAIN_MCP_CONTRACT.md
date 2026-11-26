@@ -56,6 +56,38 @@ owner-approved `@ise14` compatibility route and temporary maintenance
 bridge provide remote control; see
 [temporary maintenance controls](ARCHITECTURE.md#temporary-maintenance-and-retirement).
 
+The ISE worker reports the pinned installation version and license file
+availability separately from execution evidence. A readable regular license
+file starts as `not_yet_validated`. The worker reports `validated` with
+`license_validation_job_id` only after a persisted successful six-stage build
+with a nonempty bitstream and matching private license identity before and
+after execution. Evidence belongs to the current worker process and clears
+when the observed identity changes or becomes unavailable. Failed builds
+leave existing proof for the same observed identity intact.
+`toolchain_info` invokes no vendor stages and discloses no license identity.
+
+The named `ise_build_result` adapter accepts `ID` and optional
+`Artifact: "design.twr"`. The compatibility request is
+`["@ise14", "build_result", "<job-id>", "design.twr"]`. Omitting the
+selector returns the usual metadata and diagnostic categories without
+reading artifact pages. The remote adapter accepts only the timing report
+selector. Direct worker clients retain the chunk interface. For
+`design.twr` the worker sends pages of at most 8,192 raw bytes. In this
+interface an omitted zero offset means zero and an omitted EOF means false.
+
+The broker accepts a terminal job, verifies consecutive pages against the
+report's exact metadata size and SHA-256, and bounds the report at 1 MiB
+and the operation at 110 seconds. It returns the verified artifact metadata
+and bounded TRACE facts, including coverage and reported constraint targets,
+setup and hold errors, analyzed paths and reported slack when available.
+Constraint indices follow report order. The result uses `constrained`,
+`unconstrained`, `unknown` or `incomplete` for recognized evidence, and
+rejects unreadable or inconsistent results. The broker exposes a report's
+constraint conclusion only with corroborating coverage and constraint
+details. These facts describe the supplied report's coverage. Raw timing
+paths, clock names, vendor logs and bitstream bytes stay private to the
+worker and broker boundary.
+
 **Disposable installation acceptance is a separate normal control-plane
 workflow, not a sixth mandatory vendor worker tool.** The authenticated
 `@ise-e2e` broker adapter creates a disposable setup and vendor worker
