@@ -50,6 +50,8 @@ details are retained below.
 | 2026-11-26 UTC — Documentation sweep and canonical agent launcher enforcement shipped together | [2ab466c](https://github.com/sirchuckalot/panolab-direct/commit/2ab466ce9977dd8880eba4fbb5ce2906caa0b7c6) |
 | 2026-11-26 UTC — Final platform operations, architecture and research documentation consolidation | [db8b329](https://github.com/sirchuckalot/panolab-direct/commit/db8b329ff53f1b3d9874c91332c90226e48e4213) |
 | 2026-11-26 UTC — Repository ownership and coherent commit discipline: formalized the existing document ownership map, dependency-ordered milestones and reviewed publication, with 193 independent Python tests and live canonical agent-policy verification. No new documentation files. | [2c488e9](https://github.com/sirchuckalot/panolab-direct/commit/2c488e9c23fc096b5f721afb2dff52c461f51ab1), [351a146](https://github.com/sirchuckalot/panolab-direct/commit/351a14647c2779b012ea3ae0a5c16544b42d5abf) |
+| 2026-11-26 UTC — Licensed ISE result integration: corrected build-backed license reporting and integrity-checked, bounded TRACE retrieval. Both normal interfaces retrieved the historical 71,042-byte report (constraint coverage incomplete); fresh job `1795699429166374456` passed all six implementation stages, 20 ns constraint met (2.666 ns reported minimum period, 276 paths, zero setup/hold errors), 4,220,305-byte bitstream, license validated against that job. 202 Python tests and both Go build/test stages passed; rebuilt management images accepted on laptop. See [toolchain contract](TOOLCHAIN_MCP_CONTRACT.md). Not hardware qualification. | [9a35de7](https://github.com/sirchuckalot/panolab-direct/commit/9a35de7998cece688a306de188832a3907fbf5a1), [bc1ace2](https://github.com/sirchuckalot/panolab-direct/commit/bc1ace2adb815a4ec104fc26fc33a5dc4b2eefa9), [6e53368](https://github.com/sirchuckalot/panolab-direct/commit/6e533680cf37e42b6356929ac4f34b4cc3afaa69) |
+| 2026-11-26 UTC — Single-owner engineering milestone ledger: established ChatGPT editorial ownership, Codex evidence handoff, material-milestone-only entries and immutable chronological references. No new documentation files; 202 applicable Python tests and live policy canary `a66809d35ead41b3ba56744228a764f3` passed. | [6efbbb3](https://github.com/sirchuckalot/panolab-direct/commit/6efbbb3f3c4a9e70dbbfbe1ed591d69ac494aff2) |
 
 For current commit rules, see the
 [mandatory development process](../AGENTS.md#mandatory-development-process).
@@ -64,13 +66,10 @@ For current commit rules, see the
   instructions. Documentation consolidation recorded 193 passing Python
   tests and reduced first-party documentation candidates from 47 to 36,
   excluding upstream and frozen material.
-- **Pending ISE integration.** Separate candidate job
-  `a40ed5cca0ef4a7daf771a1413a9d0bd` reported source-only `COMPLETED` with
-  201 passing Python tests. It reproduced the historical report retrieval
-  issue and the live false license validation field. Candidate Go tests and
-  deployment verification remain pending. Full fresh-host installation,
-  reboot qualification for the current topology and physical FPGA
-  qualification remain open.
+- **Remaining qualification boundaries.** Full fresh-host installation,
+  complete reboot qualification for the current topology and physical FPGA
+  qualification remain open. Historical timing coverage is not inferred
+  from a successful implementation build.
 
 ## G2 engineering handoff
 
