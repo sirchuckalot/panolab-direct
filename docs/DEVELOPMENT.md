@@ -21,7 +21,7 @@ verified before claiming the running laptop uses the new paths.
 
 ## Mandatory execution admission
 
-Follow the [agent execution and hard-stop policy](AGENT_EXECUTION_POLICY.md) for every engineering session and dependent gate. A required input, mount, permission, tool or RPC failure stops dependent work immediately; correct and verify the original path before restarting. Distinguish infrastructure failures from valid engineering-test findings. Report blockers before results.
+Follow the [agent execution and hard-stop policy](AGENT_EXECUTION_POLICY.md) for every engineering session and dependent gate. A required input, mount, permission, tool or RPC failure stops dependent work immediately; correct and verify the original path before restarting. Distinguish infrastructure failures from valid engineering-test findings. Report infrastructure blockers immediately and first. A failed engineering prerequisite blocks downstream work, not the in-scope ChatGPT–Codex diagnosis, implementation, regression and independent-verification loop; resolve it at the earliest applicable gate and report material findings, decisions and evidence without requiring owner approval of routine engineering corrections.
 
 ## Choose the test venue
 
