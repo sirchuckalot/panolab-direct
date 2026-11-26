@@ -381,6 +381,24 @@ TIMING_CONCLUSIONS = {
     "not all constraints were met.": False,
     "timing constraints are not met.": False,
 }
+DATA_SHEET_SEPARATOR = re.compile(r"-{3,256}")
+DATA_SHEET_UNITS = "all values displayed in nanoseconds (ns)"
+DATA_SHEET_BODY_LIMIT = 8
+DATA_SHEET_NAME = r"[\w./<>\[\]$()-]{1,256}"
+DATA_SHEET_DELAY = r"[+-]?[0-9]{1,9}\.[0-9]{1,9}(?:\([RFX]\))?"
+DATA_SHEET_TABLE_LINE = re.compile(
+    rf"(?:[-+|]{{3,256}}"
+    rf"|(?:Clock to (?:Setup|Hold) on destination clock|Setup/Hold to clock) {DATA_SHEET_NAME}"
+    rf"|Clock {DATA_SHEET_NAME} to Pad|Pad to Pad"
+    rf"|\|\s*Src:Rise\|\s*Src:Fall\|\s*Src:Rise\|\s*Src:Fall\|"
+    rf"|Source Clock\s*\|Dest:Rise\|Dest:Rise\|Dest:Fall\|Dest:Fall\|"
+    rf"|\|?\s*(?:(?:Source (?:Clock|Pad)|Destination Pad|Setup to|Hold to|"
+    rf"Src/Dest|(?:Rise|Fall)/(?:Rise|Fall)|clk \(edge\)|to PAD|Delay)?\s*\|\s*){{1,5}}"
+    rf"|(?P<row>\|?\s*{DATA_SHEET_NAME}\s*\|(?:\s*{DATA_SHEET_NAME}\s*\|)?"
+    rf"(?:\s*(?:N/A)?\s*\|){{0,3}}\s*{DATA_SHEET_DELAY}\s*\|"
+    rf"(?:\s*(?:{DATA_SHEET_DELAY}|N/A)?\s*\|){{0,3}}))",
+    re.I,
+)
 
 
 def ns(value, unit):
@@ -401,6 +419,9 @@ def parse_timing_report(content):
     saw_header = False
     saw_no_constraints = False
     preceding_conclusions = set()
+    data_sheet_lines = None
+    data_sheet_valid = False
+    data_sheet_has_row = False
     for line in content.decode("utf-8", errors="replace").splitlines():
         line = line.strip()
         if not line:
@@ -409,15 +430,41 @@ def parse_timing_report(content):
         if re.match(r"Release\s+14\.7\s+Trace\b", line, re.I):
             saw_header = True
         if re.fullmatch(r"(?:Timing\s+)?Summary(?:\s+of\s+Timing\s+Analysis)?\s*[:.]*", line, re.I):
-            # TRACE 14.7 can place its conclusion immediately before the timing summary.
-            if re.fullmatch(r"Timing\s+summary:", line, re.I):
+            # TRACE can put a Data Sheet report between its conclusion and summary.
+            if in_summary or (re.fullmatch(r"Timing\s+summary:", line, re.I) and
+                              (data_sheet_lines is None or (data_sheet_valid and data_sheet_has_row))):
                 for preceding_conclusion in preceding_conclusions:
                     record_fact(overall, "all_constraints_met", preceding_conclusion)
             current = None
             in_summary = True
             preceding_conclusions.clear()
+            data_sheet_lines = None
             continue
-        if conclusion is None:
+        if data_sheet_lines is not None:
+            data_sheet_lines += 1
+            if conclusion is not None and preceding_conclusions - {conclusion}:
+                raise ValueError("conflicting timing facts")
+            if data_sheet_lines == 1:
+                valid_line = DATA_SHEET_SEPARATOR.fullmatch(line)
+            elif data_sheet_lines == 2:
+                valid_line = line.lower() == DATA_SHEET_UNITS
+            else:
+                valid_line = (data_sheet_lines <= DATA_SHEET_BODY_LIMIT + 1 and
+                              len(line) <= 256 and DATA_SHEET_TABLE_LINE.fullmatch(line))
+                if valid_line and valid_line["row"]:
+                    data_sheet_has_row = True
+            data_sheet_valid = data_sheet_valid and bool(valid_line)
+        elif line.lower() == "data sheet report:":
+            data_sheet_lines = 0
+            data_sheet_valid = True
+            data_sheet_has_row = False
+            current = None
+            in_summary = False
+            continue
+        elif conclusion is None:
+            if in_summary:
+                for preceding_conclusion in preceding_conclusions:
+                    record_fact(overall, "all_constraints_met", preceding_conclusion)
             preceding_conclusions.clear()
         else:
             preceding_conclusions.add(conclusion)
@@ -475,8 +522,9 @@ def parse_timing_report(content):
                 if setup_score is not None:
                     record_fact(overall, "setup_score", int(setup_score))
                     record_fact(overall, "hold_score", int(hold_score))
-            if conclusion is not None:
-                record_fact(overall, "all_constraints_met", conclusion)
+    if in_summary:
+        for preceding_conclusion in preceding_conclusions:
+            record_fact(overall, "all_constraints_met", preceding_conclusion)
     if not saw_header or "timing_errors" not in overall or not content.endswith(b"\n"):
         raise ValueError("incomplete TRACE report")
     explicit = [c for c in constraints if c["type"] not in ("default_period", "tig")]

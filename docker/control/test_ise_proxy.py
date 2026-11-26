@@ -370,6 +370,65 @@ class TimingResultContracts(unittest.TestCase):
             with self.subTest(report=contradictory), self.assertRaises(ValueError):
                 ise_proxy.parse_timing_report(contradictory)
 
+        data_sheet = (
+            b"\nData Sheet report:\n"
+            b"-----------------\n"
+            b"All values displayed in nanoseconds (ns)\n\n"
+            b"Clock to Setup on destination clock synthetic_clk\n"
+            b"---------------+---------+---------+---------+---------+\n"
+            b"| Src:Rise| Src:Fall| Src:Rise| Src:Fall|\n"
+            b"Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|\n"
+            b"---------------+---------+---------+---------+---------+\n"
+            b"synthetic_clk   |    2.108|         |         |         |\n"
+            b"---------------+---------+---------+---------+---------+\n"
+        )
+        report_with_sheet = details + conclusion + data_sheet + summary + coverage
+        evidence = ise_proxy.parse_timing_report(report)
+        self.assertEqual(ise_proxy.parse_timing_report(report_with_sheet), evidence)
+        self.assertTrue(evidence["overall"]["all_constraints_met"])
+        self.report = report_with_sheet
+        self.artifact.update(bytes=len(self.report), sha256=hashlib.sha256(self.report).hexdigest())
+        result = self.result()
+        self.assertTrue(result["ok"], result)
+        self.assertTrue(result["timing"]["overall"]["all_constraints_met"])
+
+        for intervening in (
+            data_sheet.replace(b"Data Sheet report:", b"Other report:"),
+            data_sheet.replace(b"-----------------\n", b"\n", 1),
+            data_sheet.replace(b"All values displayed in nanoseconds (ns)\n", b""),
+            data_sheet.replace(b"synthetic_clk   |", b"Destination: synthetic_clk|"),
+            data_sheet.replace(b"Src:Rise", b"Src:Other", 1),
+            data_sheet.replace(b"Dest:Fall", b"Dest:Other", 1),
+            data_sheet + b"Timing constraint: TIG test_group;\n",
+            data_sheet + b"Path report:\n",
+            data_sheet + b"Data Sheet report:\n" + conclusion,
+            data_sheet + b"-------------+-----------+\n",
+            data_sheet + conclusion,
+        ):
+            with self.subTest(intervening=intervening):
+                result = ise_proxy.parse_timing_report(details + conclusion + intervening + summary + coverage)
+                self.assertEqual(result["constraint_status"], "incomplete")
+                self.assertNotIn("all_constraints_met", result["overall"])
+
+        for incomplete in (
+            report_with_sheet.removesuffix(coverage),
+            details + b"Summary:\n" + conclusion + data_sheet + b"Path report:\n" + summary + coverage,
+        ):
+            with self.subTest(report=incomplete):
+                result = ise_proxy.parse_timing_report(incomplete)
+                self.assertEqual(result["constraint_status"], "incomplete")
+                self.assertNotIn("all_constraints_met", result["overall"])
+
+        for contradictory in (
+            report_with_sheet + negative,
+            details + conclusion + data_sheet + negative + summary + coverage,
+            details + negative + conclusion + data_sheet + summary + coverage,
+            report_with_sheet.replace(b"Timing errors: 0", b"Timing errors: 1"),
+            report_with_sheet.replace(b"0 failing endpoints", b"1 failing endpoint"),
+        ):
+            with self.subTest(report=contradictory), self.assertRaises(ValueError):
+                ise_proxy.parse_timing_report(contradictory)
+
     def test_license_proof_is_bounded_and_coherent(self):
         data = {"vendor": "Xilinx", "toolchain_version": "ISE 14.7",
                 "ise_available": True, "license_available": True, "license_validated": True,
