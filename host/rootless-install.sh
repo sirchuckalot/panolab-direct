@@ -241,6 +241,7 @@ options="$(r exec "$broker" docker info --format '{{json .SecurityOptions}}' 2>/
 # In the rootless user namespace, UID 0 maps to the current ordinary
 # laptop owner, allowing access to existing owner-only credentials.
 # Do not change host permissions or treat namespace root as host root.
+[[ -d "$root/research" && ! -L "$root/research" ]] || fail "Canonical research directory missing or symlinked."
 if ! new_exists "$dev"; then
   cmd=(run -d --name "$dev" --restart unless-stopped --label panolab.managed=true
     --user 0:0 --workdir /workspace --cap-drop ALL
@@ -251,7 +252,7 @@ if ! new_exists "$dev"; then
     --mount "type=bind,src=$PANOLAB_WORKSPACE_HOST,dst=/workspace"
     --mount "type=bind,src=$PANOLAB_CODEX_AUTH_HOST,dst=/codex-auth"
     --env CODEX_HOME=/codex-auth)
-  for spec in projects:ro boards:ro shared:ro third_party:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
+  for spec in projects:ro boards:ro shared:ro third_party:ro research:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
     rel="${spec%:*}"; perm="${spec#*:}"
     mount="type=bind,src=$root/$rel,dst=/repo/$rel"
     [[ "$perm" == ro ]] && mount+=",readonly"
@@ -268,6 +269,11 @@ else
      "$current_codex" == "$PANOLAB_CODEX_AUTH_HOST" &&
      "$current_projects" == "$root/projects" ]] ||
     fail "Existing dev container has unexpected bind mounts; inspect before recovery."
+  current_research="$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/research"}}{{.Type}}|{{.Source}}|{{.RW}}{{end}}{{end}}' "$dev")"
+  [[ -n "$current_research" ]] ||
+    fail "Existing dev lacks /repo/research. Use bash ./panolab-install.sh --upgrade-dev for controlled migration."
+  [[ "$current_research" == "bind|$root/research|false" ]] ||
+    fail "Existing dev has an unexpected /repo/research mount; inspect before recovery."
 fi
 # Repair pre-policy dev containers in place; never recreate or discard work.
 restart_policy="$(r inspect -f '{{.HostConfig.RestartPolicy.Name}}' "$dev")"
@@ -291,7 +297,7 @@ else
     fail "New development image lacks the pinned LiteX toolchain."
 fi
 r exec "$dev" /bin/sh -ec \
-  'test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /workspace && test ! -e /repo/docker/private && command -v yosys && command -v iverilog && command -v verilator && test -x /usr/local/bin/codex' >/dev/null ||
+  'test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /repo/research && test -d /workspace && test ! -e /repo/docker/private && test ! -e /repo/docker/.env && test ! -e /repo/.git && command -v yosys && command -v iverilog && command -v verilator && test -x /usr/local/bin/codex' >/dev/null ||
   fail "Rootless development toolchain/source mounts failed."
 for pair in 'cpu.max:200000 100000' 'memory.max:4294967296' 'pids.max:256'; do
   key="${pair%%:*}"; expect="${pair#*:}"

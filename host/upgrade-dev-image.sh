@@ -15,13 +15,13 @@ say() { printf 'PanoLab dev upgrade: %s\n' "$*"; }
 [[ "$(id -u)" != 0 && -S "$socket" ]] || die "Expected ordinary user/rootless socket."
 [[ "$(r info --format '{{json .SecurityOptions}}')" == *'"name=rootless"'* ]] || die "Rootless Engine required."
 [[ -d "$root/.git" ]] || die "Expected PanoLab checkout missing."
-for rel in projects boards shared third_party agent specs tests docs host docker/modern; do
+for rel in projects boards shared third_party research agent specs tests docs host docker/modern; do
   [[ -d "$root/$rel" && ! -L "$root/$rel" ]] || die "Unexpected source directory: $rel"
 done
-old_present=0; old_running=false
+old_present=0; old_running=false; old_layout=absent
 if r container inspect "$dev" >/dev/null 2>&1; then
   old_present=1
-  r inspect "$dev" | python3 -c '
+  old_layout="$(r inspect "$dev" | python3 -c '
 import json,sys
 c=json.load(sys.stdin)[0]; root,work,auth=sys.argv[1:]
 assert c["Config"]["Labels"].get("panolab.managed")=="true"
@@ -34,7 +34,7 @@ expected={"/workspace":(work,False),"/codex-auth":(auth,False)}
 legacy=(("gateware",False),("agent",False),("boards",True),
         ("specs",True),("tests",True),("docs",True),("host",True),
         ("docker/modern",True))
-current=(("projects",True),("boards",True),("shared",True),
+previous=(("projects",True),("boards",True),("shared",True),
          ("third_party",True),("agent",False),("specs",True),
          ("tests",True),("docs",True),("host",True),("docker/modern",True))
 def layout(mounts):
@@ -42,9 +42,16 @@ def layout(mounts):
     for name,ro in mounts:
         result["/repo/"+name]=(root+"/"+name,ro)
     return result
-got={x["Destination"]:(x["Source"],not x["RW"]) for x in c["Mounts"] if x["Type"]=="bind"}
-assert got in (layout(legacy),layout(current)), "Unexpected bind mount set"
-' "$root" "$workspace" "$auth" || die "Dev container differs from approved configuration; unchanged."
+mounts=[x for x in c["Mounts"] if
+        not (x["Type"]=="tmpfs" and x["Destination"] in ("/tmp","/home"))]
+got={x["Destination"]:(x["Source"],not x["RW"]) for x in mounts if x["Type"]=="bind"}
+assert len(got)==len(mounts), "Unexpected mount type or duplicate destination"
+layouts={"legacy":layout(legacy),"previous":layout(previous),
+         "current":layout(previous+(("research",True),))}
+kind=next((name for name,expected in layouts.items() if got==expected),None)
+assert kind is not None, "Unexpected bind mount set"
+print(kind)
+' "$root" "$workspace" "$auth")" || die "Dev container differs from approved configuration; unchanged."
   old_running="$(r inspect -f '{{.State.Running}}' "$dev")"
 fi
 label="$(r image inspect -f '{{index .Config.Labels "org.panolab.litex.recipe"}}' "$image" 2>/dev/null || true)"
@@ -67,23 +74,25 @@ python3 /opt/panolab/recipes/litex-bootstrap.py \
   --prefix /opt/panolab/litex --lock /opt/panolab/recipes/litex-upstream.lock.json \
   --requirements /opt/panolab/recipes/litex-requirements.txt --verify-only' ||
   die "Image smoke failed; old dev untouched."
+same_image=false
 if (( old_present )); then
   if [[ "$(r inspect -f '{{.Image}}' "$dev")" == "$new_id" ]]; then
-    if r inspect "$dev" | python3 -c '
-import json,sys
-c=json.load(sys.stdin)[0]
-d={x["Destination"] for x in c["Mounts"] if x["Type"]=="bind"}
-sys.exit(0 if "/repo/projects" in d and "/repo/third_party" in d else 1)
-'; then
+    same_image=true
+    if [[ "$old_layout" == current ]]; then
       say "DEV_IMAGE_AND_SOURCE_MOUNTS_ALREADY_CURRENT=1; no container replacement."
       exit 0
     fi
     say "Current image uses previous source mounts; controlled source-mount replacement required."
   fi
 fi
-# Do not stack multiple backups; a prior transition must be reviewed first.
-if r ps -a --format '{{.Names}}' --filter "name=^$dev-rollback-" | grep -q .; then
-  die "Outstanding stopped rollback dev container exists; review before retry."
+# Allow the research-only transition alongside one retained, stopped rollback.
+# Other upgrades still require review of any outstanding rollback.
+prior_rollbacks="$(r ps -a --format '{{.Names}}' --filter "name=^/?$dev-rollback-")"
+if [[ -n "$prior_rollbacks" ]]; then
+  [[ "$same_image" == true && "$old_layout" == previous && "$prior_rollbacks" =~ ^panolab-direct-dev-1-rollback-[0-9]{8}T[0-9]{6}Z$ ]] ||
+    die "Outstanding rollback dev containers exist; review before retry."
+  [[ "$(r inspect -f '{{.State.Status}}|{{index .Config.Labels "panolab.managed"}}' "$prior_rollbacks")" == 'exited|true' ]] ||
+    die "Existing rollback is not a stopped managed dev container; review before retry."
 fi
 backup="$dev-rollback-$(date -u +%Y%m%dT%H%M%SZ)"
 r container inspect "$backup" >/dev/null 2>&1 && die "Backup container name already occupied."
@@ -127,20 +136,21 @@ cmd=(run -d --name "$dev" --restart unless-stopped --label panolab.managed=true
   --mount "type=bind,src=$workspace,dst=/workspace"
   --mount "type=bind,src=$auth,dst=/codex-auth"
   --env CODEX_HOME=/codex-auth)
-for spec in projects:ro boards:ro shared:ro third_party:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
+for spec in projects:ro boards:ro shared:ro third_party:ro research:ro agent:rw specs:ro tests:ro docs:ro host:ro docker/modern:ro; do
   rel="${spec%:*}"; perm="${spec#*:}"
   mount="type=bind,src=$root/$rel,dst=/repo/$rel"
   [[ "$perm" == ro ]] && mount+=",readonly"
   cmd+=(--mount "$mount")
 done
 say "Starting replacement dev with new source mounts, unchanged quotas, security and name."
-r "${cmd[@]}" "$image" sleep infinity >/dev/null
+r "${cmd[@]}" "$new_id" sleep infinity >/dev/null
 [[ "$(r inspect -f '{{.State.Running}}' "$dev")" == true ]]
 [[ "$(r inspect -f '{{.Image}}' "$dev")" == "$new_id" ]]
+[[ "$(r inspect -f '{{range .Mounts}}{{if eq .Destination "/repo/research"}}{{.Type}}|{{.Source}}|{{.RW}}{{end}}{{end}}' "$dev")" == "bind|$root/research|false" ]]
 say "Testing new dev tools, source, Codex credentials and firmware."
 r exec -e PYTHONDONTWRITEBYTECODE=1 "$dev" /bin/sh -ec '
-test -d /repo/boards && test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /workspace
-test ! -e /repo/docker/private
+test -d /repo/boards && test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /repo/research && test -d /workspace
+test ! -e /repo/docker/private && test ! -e /repo/docker/.env && test ! -e /repo/.git
 command -v yosys; command -v iverilog; command -v verilator
 command -v riscv64-unknown-elf-gcc; command -v meson; command -v ninja
 test -x /usr/local/bin/codex; test -s /opt/panolab/litex/env.sh'

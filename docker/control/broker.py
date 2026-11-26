@@ -24,7 +24,7 @@ CONTAINER_DEV_USER="0:0" if ROOTLESS_MODE else "1000:1000"
 STAGE="panolab-direct-dev-stage"
 BACKUP="panolab-direct-dev-backup"
 SOURCE_MOUNTS=(("projects","ro"),("boards","ro"),("shared","ro"),
-               ("third_party","ro"),("agent","rw"),("specs","ro"),
+               ("third_party","ro"),("research","ro"),("agent","rw"),("specs","ro"),
                ("tests","ro"),("docs","ro"),("host","ro"),("docker/modern","ro"))
 DEV="panolab-direct-dev-1"
 NAMES=(DEV,"panolab-direct-connect-setup-1","panolab-direct-connect-tunnel-1")
@@ -52,9 +52,9 @@ def image_allowed(image):
         raise ValueError("image outside approved catalog")
     return image
 
-def launch_dev(name,image):
+def launch_dev(name,image,restart="unless-stopped"):
     cmd=["docker","run","-d","--name",name,"--label","panolab.managed=true",
-         "--user",CONTAINER_DEV_USER,"--workdir","/workspace","--cap-drop","ALL",
+         "--restart",restart,"--user",CONTAINER_DEV_USER,"--workdir","/workspace","--cap-drop","ALL",
          "--security-opt","no-new-privileges:true","--memory","4g","--cpus","2",
          "--pids-limit","256","--tmpfs","/tmp:rw,nosuid,nodev,size=256m",
          "--tmpfs","/home:rw,nosuid,nodev,size=64m",
@@ -69,48 +69,86 @@ def launch_dev(name,image):
 
 def repo_configured(name):
     out=command(["docker","inspect","--format","{{json .Mounts}}",name],15)
-    if not out["ok"]: return False
+    if not out["ok"]:
+        raise ValueError("could not inspect dev mounts")
     mounts=json.loads(out["stdout"])
-    active={m.get("Destination"):(m.get("Source"),not m.get("RW")) for m in mounts if m.get("Type")=="bind"}
-    return all(active.get("/repo/"+name)==(os.path.join(REPO,name),mode=="ro") for name,mode in SOURCE_MOUNTS)
+    expected={"/workspace":(W,False),"/codex-auth":(CODEX_AUTH,False)}
+    expected.update({"/repo/"+relative:(os.path.join(REPO,relative),mode=="ro")
+                     for relative,mode in SOURCE_MOUNTS})
+    mounts=[m for m in mounts if not (m["Type"]=="tmpfs" and m["Destination"] in ("/tmp","/home"))]
+    active={m["Destination"]:(m["Source"],not m["RW"]) for m in mounts if m["Type"]=="bind"}
+    return len(active)==len(mounts) and active==expected
 
-def migrate_dev(image):
-    image_allowed(image)
-    old=command(["docker","inspect","--format","{{index .Config.Labels \"panolab.managed\"}}",DEV],15)
-    if not old["ok"] or old["stdout"].strip()!="true":
+def verify_dev_sources(name):
+    if not repo_configured(name):
+        return False
+    probe=" && ".join(
+        ["test -d /repo/"+relative for relative,_ in SOURCE_MOUNTS]
+        + ["test -d /workspace", "test ! -e /repo/docker/private",
+           "test ! -e /repo/docker/.env", "test ! -e /repo/.git"])
+    return command(["docker","exec","--user",CONTAINER_DEV_USER,name,
+                    "/bin/sh","-c",probe],30)["ok"]
+
+def migrate_dev(image=None):
+    old=command(["docker","inspect","--format",
+                 '{{index .Config.Labels "panolab.managed"}}|{{.State.Running}}|'
+                 '{{json .HostConfig.RestartPolicy}}|{{.Image}}',DEV],15)
+    if not old["ok"]:
+        raise ValueError("existing dev container not PanoLab-managed")
+    managed,running,policy,old_image=old["stdout"].strip().split("|")
+    if managed!="true":
         raise ValueError("existing dev container not PanoLab-managed")
     if repo_configured(DEV):
         return {"ok":True,"already_configured":True}
+    restart_policy=json.loads(policy)
+    restart=restart_policy["Name"] or "no"
+    if restart=="on-failure" and restart_policy["MaximumRetryCount"]:
+        restart+=":"+str(restart_policy["MaximumRetryCount"])
+    target_image=image
+    if target_image is None:
+        approved=command(["docker","image","inspect","--format","{{.Id}}",IMAGES[0]],15)
+        if not approved["ok"] or approved["stdout"].strip()!=old_image:
+            raise ValueError("current dev image differs from the approved modern image; select an approved image explicitly")
+        target_image=old_image
     if command(["docker","inspect",STAGE],15)["ok"] or command(["docker","inspect",BACKUP],15)["ok"]:
         raise ValueError("staged or backup container already exists; inspect before migration")
-    prepared=launch_dev(STAGE,image)
+    prepared=launch_dev(STAGE,target_image,"no")
     if not prepared["ok"]: return prepared
-    probe=command(["docker","exec","--user",CONTAINER_DEV_USER,STAGE,
-                   "/bin/sh","-c","test -d /repo/projects && test -d /repo/boards && test -d /repo/shared && test -d /repo/third_party && test ! -e /repo/docker/private"],30)
-    command(["docker","rm","-f",STAGE],30)
-    if not probe["ok"]:
+    try:
+        staged=verify_dev_sources(STAGE)
+    finally:
+        removed=command(["docker","rm","-f",STAGE],30)
+    if not removed["ok"]: return removed
+    if not staged:
         return {"ok":False,"error":"staged container cannot see approved source mounts"}
-    stop=command(["docker","stop",DEV],45)
-    if not stop["ok"]: return stop
+    if running=="true":
+        stop=command(["docker","stop",DEV],45)
+        if not stop["ok"]: return stop
     rename=command(["docker","rename",DEV,BACKUP],20)
     if not rename["ok"]:
-        command(["docker","start",DEV],30)
+        if running=="true":
+            command(["docker","start",DEV],30)
         return rename
-    deployed=launch_dev(DEV,image)
-    if not deployed["ok"]:
-        command(["docker","rm","-f",DEV],20)
-        command(["docker","rename",BACKUP,DEV],20)
-        command(["docker","start",DEV],30)
-        return {"ok":False,"error":"new container failed; original container restored","detail":deployed}
-    verified=command(["docker","exec","--user",CONTAINER_DEV_USER,DEV,
-                      "/bin/sh","-c","test -d /repo/projects && test -d /repo/shared && test -d /repo/third_party && test -d /workspace"],30)
-    if not verified["ok"]:
+    deployed=launch_dev(DEV,target_image,restart)
+    error=None
+    try:
+        if not deployed["ok"]:
+            error="new container failed"
+        elif not verify_dev_sources(DEV):
+            error="post-creation source probe failed"
+        elif running!="true" and not command(["docker","stop",DEV],45)["ok"]:
+            error="could not restore stopped state"
+        elif restart=="always" and not command(["docker","update","--restart","no",BACKUP],30)["ok"]:
+            error="could not disable automatic restart on the stopped rollback"
+    except (ValueError, KeyError, TypeError):
+        error="post-creation mount inspection failed"
+    if error:
         command(["docker","rm","-f",DEV],30)
-        command(["docker","rename",BACKUP,DEV],20)
-        command(["docker","start",DEV],30)
-        return {"ok":False,"error":"post-creation probe failed; original restored"}
-    command(["docker","rm","-f",BACKUP],30)
-    return {"ok":True,"migrated":True,"source_tree":"/repo","private_mounted":False}
+        restored=command(["docker","rename",BACKUP,DEV],20)["ok"]
+        if restored and running=="true":
+            restored=command(["docker","start",DEV],30)["ok"]
+        return {"ok":False,"error":error,"original_restored":restored}
+    return {"ok":True,"migrated":True,"source_tree":"/repo","private_mounted":False,"rollback":BACKUP}
 
 def maintenance_identity(command_fn):
     # This is explicitly owner-trusted and temporary. The sidecar has the
@@ -139,8 +177,7 @@ def dispatch(r):
             raise ValueError("development instance already exists; use dev_attach_checkout")
         return launch_dev(DEV,image)
     if a=="attach_checkout":
-        image=image_allowed(r.get("image","panolab-direct-modern:local"))
-        return migrate_dev(image)
+        return migrate_dev(image_allowed(r["image"]) if "image" in r else None)
     if a=="lifecycle":
         op=r.get("operation")
         if op not in ("start","stop","restart"):

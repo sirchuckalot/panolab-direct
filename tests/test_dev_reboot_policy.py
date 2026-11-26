@@ -14,12 +14,13 @@ INSTALLER = Path(os.environ.get(
 
 MOCK = r"""set -euo pipefail
 dev=panolab-direct-dev-1
-root=/test/repo
+root="$(mktemp -d)"
+mkdir "$root/research"
 PANOLAB_WORKSPACE_HOST=/test/ws
 PANOLAB_CODEX_AUTH_HOST=/test/auth
 started=0
 log="$(mktemp)"
-trap 'rm -f "$log"' EXIT
+trap 'rm -f "$log"; rmdir "$root/research" "$root"' EXIT
 fail() { echo "BLOCKED: $*" >&2; exit 9; }
 say() { :; }
 new_exists() { [[ "$CASE" != fresh ]]; }
@@ -36,7 +37,14 @@ r() {
         *'/codex-auth'*)
           [[ "$CASE" == bad_auth ]] && echo /unexpected/auth || echo /test/auth;;
         *'/repo/projects'*)
-          [[ "$CASE" == bad_source ]] && echo /unexpected/repo || echo /test/repo/projects;;
+          [[ "$CASE" == bad_source ]] && echo /unexpected/repo || echo "$root/projects";;
+        *'/repo/research'*)
+          case "$CASE" in
+            missing_research) ;;
+            writable_research) echo "bind|$root/research|true";;
+            wrong_research) echo "bind|$root/elsewhere|false";;
+            *) echo "bind|$root/research|false";;
+          esac;;
         *'RestartPolicy.Name'*)
           [[ "$CASE" == existing_correct ]] && echo unless-stopped || echo no;;
         *'.Image'*)
@@ -61,7 +69,7 @@ class RestartPolicyContract(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         source = INSTALLER.read_text()
-        beginning = 'if ! new_exists "$dev"; then'
+        beginning = '[[ -d "$root/research"'
         ending = 'current_modern_image='
         cls.snippet = source.split(beginning, 1)[1].split(ending, 1)[0]
         assert cls.snippet and ending in source
@@ -85,6 +93,22 @@ class RestartPolicyContract(unittest.TestCase):
     def test_new_container_has_restart_policy(self):
         output = self.mock_case("fresh")
         self.assertIn("run -d --name panolab-direct-dev-1 --restart unless-stopped", output)
+
+        self.assertIn("dst=/repo/research,readonly", output)
+        for target in ("/repo/docker/private", "/repo/docker/.env", "/repo/.git", "dst=/repo "):
+            self.assertNotIn(target, output)
+
+    def test_existing_dev_without_research_requires_controlled_upgrade(self):
+        output = self.mock_case("missing_research", expect_success=False)
+        self.assertIn("panolab-install.sh --upgrade-dev", output)
+        self.assertNotIn("update --restart", output)
+
+    def test_wrong_research_mount_is_rejected(self):
+        for case in ("wrong_research", "writable_research"):
+            with self.subTest(case=case):
+                output = self.mock_case(case, expect_success=False)
+                self.assertIn("unexpected /repo/research mount", output)
+                self.assertNotIn("update --restart", output)
 
     def test_legacy_running_container_policy_repaired(self):
         output = self.mock_case("existing_running")
